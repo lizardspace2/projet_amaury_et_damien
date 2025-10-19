@@ -1,94 +1,76 @@
-import { useEffect, useRef } from 'react';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
-
-// Configuration des constantes
-const INITIAL_LAT = 41.7151;
-const INITIAL_LNG = 44.7871; // Décalé de ~3km vers l'ouest (original: 44.8271)
-const INITIAL_ZOOM = 12; // Réduit de 1 par rapport au zoom original (13)
-
-// Correction pour les icônes Leaflet
-const createDefaultIcon = () => {
-  return L.icon({
-    iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
-    iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
-    shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41]
-  });
-};
+import { useEffect, useRef, useState } from 'react';
 
 interface LocationMapProps {
   onLocationSelect: (lat: number, lng: number) => void;
+  onAddressSelect: (address: string) => void;
   initialLat?: number;
   initialLng?: number;
 }
 
-export default function LocationMapLeaflet({
+export default function LocationMap({ 
   onLocationSelect,
-  initialLat = INITIAL_LAT,
-  initialLng = INITIAL_LNG,
+  onAddressSelect,
+  initialLat = 41.7151,
+  initialLng = 44.7871
 }: LocationMapProps) {
-  const mapRef = useRef<L.Map | null>(null);
-  const markerRef = useRef<L.Marker | null>(null);
-  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<HTMLDivElement>(null);
+  const [map, setMap] = useState<google.maps.Map | null>(null);
+  const [marker, setMarker] = useState<google.maps.Marker | null>(null);
 
   useEffect(() => {
-    if (mapRef.current || !mapContainerRef.current) return;
+    if (mapRef.current && !map) {
+      const newMap = new window.google.maps.Map(mapRef.current, {
+        center: { lat: initialLat, lng: initialLng },
+        zoom: 12,
+      });
+      setMap(newMap);
 
-    // Initialisation de la carte avec les paramètres ajustés
-    mapRef.current = L.map(mapContainerRef.current, {
-      center: [initialLat, initialLng],
-      zoom: INITIAL_ZOOM,
-      preferCanvas: true
-    });
+      const newMarker = new window.google.maps.Marker({
+        position: { lat: initialLat, lng: initialLng },
+        map: newMap,
+        draggable: true,
+      });
+      setMarker(newMarker);
 
-    // Couche OpenStreetMap
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      maxZoom: 19,
-    }).addTo(mapRef.current);
+      newMarker.addListener('dragend', () => {
+        const pos = newMarker.getPosition();
+        if (pos) {
+          onLocationSelect(pos.lat(), pos.lng());
+          const geocoder = new window.google.maps.Geocoder();
+          geocoder.geocode({ location: pos }, (results, status) => {
+            if (status === 'OK' && results?.[0]) {
+              onAddressSelect(results[0].formatted_address);
+            }
+          });
+        }
+      });
 
-    // Configuration du marqueur
-    L.Marker.prototype.options.icon = createDefaultIcon();
-    
-    markerRef.current = L.marker([initialLat, initialLng], {
-      draggable: true,
-      autoPan: true,
-    }).addTo(mapRef.current);
+      newMap.addListener('click', (e: google.maps.MapMouseEvent) => {
+        if (e.latLng) {
+            newMarker.setPosition(e.latLng);
+            onLocationSelect(e.latLng.lat(), e.latLng.lng());
+            const geocoder = new window.google.maps.Geocoder();
+            geocoder.geocode({ location: e.latLng }, (results, status) => {
+                if (status === 'OK' && results?.[0]) {
+                    onAddressSelect(results[0].formatted_address);
+                }
+            });
+        }
+      });
+    }
+  }, [mapRef, map, initialLat, initialLng, onLocationSelect, onAddressSelect]);
 
-    // Gestion des événements
-    const handleMapClick = (e: L.LeafletMouseEvent) => {
-      const { lat, lng } = e.latlng;
-      markerRef.current?.setLatLng([lat, lng]);
-      onLocationSelect(lat, lng);
-    };
-
-    const handleMarkerDrag = () => {
-      const position = markerRef.current?.getLatLng();
-      if (position) {
-        onLocationSelect(position.lat, position.lng);
-        mapRef.current?.panTo(position);
-      }
-    };
-
-    mapRef.current.on('click', handleMapClick);
-    markerRef.current.on('dragend', handleMarkerDrag);
-
-    // Nettoyage
-    return () => {
-      mapRef.current?.off('click', handleMapClick);
-      markerRef.current?.off('dragend', handleMarkerDrag);
-      mapRef.current?.remove();
-      mapRef.current = null;
-    };
-  }, []);
+  useEffect(() => {
+    if (map && marker) {
+        const newPos = { lat: initialLat, lng: initialLng };
+        map.setCenter(newPos);
+        marker.setPosition(newPos);
+    }
+  }, [initialLat, initialLng, map, marker]);
 
   return (
     <div
-      ref={mapContainerRef}
+      ref={mapRef}
       className="w-full h-[400px] rounded-lg border border-gray-300 z-0"
       aria-label="Carte de localisation de la propriété"
     />

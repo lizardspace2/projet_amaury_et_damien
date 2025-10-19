@@ -19,8 +19,6 @@ import {
   FormControl,
   FormMessage
 } from "@/components/ui/form";
-import { FRENCH_CITIES, FrenchCity } from "@/data/FrenchCities";
-import { getDistrictsForCity } from "@/data/FrenchDistricts";
 import Autocomplete from "@/components/Autocomplete";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -39,7 +37,7 @@ interface AddPropertyStep4Props {
   onBack: () => void;
   initialData: Partial<CreatePropertyInput>;
   isSubmitting: boolean;
-  onNext: (data: Partial<CreatePropertyInput> & { existingImageUrls: string[], removedImageUrls: string[] }) => void;
+  onNext: (data: Partial<CreatePropertyInput> & { existingImageUrls?: string[], removedImageUrls?: string[] }) => void;
 }
 
 const AddPropertyStep4 = ({
@@ -95,7 +93,7 @@ const AddPropertyStep4 = ({
           address.district = component.long_name;
         }
       });
-      form.setValue("address", `${address.street}, ${address.district}, ${address.city}`);
+      form.setValue("address", place.formatted_address || `${address.street}, ${address.district}, ${address.city}`);
       Object.assign(initialData, {
         address_street: address.street,
         address_city: address.city,
@@ -162,6 +160,10 @@ const AddPropertyStep4 = ({
     form.setValue("lng", lng);
   };
 
+  const handleAddressSelect = (address: string) => {
+    form.setValue("address", address);
+  };
+
   const handleSubmit = (data: AddressFormValues) => {
     const updatedData = {
       lat: data.lat,
@@ -193,9 +195,10 @@ const AddPropertyStep4 = ({
             <div className="mb-6">
               <FormLabel>{"Localisation sur la carte"}</FormLabel>
               <LocationMap
-                initialLat={form.getValues("lat")}
-                initialLng={form.getValues("lng")}
+                initialLat={form.watch("lat")}
+                initialLng={form.watch("lng")}
                 onLocationSelect={handleLocationSelect}
+                onAddressSelect={handleAddressSelect}
               />
             </div>
 

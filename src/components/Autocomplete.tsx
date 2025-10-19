@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 
 interface AutocompleteProps {
-  onPlaceChanged: (place: any) => void;
+  onPlaceChanged: (place: google.maps.places.PlaceResult) => void;
   value: string;
   onChange: (value: string) => void;
   placeholder: string;
@@ -10,19 +10,20 @@ interface AutocompleteProps {
 
 const Autocomplete = ({ onPlaceChanged, value, onChange, placeholder, label }: AutocompleteProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
-  const autocompleteRef = useRef<any>(null);
+  const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
 
   useEffect(() => {
-    if (inputRef.current) {
-      const autocomplete = new (window as any).google.maps.places.PlaceAutocompleteElement({
-        inputElement: inputRef.current,
+    if (inputRef.current && !autocompleteRef.current) {
+      const autocomplete = new window.google.maps.places.Autocomplete(inputRef.current, {
         componentRestrictions: { country: ["fr", "de", "es", "it", "gb"] },
         types: ["address"],
       });
 
-      autocomplete.addEventListener("gmp-placeselect", (event: any) => {
-        const { place } = event.detail;
-        onPlaceChanged(place);
+      autocomplete.addListener("place_changed", () => {
+        const place = autocomplete.getPlace();
+        if (place.geometry) {
+          onPlaceChanged(place);
+        }
       });
 
       autocompleteRef.current = autocomplete;

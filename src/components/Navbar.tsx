@@ -1,14 +1,37 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Menu, X, User, ChevronDown, Home, Key, Users, CalendarDays, LogIn, LogOut, UserPlus, PlusCircle, Truck } from 'lucide-react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Menu, X, User, ChevronDown, Home, Key, Users, CalendarDays, LogIn, LogOut, UserPlus, PlusCircle, Truck, Building } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { signInWithEmail, signUpWithEmail, signOut } from '@/lib/api/auth';
 import { supabase } from '@/lib/api/supabaseClient';
+
+const Logo = () => (
+  <Link to="/" className="flex items-center gap-2 text-xl font-bold text-slate-800 no-underline hover:no-underline">
+    <Building className="h-7 w-7 text-teal-600" />
+    <div className="flex flex-col">
+        <span className="font-serif leading-tight">AnnoncesImmo</span>
+        <span className="text-xs font-light text-slate-500 leading-tight">Région Lyonnaise</span>
+    </div>
+  </Link>
+);
+
+const NavLink = ({ to, children }: { to: string; children: React.ReactNode }) => {
+  const location = useLocation();
+  const isActive = location.pathname === to;
+
+  return (
+    <Link
+      to={to}
+      className={`text-sm font-medium transition-colors px-3 py-2 rounded-md no-underline hover:no-underline ${isActive ? 'bg-teal-100 text-teal-700' : 'text-slate-600 hover:bg-gray-100'}`}>
+      {children}
+    </Link>
+  );
+};
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -36,7 +59,7 @@ const Navbar = () => {
 
     checkAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
       setIsLoggedIn(!!session?.user);
       setUserEmail(session?.user?.email || '');
     });
@@ -52,7 +75,6 @@ const Navbar = () => {
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     const success = await signInWithEmail(formData.email, formData.password);
-
     if (success) {
       setIsAuthDialogOpen(false);
       resetForm();
@@ -64,7 +86,6 @@ const Navbar = () => {
     e.preventDefault();
     const { email, password, ...profileData } = formData;
     const success = await signUpWithEmail(email, password, profileData);
-
     if (success) {
       setIsAuthDialogOpen(false);
       resetForm();
@@ -80,15 +101,7 @@ const Navbar = () => {
   };
 
   const resetForm = () => {
-    setFormData({
-      email: '',
-      password: '',
-      phone: '',
-      address: '',
-      instagram: '',
-      twitter: '',
-      facebook: ''
-    });
+    setFormData({ email: '', password: '', phone: '', address: '', instagram: '', twitter: '', facebook: '' });
   };
 
   const toggleAuthMode = () => {
@@ -98,359 +111,148 @@ const Navbar = () => {
 
   const handleNavigationWithFilter = (type: string) => {
     navigate(`/properties?type=${type}`);
+    setIsMenuOpen(false);
   };
 
+  const mainNavLinks = [
+    { name: 'Acheter', path: '/properties?type=sale' },
+    { name: 'Louer', path: '/properties?type=rent' },
+    { name: 'Bail Commercial', path: '/properties?type=lease' },
+    { name: 'Location Journalière', path: '/properties?type=rent_by_day' },
+    { name: 'Services de déménagement', path: '/moving-services' },
+  ];
+
   return (
-    <nav className="bg-white shadow-sm sticky top-0 z-50">
-      <div className="container py-3 flex items-center justify-between">
-        {/* Logo et nom du site */}
-        <Link to="/" className="flex flex-col items-start">
-          <div className="text-estate-800 font-serif font-bold flex flex-col">
-            <div className="text-2xl leading-tight">Annonces Immobilières</div>
-            <div className="text-lg text-teal-600 leading-tight">Région Lyonnaise</div>
-          </div>
-        </Link>
+    <header className="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-50">
+      <div className="container py-4 flex items-center justify-between">
+        <Logo />
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-6">
-          <div className="flex gap-6">
-            <button
-              onClick={() => handleNavigationWithFilter('sell')}
-              className="text-estate-neutral-700 hover:text-estate-800 font-medium flex items-center gap-2"
-            >
-              <Home size={18} />
-              Vendre
-            </button>
-            <button
-              onClick={() => handleNavigationWithFilter('lease')}
-              className="text-estate-neutral-700 hover:text-estate-800 font-medium flex items-center gap-2"
-            >
-              <Key size={18} />
-              Bail Commercial
-            </button>
-            <button
-              onClick={() => handleNavigationWithFilter('rent')}
-              className="text-estate-neutral-700 hover:text-estate-800 font-medium flex items-center gap-2"
-            >
-              <Users size={18} />
-              Louer
-            </button>
-            <button
-              onClick={() => handleNavigationWithFilter('daily-rent')}
-              className="text-estate-neutral-700 hover:text-estate-800 font-medium flex items-center gap-2"
-            >
-              <CalendarDays size={18} />
-              Location Journalière
-            </button>
-            <Link
-              to="/moving-services"
-              className="text-estate-neutral-700 hover:text-estate-800 font-medium flex items-center gap-2"
-            >
-              <Truck size={18} />
-              Services de déménagement
-            </Link>
-          </div>
-        </div>
+        <nav className="hidden md:flex items-center gap-8">
+          {mainNavLinks.map(link => <NavLink key={link.name} to={link.path}>{link.name}</NavLink>)}
+        </nav>
 
-        <div className="hidden md:flex items-center gap-4">
+        <div className="hidden md:flex items-center gap-2">
           {isLoggedIn ? (
-            <>
-              <Button asChild variant="outline" className="flex gap-2">
-                <Link to="/account">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" className="flex items-center gap-2">
                   <User size={18} />
-                  <span>{userEmail || 'Mon Compte'}</span>
-                </Link>
-              </Button>
-              <Button
-                variant="outline"
-                className="text-red-500 border-red-500 hover:bg-red-50 flex items-center gap-2"
-                onClick={handleLogout}
-              >
-                <LogOut size={18} />
-                Déconnexion
-              </Button>
-            </>
+                  <span>Mon Compte</span>
+                  <ChevronDown size={16} />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-56">
+                <div className="flex flex-col gap-2">
+                  <Button asChild variant="ghost" className="justify-start">
+                    <Link to="/account">Mon Compte</Link>
+                  </Button>
+                  <Button variant="ghost" className="justify-start text-red-500 hover:text-red-600" onClick={handleLogout}>
+                    Déconnexion
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
           ) : (
             <>
-              <Dialog open={isAuthDialogOpen} onOpenChange={setIsAuthDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="flex items-center gap-2"
-                    onClick={() => setAuthMode('login')}
-                  >
-                    <LogIn size={18} />
-                    <span>Connexion</span>
-                  </Button>
-                </DialogTrigger>
-                <Button
-                  variant="ghost"
-                  className="text-teal-600 hover:text-teal-700 flex items-center gap-2"
-                  onClick={() => {
-                    setIsAuthDialogOpen(true);
-                    setAuthMode('signup');
-                  }}
-                >
-                  <UserPlus size={18} />
-                  S'inscrire
-                </Button>
-              </Dialog>
+              <Button variant="ghost" onClick={() => { setIsAuthDialogOpen(true); setAuthMode('login'); }}>Connexion</Button>
+              <Button onClick={() => { setIsAuthDialogOpen(true); setAuthMode('signup'); }}>S'inscrire</Button>
             </>
           )}
-          <Button asChild className="bg-teal-500 hover:bg-teal-600 flex items-center gap-2">
+          <Button asChild className="bg-teal-600 hover:bg-teal-700">
             <Link to="/sell">
-              <PlusCircle size={18} />
+              <PlusCircle size={18} className="mr-2" />
               Publier une annonce
             </Link>
           </Button>
         </div>
 
         {/* Mobile Menu Button */}
-        <button
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="md:hidden text-estate-800"
-          aria-label="Toggle menu"
-        >
+        <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="md:hidden text-slate-800">
           {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
 
       {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div className="md:hidden bg-white py-4 px-6 shadow-lg animate-fade-in">
-          <div className="flex flex-col gap-3">
-            <button
-              onClick={() => {
-                handleNavigationWithFilter('sell');
-                setIsMenuOpen(false);
-              }}
-              className="py-2 text-estate-neutral-700 hover:text-estate-800 font-medium flex items-center gap-2"
-            >
-              <Home size={18} />
-              Vendre
-            </button>
-            <button
-              onClick={() => {
-                handleNavigationWithFilter('lease');
-                setIsMenuOpen(false);
-              }}
-              className="py-2 text-estate-neutral-700 hover:text-estate-800 font-medium flex items-center gap-2"
-            >
-              <Key size={18} />
-              Bail Commercial
-            </button>
-            <button
-              onClick={() => {
-                handleNavigationWithFilter('rent');
-                setIsMenuOpen(false);
-              }}
-              className="py-2 text-estate-neutral-700 hover:text-estate-800 font-medium flex items-center gap-2"
-            >
-              <Users size={18} />
-              Louer
-            </button>
-            <button
-              onClick={() => {
-                handleNavigationWithFilter('daily-rent');
-                setIsMenuOpen(false);
-              }}
-              className="py-2 text-estate-neutral-700 hover:text-estate-800 font-medium flex items-center gap-2"
-            >
-              <CalendarDays size={18} />
-              Location Journalière
-            </button>
-            <Link
-              to="/moving-services"
-              onClick={() => setIsMenuOpen(false)}
-              className="py-2 text-estate-neutral-700 hover:text-estate-800 font-medium flex items-center gap-2"
-            >
-              <Truck size={18} />
-              Services de déménagement
-            </Link>
-
+      <div className={`md:hidden absolute top-full left-0 w-full bg-white shadow-lg transition-transform duration-300 ease-in-out ${isMenuOpen ? 'transform translate-y-0' : 'transform -translate-y-[150%]'}`}>
+        <nav className="flex flex-col gap-4 p-6">
+          {mainNavLinks.map(link => <NavLink key={link.name} to={link.path}>{link.name}</NavLink>)}
+          <hr className="my-4" />
+          {isLoggedIn ? (
             <div className="flex flex-col gap-2">
-              {isLoggedIn ? (
-                <>
-                  <Button asChild variant="outline" className="flex gap-2 justify-center">
-                    <Link to="/account" onClick={() => setIsMenuOpen(false)}>
-                      <User size={18} />
-                      <span>{userEmail || 'Mon Compte'}</span>
-                    </Link>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="text-red-500 border-red-500 hover:bg-red-50 flex items-center gap-2 justify-center"
-                    onClick={() => {
-                      handleLogout();
-                      setIsMenuOpen(false);
-                    }}
-                  >
-                    <LogOut size={18} />
-                    Déconnexion
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button
-                    variant="outline"
-                    className="flex items-center gap-2 justify-center"
-                    onClick={() => {
-                      setIsAuthDialogOpen(true);
-                      setAuthMode('login');
-                      setIsMenuOpen(false);
-                    }}
-                  >
-                    <LogIn size={18} />
-                    <span>Connexion</span>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    className="text-teal-600 hover:text-teal-700 flex items-center gap-2 justify-center"
-                    onClick={() => {
-                      setIsAuthDialogOpen(true);
-                      setAuthMode('signup');
-                      setIsMenuOpen(false);
-                    }}
-                  >
-                    <UserPlus size={18} />
-                    S'inscrire
-                  </Button>
-                </>
-              )}
-              <Button asChild className="bg-teal-500 hover:bg-teal-600 flex items-center gap-2 justify-center">
-                <Link to="/sell" onClick={() => setIsMenuOpen(false)}>
-                  <PlusCircle size={18} />
-                  Publier une annonce
-                </Link>
+              <Button asChild variant="outline" className="justify-center">
+                <Link to="/account" onClick={() => setIsMenuOpen(false)}><User size={18} className="mr-2" />Mon Compte</Link>
               </Button>
+              <Button variant="destructive" onClick={handleLogout}>Déconnexion</Button>
             </div>
-          </div>
-        </div>
-      )}
+          ) : (
+            <div className="flex flex-col gap-2">
+              <Button variant="outline" onClick={() => { setIsAuthDialogOpen(true); setAuthMode('login'); setIsMenuOpen(false); }}>Connexion</Button>
+              <Button onClick={() => { setIsAuthDialogOpen(true); setAuthMode('signup'); setIsMenuOpen(false); }}>S'inscrire</Button>
+            </div>
+          )}
+           <Button asChild className="bg-teal-600 hover:bg-teal-700 mt-4">
+            <Link to="/sell">
+              <PlusCircle size={18} className="mr-2" />
+              Publier une annonce
+            </Link>
+          </Button>
+        </nav>
+      </div>
 
       {/* Auth Dialog */}
       <Dialog open={isAuthDialogOpen} onOpenChange={setIsAuthDialogOpen}>
-        <DialogContent className="max-h-[80vh] overflow-y-auto">
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-estate-800">
+            <DialogTitle className="text-2xl font-bold text-slate-800">
               {authMode === 'login' ? 'Connexion' : 'S\'inscrire'}
             </DialogTitle>
           </DialogHeader>
-
-          <div className="space-y-4">
-            <form onSubmit={authMode === 'login' ? handleEmailLogin : handleEmailSignUp} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Entrez votre e-mail"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Mot de passe</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Entrez votre mot de passe"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-
-              {authMode === 'signup' && (
-                <div className="space-y-4">
-                  <div className="space-y-2">
+          <form onSubmit={authMode === 'login' ? handleEmailLogin : handleEmailSignUp} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" type="email" placeholder="Entrez votre e-mail" value={formData.email} onChange={handleInputChange} required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Mot de passe</Label>
+              <Input id="password" type="password" placeholder="Entrez votre mot de passe" value={formData.password} onChange={handleInputChange} required />
+            </div>
+            {authMode === 'signup' && (
+              <div className="space-y-4">
+                 <div className="space-y-2">
                     <Label htmlFor="phone">Téléphone</Label>
-                    <Input
-                      id="phone"
-                      type="tel"
-                      placeholder="Entrez votre numéro de téléphone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                    />
+                    <Input id="phone" type="tel" placeholder="Entrez votre numéro de téléphone" value={formData.phone} onChange={handleInputChange} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="address">Adresse</Label>
-                    <Input
-                      id="address"
-                      type="text"
-                      placeholder="Entrez votre adresse"
-                      value={formData.address}
-                      onChange={handleInputChange}
-                    />
+                    <Input id="address" type="text" placeholder="Entrez votre adresse" value={formData.address} onChange={handleInputChange} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="instagram">Instagram</Label>
-                    <Input
-                      id="instagram"
-                      type="text"
-                      placeholder="@votrenomdutilisateur"
-                      value={formData.instagram}
-                      onChange={handleInputChange}
-                    />
+                    <Input id="instagram" type="text" placeholder="@votrenomdutilisateur" value={formData.instagram} onChange={handleInputChange} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="twitter">Twitter</Label>
-                    <Input
-                      id="twitter"
-                      type="text"
-                      placeholder="@votrenomdutilisateur"
-                      value={formData.twitter}
-                      onChange={handleInputChange}
-                    />
+                    <Input id="twitter" type="text" placeholder="@votrenomdutilisateur" value={formData.twitter} onChange={handleInputChange} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="facebook">Facebook</Label>
-                    <Input
-                      id="facebook"
-                      type="text"
-                      placeholder="Lien vers votre profil"
-                      value={formData.facebook}
-                      onChange={handleInputChange}
-                    />
+                    <Input id="facebook" type="text" placeholder="Lien vers votre profil" value={formData.facebook} onChange={handleInputChange} />
                   </div>
-                </div>
-              )}
-
-              <Button type="submit" className="w-full bg-teal-500 hover:bg-teal-600">
-                {authMode === 'login' ? 'Connexion' : 'S\'inscrire'}
-              </Button>
-            </form>
-
-            <div className="text-center text-sm">
-              {authMode === 'login' ? (
-                <>
-                  Vous n'avez pas de compte?{' '}
-                  <button
-                    type="button"
-                    className="text-teal-600 hover:underline"
-                    onClick={toggleAuthMode}
-                  >
-                    S'inscrire
-                  </button>
-                </>
-              ) : (
-                <>
-                  Vous avez déjà un compte?{' '}
-                  <button
-                    type="button"
-                    className="text-teal-600 hover:underline"
-                    onClick={toggleAuthMode}
-                  >
-                    Connexion
-                  </button>
-                </>
-              )}
-            </div>
+              </div>
+            )}
+            <Button type="submit" className="w-full bg-teal-600 hover:bg-teal-700">{authMode === 'login' ? 'Connexion' : 'S\'inscrire'}</Button>
+          </form>
+          <div className="text-center text-sm">
+            {authMode === 'login' ? (
+              <p>Vous n'avez pas de compte? <button type="button" className="text-teal-600 hover:underline" onClick={toggleAuthMode}>S'inscrire</button></p>
+            ) : (
+              <p>Vous avez déjà un compte? <button type="button" className="text-teal-600 hover:underline" onClick={toggleAuthMode}>Connexion</button></p>
+            )}
           </div>
         </DialogContent>
       </Dialog>
-    </nav>
+    </header>
   );
 };
 

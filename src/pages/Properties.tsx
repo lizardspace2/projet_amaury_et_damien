@@ -329,9 +329,10 @@ const Properties = () => {
 
     // City filter
     if (selectedCities.length > 0) {
-      filtered = filtered.filter(property =>
-        property.address_city && selectedCities.includes(property.address_city)
-      );
+      filtered = filtered.filter(property => {
+        const fullAddress = `${property.address_street || ''} ${property.address_city || ''} ${property.address_district || ''}`.toLowerCase();
+        return selectedCities.some(city => fullAddress.includes(city.toLowerCase()));
+      });
     }
 
     // Features filters

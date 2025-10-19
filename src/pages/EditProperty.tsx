@@ -39,134 +39,17 @@ const EditProperty = () => {
   });
 
   useEffect(() => {
-    console.log('Fetched property:', fetchedProperty);
     if (fetchedProperty) {
-      // Transform fetchedProperty to match CreatePropertyInput structure for formData
       setFormData({
-        title: fetchedProperty.title,
-        description: fetchedProperty.description,
-        price: fetchedProperty.price,
-        phone_number: fetchedProperty.phone_number,
-        cadastral_code: fetchedProperty.cadastralCode,
-        propertyType: fetchedProperty.propertyType,
-        listingType: fetchedProperty.listingType,
-        status: fetchedProperty.status,
-        condition: fetchedProperty.condition,
-        plan: fetchedProperty.plan,
-        address_street: fetchedProperty.address.street,
-        address_city: fetchedProperty.address.city,
-        address_district: fetchedProperty.address.district,
-        lat: fetchedProperty.address.coordinates.lat,
-        lng: fetchedProperty.address.coordinates.lng,
-        beds: fetchedProperty.beds,
-        baths: fetchedProperty.baths,
-        m2: fetchedProperty.m2,
-        rooms: fetchedProperty.rooms,
-        terrace_area: fetchedProperty.terraceArea,
-        kitchen_type: fetchedProperty.kitchenType,
-        ceiling_height: fetchedProperty.ceilingHeight,
-        floor_level: fetchedProperty.floorLevel,
-        total_floors: fetchedProperty.totalFloors,
-        year_built: fetchedProperty.yearBuilt,
-        featured: fetchedProperty.featured,
-        amenities: fetchedProperty.amenities,
-        hasElevator: fetchedProperty.hasElevator,
-        hasVentilation: fetchedProperty.hasVentilation,
-        hasAirConditioning: fetchedProperty.hasAirConditioning,
-        equipment: fetchedProperty.equipment,
-        internet_tv: fetchedProperty.internetTV,
-        storage: fetchedProperty.storage,
-        security: fetchedProperty.security,
-        isAccessible: fetchedProperty.isAccessible,
-        nearby_places: fetchedProperty.nearbyPlaces,
-        online_services: fetchedProperty.onlineServices,
-        images: fetchedProperty.images, // Keep as URLs for existing images
-        contactEmail: fetchedProperty.contactEmail,
-        instagramHandle: fetchedProperty.instagramHandle,
-        facebookUrl: fetchedProperty.facebookUrl,
-        twitterHandle: fetchedProperty.twitterHandle,
-        has_gas: fetchedProperty.has_gas,
-        has_loggia: fetchedProperty.has_loggia,
-        building_material: fetchedProperty.building_material,
-        furniture_type: fetchedProperty.furniture_type,
-        has_fireplace: fetchedProperty.has_fireplace,
-        storeroom_type: fetchedProperty.storeroom_type,
-        heating_type: fetchedProperty.heating_type,
-        hot_water_type: fetchedProperty.hot_water_type,
-        parking_type: fetchedProperty.parking_type,
-        
-        // Ajouter les champs manquants pour les étapes du formulaire
-        // Pour AddPropertyStep1
-        reference_number: fetchedProperty.cadastralCode,
-        
-        // Pour AddPropertyStep2
-        yearBuilt: fetchedProperty.yearBuilt,
-        
-        // Pour AddPropertyStep3 - mapping des booléens
-        has_elevator: fetchedProperty.hasElevator,
-        has_ventilation: fetchedProperty.hasVentilation,
-        has_air_conditioning: fetchedProperty.hasAirConditioning,
-        is_accessible: fetchedProperty.isAccessible,
-        has_gas: fetchedProperty.has_gas,
-        has_loggia: fetchedProperty.has_loggia,
-        has_fireplace: fetchedProperty.has_fireplace,
-        has_internet: fetchedProperty.internetTV?.includes("Internet") || false,
-        has_cable_tv: fetchedProperty.internetTV?.includes("Télévision par câble") || false,
-        has_satellite_tv: fetchedProperty.internetTV?.includes("Télévision par satellite") || false,
-        has_phone_line: fetchedProperty.internetTV?.includes("Ligne téléphonique") || false,
-        has_vent: fetchedProperty.amenities?.includes("Ventilation") || false,
-        has_cinema: fetchedProperty.amenities?.includes("Home Cinéma") || false,
-        has_dishwasher: fetchedProperty.equipment?.includes("Lave-vaisselle") || false,
-        has_gas_stove: fetchedProperty.equipment?.includes("Cuisinière à gaz") || false,
-        has_electric_kettle: fetchedProperty.equipment?.includes("Bouilloire électrique") || false,
-        has_induction_oven: fetchedProperty.equipment?.includes("Four à induction") || false,
-        has_microwave: fetchedProperty.equipment?.includes("Micro-ondes") || false,
-        has_electric_oven: fetchedProperty.equipment?.includes("Four électrique") || false,
-        has_washing_machine: fetchedProperty.equipment?.includes("Lave-linge") || false,
-        has_tv: fetchedProperty.equipment?.includes("Télévision") || false,
-        has_coffee_machine: fetchedProperty.equipment?.includes("Machine à café") || false,
-        has_audio_system: fetchedProperty.equipment?.includes("Système audio") || false,
-        has_heater: fetchedProperty.equipment?.includes("Chauffage") || false,
-        has_hair_dryer: fetchedProperty.equipment?.includes("Sèche-cheveux") || false,
-        has_refrigerator: fetchedProperty.equipment?.includes("Réfrigérateur") || false,
-        has_vacuum_cleaner: fetchedProperty.equipment?.includes("Aspirateur") || false,
-        has_dryer: fetchedProperty.equipment?.includes("Sèche-linge") || false,
-        has_iron: fetchedProperty.equipment?.includes("Fer à repasser") || false,
-        has_co_detector: fetchedProperty.security?.includes("Détecteur de CO") || false,
-        has_smoke_detector: fetchedProperty.security?.includes("Détecteur de fumée") || false,
-        has_evacuation_ladder: fetchedProperty.security?.includes("Échelle d'évacuation") || false,
-        has_fire_fighting_system: fetchedProperty.security?.includes("Système anti-incendie") || false,
-        has_perimeter_cameras: fetchedProperty.security?.includes("Caméras périmétriques") || false,
-        has_alarm: fetchedProperty.security?.includes("Alarme") || false,
-        has_live_protection: fetchedProperty.security?.includes("Protection en direct") || false,
-        has_locked_entrance: fetchedProperty.security?.includes("Entrée sécurisée") || false,
-        has_locked_yard: fetchedProperty.security?.includes("Cour sécurisée") || false,
-        near_bus_stop: fetchedProperty.nearbyPlaces?.includes("Arrêt de bus") || false,
-        near_bank: fetchedProperty.nearbyPlaces?.includes("Banque") || false,
-        near_subway: fetchedProperty.nearbyPlaces?.includes("Métro") || false,
-        near_supermarket: fetchedProperty.nearbyPlaces?.includes("Supermarché") || false,
-        near_kindergarten: fetchedProperty.nearbyPlaces?.includes("Jardin d'enfants") || false,
-        near_city_center: fetchedProperty.nearbyPlaces?.includes("Centre-ville") || false,
-        near_pharmacy: fetchedProperty.nearbyPlaces?.includes("Pharmacie") || false,
-        near_greenery: fetchedProperty.nearbyPlaces?.includes("Espaces verts") || false,
-        near_park: fetchedProperty.nearbyPlaces?.includes("Parc") || false,
-        near_shopping_centre: fetchedProperty.nearbyPlaces?.includes("Centre commercial") || false,
-        near_school: fetchedProperty.nearbyPlaces?.includes("École") || false,
-        near_old_district: fetchedProperty.nearbyPlaces?.includes("Vieux quartier") || false,
-        allows_pets: fetchedProperty.allows_pets || false,
-        allows_parties: fetchedProperty.allows_parties || false,
-        allows_smoking: fetchedProperty.allows_smoking || false,
-    });
+        ...fetchedProperty,
+        existingImageUrls: fetchedProperty.images,
+      });
     } else if (isError) {
       toast.error("Failed to load property for editing.");
       console.error("Error fetching property:", error);
       navigate('/account'); // Redirect if property not found or error
     }
   }, [fetchedProperty, isError, error, navigate]);
-
-  useEffect(() => {
-    console.log('Form data after mapping:', formData);
-  }, [formData]);
 
   const updatePropertyMutation = useMutation({
     mutationFn: (data: { propertyId: string, input: Partial<CreatePropertyInput> }) =>
@@ -187,7 +70,7 @@ const EditProperty = () => {
     setFormData(prev => ({
       ...prev,
       ...data,
-      images: data.images || prev.images, // Preserve existing images if not updated in this step
+      images: data.images || prev.images,
       existingImageUrls: data.existingImageUrls || prev.existingImageUrls,
       removedImageUrls: data.removedImageUrls || prev.removedImageUrls,
     }));

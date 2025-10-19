@@ -70,7 +70,7 @@ const PropertyCard = ({ property, isEditable, onEdit, onDelete }: PropertyCardPr
           <div className="flex items-center text-estate-neutral-600 mb-3">
             <MapPin size={14} className="mr-1" />
             <p className="text-sm line-clamp-1">
-              {property.address.street}, {property.address.district}, {property.address.city}
+              {property.address_street}, {property.address_district}, {property.address_city}
             </p>
           </div>
 
@@ -87,13 +87,13 @@ const PropertyCard = ({ property, isEditable, onEdit, onDelete }: PropertyCardPr
           </div>
 
           <div className="flex justify-between border-t border-estate-neutral-100 pt-3">
-            {property.beds > 0 && (
+            {property.beds && property.beds > 0 && (
               <div className="flex items-center">
                 <Bed size={18} className="mr-1 text-estate-neutral-500" />
                 <span className="text-sm">{property.beds} Chambres</span>
               </div>
             )}
-            {property.baths > 0 && (
+            {property.baths && property.baths > 0 && (
               <div className="flex items-center">
                 <Bath size={18} className="mr-1 text-estate-neutral-500" />
                 <span className="text-sm">
@@ -101,6 +101,7 @@ const PropertyCard = ({ property, isEditable, onEdit, onDelete }: PropertyCardPr
                 </span>
               </div>
             )}
+            {property.m2 &&
             <div className="flex items-center">
               <Square size={18} className="mr-1 text-estate-neutral-500" />
               <span className="text-sm">
@@ -109,6 +110,7 @@ const PropertyCard = ({ property, isEditable, onEdit, onDelete }: PropertyCardPr
                   : `${property.m2} m²`}
               </span>
             </div>
+            }
           </div>
         </div>
         {isEditable && (

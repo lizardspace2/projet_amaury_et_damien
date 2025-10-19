@@ -9,211 +9,409 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      properties: {
+      profiles: {
         Row: {
-          address_city: string
-          address_district: string | null
-          address_state: string | null
-          address_street: string | null
-          address_zip: string | null
-          agent_name: string | null
-          agent_phone: string | null
-          baths: number
-          beds: number
-          cadastral_code: string | null
-          ceiling_height: number | null
-          condition: Database["public"]["Enums"]["property_condition"] | null
-          contact_email: string | null
-          created_at: string | null
-          description: string | null
-          facebook_url: string | null
-          featured: boolean | null
-          floor_level: number | null
-          has_air_conditioning: boolean | null
-          has_elevator: boolean | null
-          has_ventilation: boolean | null
-          id: string
-          instagram_handle: string | null
-          is_accessible: boolean | null
-          kitchen_type: Database["public"]["Enums"]["kitchen_type"] | null
-          lat: number | null
-          listing_type: Database["public"]["Enums"]["listing_type"]
-          lng: number | null
-          phone_number: string | null
-          plan: string | null
-          price: number
-          project_name: string | null
-          property_type: Database["public"]["Enums"]["property_type"]
-          rooms: number | null
-          m2: number // Changé de sqft à m2
-          status: Database["public"]["Enums"]["property_status"] | null
-          terrace_area: number | null
-          title: string
-          total_floors: number | null
-          twitter_handle: string | null
-          updated_at: string | null
-          year_built: number | null
+          user_id: string
+          phone: string | null
+          address: string | null
+          instagram: string | null
+          twitter: string | null
+          facebook: string | null
+          created_at: string
+          updated_at: string
+          email: string | null
+          liked_properties: Json | null
         }
         Insert: {
-          address_city: string
-          address_district?: string | null
-          address_state?: string | null
-          address_street?: string | null
-          address_zip?: string | null
-          agent_name?: string | null
-          agent_phone?: string | null
-          baths?: number
-          beds?: number
-          cadastral_code?: string | null
-          ceiling_height?: number | null
-          condition?: Database["public"]["Enums"]["property_condition"] | null
-          contact_email?: string | null
-          created_at?: string | null
-          description?: string | null
-          facebook_url?: string | null
-          featured?: boolean | null
-          floor_level?: number | null
-          has_air_conditioning?: boolean | null
-          has_elevator?: boolean | null
-          has_ventilation?: boolean | null
-          id?: string
-          instagram_handle?: string | null
-          is_accessible?: boolean | null
-          kitchen_type?: Database["public"]["Enums"]["kitchen_type"] | null
-          lat?: number | null
-          listing_type: Database["public"]["Enums"]["listing_type"]
-          lng?: number | null
-          phone_number?: string | null
-          plan?: string | null
-          price: number
-          project_name?: string | null
-          property_type: Database["public"]["Enums"]["property_type"]
-          rooms?: number | null
-          m2?: number // Changé de sqft à m2
-          status?: Database["public"]["Enums"]["property_status"] | null
-          terrace_area?: number | null
-          title: string
-          total_floors?: number | null
-          twitter_handle?: string | null
-          updated_at?: string | null
-          year_built?: number | null
+          user_id: string
+          phone?: string | null
+          address?: string | null
+          instagram?: string | null
+          twitter?: string | null
+          facebook?: string | null
+          created_at?: string
+          updated_at?: string
+          email?: string | null
+          liked_properties?: Json | null
         }
         Update: {
-          address_city?: string
-          address_district?: string | null
-          address_state?: string | null
-          address_street?: string | null
-          address_zip?: string | null
-          agent_name?: string | null
-          agent_phone?: string | null
-          baths?: number
-          beds?: number
-          cadastral_code?: string | null
-          ceiling_height?: number | null
-          condition?: Database["public"]["Enums"]["property_condition"] | null
-          contact_email?: string | null
-          created_at?: string | null
-          description?: string | null
-          facebook_url?: string | null
-          featured?: boolean | null
-          floor_level?: number | null
-          has_air_conditioning?: boolean | null
-          has_elevator?: boolean | null
-          has_ventilation?: boolean | null
-          id?: string
-          instagram_handle?: string | null
-          is_accessible?: boolean | null
-          kitchen_type?: Database["public"]["Enums"]["kitchen_type"] | null
-          lat?: number | null
-          listing_type?: Database["public"]["Enums"]["listing_type"]
-          lng?: number | null
-          phone_number?: string | null
-          plan?: string | null
-          price?: number
-          project_name?: string | null
-          property_type?: Database["public"]["Enums"]["property_type"]
-          rooms?: number | null
-          m2?: number // Changé de sqft à m2
-          status?: Database["public"]["Enums"]["property_status"] | null
-          terrace_area?: number | null
-          title?: string
-          total_floors?: number | null
-          twitter_handle?: string | null
-          updated_at?: string | null
-          year_built?: number | null
-        }
-        Relationships: []
-      }
-      property_amenities: {
-        Row: {
-          amenity: string
-          id: string
-          property_id: string | null
-        }
-        Insert: {
-          amenity: string
-          id?: string
-          property_id?: string | null
-        }
-        Update: {
-          amenity?: string
-          id?: string
-          property_id?: string | null
+          user_id?: string
+          phone?: string | null
+          address?: string | null
+          instagram?: string | null
+          twitter?: string | null
+          facebook?: string | null
+          created_at?: string
+          updated_at?: string
+          email?: string | null
+          liked_properties?: Json | null
         }
         Relationships: [
           {
-            foreignKeyName: "property_amenities_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
+            foreignKeyName: "profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
-      property_equipment: {
+      properties: {
         Row: {
-          equipment: string
           id: string
-          property_id: string | null
+          created_at: string
+          updated_at: string
+          user_id: string | null
+          phone_number: string | null
+          contact_email: string | null
+          instagram_handle: string | null
+          facebook_url: string | null
+          twitter_handle: string | null
+          reference_number: string | null
+          cadastral_code: string | null
+          title: string
+          description: string | null
+          price: number
+          currency: string
+          m2: number | null
+          beds: number
+          baths: number
+          rooms: number | null
+          year_built: number | null
+          condition: string | null
+          status: string | null
+          featured: boolean
+          terrace_area: number | null
+          kitchen_type: string | null
+          ceiling_height: number | null
+          floor_level: number | null
+          total_floors: number | null
+          amenities: string[]
+          equipment: string[]
+          internet_tv: string[]
+          storage: string[]
+          security: string[]
+          nearby_places: string[]
+          online_services: string[]
+          has_elevator: boolean
+          has_ventilation: boolean
+          has_air_conditioning: boolean
+          is_accessible: boolean
+          has_gas: boolean
+          has_loggia: boolean
+          has_fireplace: boolean
+          has_internet: boolean
+          has_cable_tv: boolean
+          has_satellite_tv: boolean
+          has_phone_line: boolean
+          has_vent: boolean
+          has_cinema: boolean
+          has_dishwasher: boolean
+          has_gas_stove: boolean
+          has_electric_kettle: boolean
+          has_induction_oven: boolean
+          has_microwave: boolean
+          has_electric_oven: boolean
+          has_washing_machine: boolean
+          has_tv: boolean
+          has_coffee_machine: boolean
+          has_audio_system: boolean
+          has_heater: boolean
+          has_hair_dryer: boolean
+          has_refrigerator: boolean
+          has_vacuum_cleaner: boolean
+          has_dryer: boolean
+          has_iron: boolean
+          has_co_detector: boolean
+          has_smoke_detector: boolean
+          has_evacuation_ladder: boolean
+          has_fire_fighting_system: boolean
+          has_perimeter_cameras: boolean
+          has_alarm: boolean
+          has_live_protection: boolean
+          has_locked_entrance: boolean
+          has_locked_yard: boolean
+          near_bus_stop: boolean
+          near_bank: boolean
+          near_subway: boolean
+          near_supermarket: boolean
+          near_kindergarten: boolean
+          near_city_center: boolean
+          near_pharmacy: boolean
+          near_greenery: boolean
+          near_park: boolean
+          near_shopping_centre: boolean
+          near_school: boolean
+          near_old_district: boolean
+          allows_pets: boolean
+          allows_parties: boolean
+          allows_smoking: boolean
+          building_material: string | null
+          furniture_type: string | null
+          storeroom_type: string | null
+          heating_type: string | null
+          hot_water_type: string | null
+          parking_type: string | null
+          address_street: string | null
+          address_city: string
+          address_district: string | null
+          lat: number
+          lng: number
+          images: string[]
+          property_type: string | null
+          listing_type: string | null
+          plan: string | null
+          agent_name: string | null
+          agent_phone: string | null
+          project_name: string | null
+          price_per_m2: number | null
         }
         Insert: {
-          equipment: string
           id?: string
-          property_id?: string | null
+          created_at?: string
+          updated_at?: string
+          user_id?: string | null
+          phone_number?: string | null
+          contact_email?: string | null
+          instagram_handle?: string | null
+          facebook_url?: string | null
+          twitter_handle?: string | null
+          reference_number?: string | null
+          cadastral_code?: string | null
+          title: string
+          description?: string | null
+          price: number
+          currency?: string
+          m2?: number | null
+          beds?: number
+          baths?: number
+          rooms?: number | null
+          year_built?: number | null
+          condition?: string | null
+          status?: string | null
+          featured?: boolean
+          terrace_area?: number | null
+          kitchen_type?: string | null
+          ceiling_height?: number | null
+          floor_level?: number | null
+          total_floors?: number | null
+          amenities?: string[]
+          equipment?: string[]
+          internet_tv?: string[]
+          storage?: string[]
+          security?: string[]
+          nearby_places?: string[]
+          online_services?: string[]
+          has_elevator?: boolean
+          has_ventilation?: boolean
+          has_air_conditioning?: boolean
+          is_accessible?: boolean
+          has_gas?: boolean
+          has_loggia?: boolean
+          has_fireplace?: boolean
+          has_internet?: boolean
+          has_cable_tv?: boolean
+          has_satellite_tv?: boolean
+          has_phone_line?: boolean
+          has_vent?: boolean
+          has_cinema?: boolean
+          has_dishwasher?: boolean
+          has_gas_stove?: boolean
+          has_electric_kettle?: boolean
+          has_induction_oven?: boolean
+          has_microwave?: boolean
+          has_electric_oven?: boolean
+          has_washing_machine?: boolean
+          has_tv?: boolean
+          has_coffee_machine?: boolean
+          has_audio_system?: boolean
+          has_heater?: boolean
+          has_hair_dryer?: boolean
+          has_refrigerator?: boolean
+          has_vacuum_cleaner?: boolean
+          has_dryer?: boolean
+          has_iron?: boolean
+          has_co_detector?: boolean
+          has_smoke_detector?: boolean
+          has_evacuation_ladder?: boolean
+          has_fire_fighting_system?: boolean
+          has_perimeter_cameras?: boolean
+          has_alarm?: boolean
+          has_live_protection?: boolean
+          has_locked_entrance?: boolean
+          has_locked_yard?: boolean
+          near_bus_stop?: boolean
+          near_bank?: boolean
+          near_subway?: boolean
+          near_supermarket?: boolean
+          near_kindergarten?: boolean
+          near_city_center?: boolean
+          near_pharmacy?: boolean
+          near_greenery?: boolean
+          near_park?: boolean
+          near_shopping_centre?: boolean
+          near_school?: boolean
+          near_old_district?: boolean
+          allows_pets?: boolean
+          allows_parties?: boolean
+          allows_smoking?: boolean
+          building_material?: string | null
+          furniture_type?: string | null
+          storeroom_type?: string | null
+          heating_type?: string | null
+          hot_water_type?: string | null
+          parking_type?: string | null
+          address_street?: string | null
+          address_city: string
+          address_district?: string | null
+          lat?: number
+          lng?: number
+          images?: string[]
+          property_type?: string | null
+          listing_type?: string | null
+          plan?: string | null
+          agent_name?: string | null
+          agent_phone?: string | null
+          project_name?: string | null
+          price_per_m2?: number | null
         }
         Update: {
-          equipment?: string
           id?: string
-          property_id?: string | null
+          created_at?: string
+          updated_at?: string
+          user_id?: string | null
+          phone_number?: string | null
+          contact_email?: string | null
+          instagram_handle?: string | null
+          facebook_url?: string | null
+          twitter_handle?: string | null
+          reference_number?: string | null
+          cadastral_code?: string | null
+          title?: string
+          description?: string | null
+          price?: number
+          currency?: string
+          m2?: number | null
+          beds?: number
+          baths?: number
+          rooms?: number | null
+          year_built?: number | null
+          condition?: string | null
+          status?: string | null
+          featured?: boolean
+          terrace_area?: number | null
+          kitchen_type?: string | null
+          ceiling_height?: number | null
+          floor_level?: number | null
+          total_floors?: number | null
+          amenities?: string[]
+          equipment?: string[]
+          internet_tv?: string[]
+          storage?: string[]
+          security?: string[]
+          nearby_places?: string[]
+          online_services?: string[]
+          has_elevator?: boolean
+          has_ventilation?: boolean
+          has_air_conditioning?: boolean
+          is_accessible?: boolean
+          has_gas?: boolean
+          has_loggia?: boolean
+          has_fireplace?: boolean
+          has_internet?: boolean
+          has_cable_tv?: boolean
+          has_satellite_tv?: boolean
+          has_phone_line?: boolean
+          has_vent?: boolean
+          has_cinema?: boolean
+          has_dishwasher?: boolean
+          has_gas_stove?: boolean
+          has_electric_kettle?: boolean
+          has_induction_oven?: boolean
+          has_microwave?: boolean
+          has_electric_oven?: boolean
+          has_washing_machine?: boolean
+          has_tv?: boolean
+          has_coffee_machine?: boolean
+          has_audio_system?: boolean
+          has_heater?: boolean
+          has_hair_dryer?: boolean
+          has_refrigerator?: boolean
+          has_vacuum_cleaner?: boolean
+          has_dryer?: boolean
+          has_iron?: boolean
+          has_co_detector?: boolean
+          has_smoke_detector?: boolean
+          has_evacuation_ladder?: boolean
+          has_fire_fighting_system?: boolean
+          has_perimeter_cameras?: boolean
+          has_alarm?: boolean
+          has_live_protection?: boolean
+          has_locked_entrance?: boolean
+          has_locked_yard?: boolean
+          near_bus_stop?: boolean
+          near_bank?: boolean
+          near_subway?: boolean
+          near_supermarket?: boolean
+          near_kindergarten?: boolean
+          near_city_center?: boolean
+          near_pharmacy?: boolean
+          near_greenery?: boolean
+          near_park?: boolean
+          near_shopping_centre?: boolean
+          near_school?: boolean
+          near_old_district?: boolean
+          allows_pets?: boolean
+          allows_parties?: boolean
+          allows_smoking?: boolean
+          building_material?: string | null
+          furniture_type?: string | null
+          storeroom_type?: string | null
+          heating_type?: string | null
+          hot_water_type?: string | null
+          parking_type?: string | null
+          address_street?: string | null
+          address_city?: string
+          address_district?: string | null
+          lat?: number
+          lng?: number
+          images?: string[]
+          property_type?: string | null
+          listing_type?: string | null
+          plan?: string | null
+          agent_name?: string | null
+          agent_phone?: string | null
+          project_name?: string | null
+          price_per_m2?: number | null
         }
         Relationships: [
           {
-            foreignKeyName: "property_equipment_property_id_fkey"
-            columns: ["property_id"]
+            foreignKeyName: "properties_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "properties"
+            referencedRelation: "users"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       property_images: {
         Row: {
           id: string
-          image_url: string
-          is_primary: boolean | null
           property_id: string | null
+          image_url: string
+          is_primary: boolean
         }
         Insert: {
           id?: string
-          image_url: string
-          is_primary?: boolean | null
           property_id?: string | null
+          image_url: string
+          is_primary?: boolean
         }
         Update: {
           id?: string
-          image_url?: string
-          is_primary?: boolean | null
           property_id?: string | null
+          image_url?: string
+          is_primary?: boolean
         }
         Relationships: [
           {
@@ -222,137 +420,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
-          },
-        ]
-      }
-      property_internet_tv: {
-        Row: {
-          id: string
-          option_name: string
-          property_id: string | null
-        }
-        Insert: {
-          id?: string
-          option_name: string
-          property_id?: string | null
-        }
-        Update: {
-          id?: string
-          option_name?: string
-          property_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "property_internet_tv_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      property_nearby_places: {
-        Row: {
-          id: string
-          place_name: string
-          property_id: string | null
-        }
-        Insert: {
-          id?: string
-          place_name: string
-          property_id?: string | null
-        }
-        Update: {
-          id?: string
-          place_name?: string
-          property_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "property_nearby_places_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      property_online_services: {
-        Row: {
-          id: string
-          property_id: string | null
-          service_name: string
-        }
-        Insert: {
-          id?: string
-          property_id?: string | null
-          service_name: string
-        }
-        Update: {
-          id?: string
-          property_id?: string | null
-          service_name?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "property_online_services_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      property_security: {
-        Row: {
-          id: string
-          property_id: string | null
-          security_feature: string
-        }
-        Insert: {
-          id?: string
-          property_id?: string | null
-          security_feature: string
-        }
-        Update: {
-          id?: string
-          property_id?: string | null
-          security_feature?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "property_security_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      property_storage: {
-        Row: {
-          id: string
-          property_id: string | null
-          storage_type: string
-        }
-        Insert: {
-          id?: string
-          property_id?: string | null
-          storage_type: string
-        }
-        Update: {
-          id?: string
-          property_id?: string | null
-          storage_type?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "property_storage_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
+          }
         ]
       }
     }

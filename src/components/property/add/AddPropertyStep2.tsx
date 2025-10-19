@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CreatePropertyInput } from '@/lib/api/properties';
 
 
 const formSchema = z.object({
@@ -24,7 +25,7 @@ const formSchema = z.object({
   beds: z.coerce.number().int().min(0, "Le nombre de lits doit être supérieur ou égal à 0"),
   baths: z.coerce.number().int().min(0, "Le nombre de salles de bain doit être supérieur ou égal à 0"),
   m2: z.coerce.number().positive("La surface doit être un nombre positif"),
-  yearBuilt: z.coerce.number().int().min(1800, "L'année doit être 1800 ou ultérieure").max(new Date().getFullYear(), "L'année ne peut pas être dans le futur"),
+  year_built: z.coerce.number().int().min(1800, "L'année doit être 1800 ou ultérieure").max(new Date().getFullYear(), "L'année ne peut pas être dans le futur"),
   cadastral_code: z.string().optional(),
   condition: z.enum(["newly_renovated", "under_renovation", "white_frame", "green_frame", "not_renovated", "black_frame", "old_renovation"]),
   status: z.enum(["available", "pending", "sold", "new_building_under_construction", "old_building"]).default("available"),
@@ -55,8 +56,8 @@ const AddPropertyStep2 = ({ onBack, onNext, initialData }: AddPropertyStep2Props
       beds: initialData?.beds || 0,
       baths: initialData?.baths || 0,
       m2: initialData?.m2 || 0,
-      yearBuilt: initialData?.yearBuilt || new Date().getFullYear(),
-      cadastral_code: initialData?.cadastralCode || "",
+      year_built: initialData?.year_built || new Date().getFullYear(),
+      cadastral_code: initialData?.cadastral_code || "",
       condition: initialData?.condition || "newly_renovated",
       status: initialData?.status || "available",
       kitchen_type: initialData?.kitchen_type || undefined,
@@ -71,29 +72,7 @@ const AddPropertyStep2 = ({ onBack, onNext, initialData }: AddPropertyStep2Props
 
   const onSubmit = async (data: FormValues) => {
     try {
-      console.log('Form data submitted:', data);
-      const mappedData = {
-        title: data.title,
-        description: data.description,
-        price: data.price,
-        currency: "EUR",
-        beds: data.beds,
-        baths: data.baths,
-        m2: data.m2,
-        year_built: data.yearBuilt, // Map to year_built
-        cadastral_code: data.cadastral_code,
-        condition: data.condition,
-        status: data.status,
-        kitchen_type: data.kitchen_type,
-        ceiling_height: data.ceiling_height,
-        terrace_area: data.terrace_area,
-        floor_level: data.floor_level,
-        total_floors: data.total_floors,
-        featured: data.featured,
-        rooms: data.rooms,
-      };
-      console.log('Mapped data:', mappedData);
-      onNext(mappedData);
+      onNext({ ...data, currency: "EUR" });
     } catch (error) {
       console.error('Submission error:', error);
     }
@@ -169,7 +148,7 @@ const AddPropertyStep2 = ({ onBack, onNext, initialData }: AddPropertyStep2Props
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
-              name="yearBuilt"
+              name="year_built"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{"Année de construction"}*</FormLabel>

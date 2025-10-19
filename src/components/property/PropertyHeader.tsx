@@ -15,11 +15,14 @@ const PropertyHeader = ({ property }: PropertyHeaderProps) => {
   const listingTypes: { [key: string]: string } = {
     sale: "Vente",
     rent: "Location",
+    rent_by_day: "Location par jour",
   };
 
   const propertyTypes: { [key: string]: string } = {
     apartment: "Appartement",
     house: "Maison",
+    land: "Terrain",
+    commercial: "Commercial",
   };
 
   return (
@@ -40,14 +43,15 @@ const PropertyHeader = ({ property }: PropertyHeaderProps) => {
         </div>
 
         <div className="flex flex-wrap gap-2 mb-4">
+        {property.listing_type &&
           <Badge className="bg-teal-500 hover:bg-teal-500">
-            {listingTypes[property.listingType.toLowerCase()]}
-          </Badge>
-          <Badge className="bg-estate-neutral-700 hover:bg-estate-neutral-700">
-            {propertyTypes[property.propertyType.toLowerCase()]}
-          </Badge>
+            {listingTypes[property.listing_type.toLowerCase()]}
+          </Badge>}
+          {property.property_type && <Badge className="bg-estate-neutral-700 hover:bg-estate-neutral-700">
+            {propertyTypes[property.property_type.toLowerCase()]}
+          </Badge>}
           <span className="text-2xl font-bold text-estate-800 ml-auto">
-            {property.listingType === "rent"
+            {property.listing_type === "rent"
               ? `${formatPrice(property.price)}/mois`
               : formatPrice(property.price)}
           </span>

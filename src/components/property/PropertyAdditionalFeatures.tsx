@@ -1,4 +1,3 @@
-
 import { Property } from "@/types/property";
 import { Check } from "lucide-react";
 
@@ -8,17 +7,17 @@ interface PropertyAdditionalFeaturesProps {
 
 const PropertyAdditionalFeatures = ({ property }: PropertyAdditionalFeaturesProps) => {
   const features = [
-    { label: "Elevator", value: property.hasElevator },
-    { label: "Ventilation", value: property.hasVentilation },
-    { label: "Air Conditioning", value: property.hasAirConditioning },
-    { label: "Accessible", value: property.isAccessible },
+    { label: "Elevator", value: property.has_elevator },
+    { label: "Ventilation", value: property.has_ventilation },
+    { label: "Air Conditioning", value: property.has_air_conditioning },
+    { label: "Accessible", value: property.is_accessible },
   ].filter(feature => feature.value);
 
   const hasEquipment = property.equipment && property.equipment.length > 0;
-  const hasInternetTV = property.internetTV && property.internetTV.length > 0;
+  const hasInternetTV = property.internet_tv && property.internet_tv.length > 0;
   const hasStorage = property.storage && property.storage.length > 0;
   const hasSecurity = property.security && property.security.length > 0;
-  const hasNearbyPlaces = property.nearbyPlaces && property.nearbyPlaces.length > 0;
+  const hasNearbyPlaces = property.nearby_places && property.nearby_places.length > 0;
 
   if (!features.length && !hasEquipment && !hasInternetTV && !hasStorage && !hasSecurity && !hasNearbyPlaces) {
     return null;
@@ -61,7 +60,7 @@ const PropertyAdditionalFeatures = ({ property }: PropertyAdditionalFeaturesProp
             <div>
               <h3 className="font-medium mb-3">Internet & TV</h3>
               <div className="grid grid-cols-1 gap-2">
-                {property.internetTV?.map((item, index) => (
+                {property.internet_tv?.map((item, index) => (
                   <div key={index} className="flex items-center gap-2">
                     <Check size={18} className="text-teal-500" />
                     <span>{item}</span>
@@ -89,7 +88,7 @@ const PropertyAdditionalFeatures = ({ property }: PropertyAdditionalFeaturesProp
             <div>
               <h3 className="font-medium mb-3">Nearby Places</h3>
               <div className="grid grid-cols-1 gap-2">
-                {property.nearbyPlaces?.map((place, index) => (
+                {property.nearby_places?.map((place, index) => (
                   <div key={index} className="flex items-center gap-2">
                     <Check size={18} className="text-teal-500" />
                     <span>{place}</span>

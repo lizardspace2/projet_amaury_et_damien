@@ -58,11 +58,11 @@ const AddPropertyStep4 = ({
   const totalImages = existingImageUrls.length + newImageFiles.length;
 
   useEffect(() => {
-    if (initialData.images && initialData.images.length > 0) {
+    if (initialData?.images && initialData.images.length > 0) {
       setExistingImageUrls(initialData.images as string[]);
       setPreviewUrls(initialData.images as string[]);
     }
-  }, [initialData.images]);
+  }, [initialData]);
 
   const form = useForm<AddressFormValues>({
     resolver: zodResolver(addressSchema),

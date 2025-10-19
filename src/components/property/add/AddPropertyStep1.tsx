@@ -16,10 +16,10 @@ import { CreatePropertyInput } from '@/lib/api/properties';
 
 const propertyStep1Schema = z.object({
   phone_number: z.string().min(6, "Numéro de téléphone trop court").max(20, "Numéro de téléphone trop long"),
-  contactEmail: z.string().email("Adresse e-mail invalide").optional().or(z.literal('')),
-  instagramHandle: z.string().optional(),
-  facebookUrl: z.string().url("URL invalide").optional().or(z.literal('')),
-  twitterHandle: z.string().optional(),
+  contact_email: z.string().email("Adresse e-mail invalide").optional().or(z.literal('')),
+  instagram_handle: z.string().optional(),
+  facebook_url: z.string().url("URL invalide").optional().or(z.literal('')),
+  twitter_handle: z.string().optional(),
   reference_number: z.string().optional(),
 });
 
@@ -34,10 +34,10 @@ const AddPropertyStep1: React.FC<AddPropertyStep1Props> = ({ onNext, onBack, ini
     resolver: zodResolver(propertyStep1Schema),
     defaultValues: {
       phone_number: initialData?.phone_number || '',
-      contactEmail: initialData?.contactEmail || '',
-      instagramHandle: initialData?.instagramHandle || '',
-      facebookUrl: initialData?.facebookUrl || '',
-      twitterHandle: initialData?.twitterHandle || '',
+      contact_email: initialData?.contact_email || '',
+      instagram_handle: initialData?.instagram_handle || '',
+      facebook_url: initialData?.facebook_url || '',
+      twitter_handle: initialData?.twitter_handle || '',
       reference_number: initialData?.cadastral_code || '', // Assuming cadastral_code is used as reference_number
     }
   });
@@ -57,15 +57,7 @@ const AddPropertyStep1: React.FC<AddPropertyStep1Props> = ({ onNext, onBack, ini
   }, [form, initialData]);
 
   const onSubmit = (values: z.infer<typeof propertyStep1Schema>) => {
-    const mappedData = {
-      phone_number: values.phone_number,
-      cadastral_code: values.reference_number, // Map back to cadastral_code
-      contactEmail: values.contactEmail,
-      instagramHandle: values.instagramHandle,
-      facebookUrl: values.facebookUrl,
-      twitterHandle: values.twitterHandle,
-    };
-    onNext(mappedData);
+    onNext(values);
   };
 
   return (
@@ -95,7 +87,7 @@ const AddPropertyStep1: React.FC<AddPropertyStep1Props> = ({ onNext, onBack, ini
 
           <FormField
             control={form.control}
-            name="contactEmail"
+            name="contact_email"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Email de contact</FormLabel>
@@ -126,7 +118,7 @@ const AddPropertyStep1: React.FC<AddPropertyStep1Props> = ({ onNext, onBack, ini
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <FormField
               control={form.control}
-              name="instagramHandle"
+              name="instagram_handle"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Instagram</FormLabel>
@@ -140,7 +132,7 @@ const AddPropertyStep1: React.FC<AddPropertyStep1Props> = ({ onNext, onBack, ini
 
             <FormField
               control={form.control}
-              name="facebookUrl"
+              name="facebook_url"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Facebook</FormLabel>
@@ -154,7 +146,7 @@ const AddPropertyStep1: React.FC<AddPropertyStep1Props> = ({ onNext, onBack, ini
 
             <FormField
               control={form.control}
-              name="twitterHandle"
+              name="twitter_handle"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Twitter</FormLabel>

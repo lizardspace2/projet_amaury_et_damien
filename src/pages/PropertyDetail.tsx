@@ -127,13 +127,13 @@ const PropertyDetail = () => {
                   <CardTitle>Localisation</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p>{property.address.street}, {property.address.district}, {property.address.city}</p>
-                  {property.address.coordinates.lat && property.address.coordinates.lng && (
+                  <p>{property.address_street}, {property.address_district}, {property.address_city}</p>
+                  {property.lat && property.lng && (
                     <div className="mt-4 h-96 w-full">
                       <PropertyMap
-                        lat={property.address.coordinates.lat}
-                        lng={property.address.coordinates.lng}
-                        address={`${property.address.street}, ${property.address.city}`}
+                        lat={property.lat}
+                        lng={property.lng}
+                        address={`${property.address_street}, ${property.address_city}`}
                       />
                     </div>
                   )}

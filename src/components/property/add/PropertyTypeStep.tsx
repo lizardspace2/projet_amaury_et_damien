@@ -24,32 +24,25 @@ interface PropertyTypeStepProps {
 }
 
 const PropertyTypeStep: React.FC<PropertyTypeStepProps> = ({ onNext, onBack, initialData }) => {
-  console.log('PropertyTypeStep - initialData:', initialData);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      listing_type: initialData?.listingType,
-      property_type: initialData?.propertyType,
+      listing_type: initialData?.listing_type,
+      property_type: initialData?.property_type,
     },
   });
-  console.log('PropertyTypeStep - form defaultValues:', form.getValues());
 
   useEffect(() => {
     if (initialData) {
-      console.log('PropertyTypeStep - resetting form with initialData:', initialData);
       form.reset({
-        listing_type: initialData.listingType,
-        property_type: initialData.propertyType,
+        listing_type: initialData.listing_type,
+        property_type: initialData.property_type,
       });
     }
   }, [initialData, form]);
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
-    const mappedData = {
-      listingType: data.listing_type,
-      propertyType: data.property_type,
-    };
-    onNext(mappedData);
+    onNext(data);
   };
 
   return (

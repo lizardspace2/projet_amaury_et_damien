@@ -6,10 +6,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { CreatePropertyInput } from "@/lib/api/properties";
+import { CreatePropertyInput, ListingType } from "@/lib/api/properties";
 
 const formSchema = z.object({
-  listing_type: z.enum(["sale", "rent", "rent_by_day", "lease"], {
+  listing_type: z.enum(["sale", "rent", "rent_by_day", "lease", "auction"], {
     required_error: "Veuillez sélectionner un type d'annonce",
   }),
   property_type: z.enum(["house", "apartment", "land", "commercial"], {
@@ -21,13 +21,14 @@ interface PropertyTypeStepProps {
   onNext: (data: Partial<CreatePropertyInput>) => void;
   onBack?: () => void;
   initialData?: Partial<CreatePropertyInput>;
+  fixedListingType?: ListingType;
 }
 
-const PropertyTypeStep: React.FC<PropertyTypeStepProps> = ({ onNext, onBack, initialData }) => {
+const PropertyTypeStep: React.FC<PropertyTypeStepProps> = ({ onNext, onBack, initialData, fixedListingType }) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      listing_type: initialData?.listing_type,
+      listing_type: fixedListingType || initialData?.listing_type,
       property_type: initialData?.property_type,
     },
   });
@@ -35,11 +36,14 @@ const PropertyTypeStep: React.FC<PropertyTypeStepProps> = ({ onNext, onBack, ini
   useEffect(() => {
     if (initialData) {
       form.reset({
-        listing_type: initialData.listing_type,
+        listing_type: fixedListingType || initialData.listing_type,
         property_type: initialData.property_type,
       });
     }
-  }, [initialData, form]);
+    if (fixedListingType) {
+        form.setValue("listing_type", fixedListingType);
+    }
+  }, [initialData, form, fixedListingType]);
 
   const onSubmit = (data: z.infer<typeof formSchema>) => {
     onNext(data);
@@ -56,7 +60,7 @@ const PropertyTypeStep: React.FC<PropertyTypeStepProps> = ({ onNext, onBack, ini
             </p>
           </div>
 
-          <FormField
+          {!fixedListingType && <FormField
             control={form.control}
             name="listing_type"
             render={({ field }) => (
@@ -109,7 +113,7 @@ const PropertyTypeStep: React.FC<PropertyTypeStepProps> = ({ onNext, onBack, ini
                 <FormMessage />
               </FormItem>
             )}
-          />
+          />}
 
           <FormField
             control={form.control}

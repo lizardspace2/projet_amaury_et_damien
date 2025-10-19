@@ -19,6 +19,8 @@ import Mensualites from "./pages/borrow/Mensualites";
 import FraisNotaire from "./pages/borrow/FraisNotaire";
 import InvestissementLocatif from "./pages/borrow/InvestissementLocatif";
 import Auctions from "./pages/Auctions";
+import AuctionProperties from "./pages/AuctionProperties";
+import CreateAuction from "./pages/CreateAuction";
 import MovingServicesWrapper from "./pages/MovingServices"; // Import the new component
 import EditProperty from "./pages/EditProperty"; // Import EditProperty
 import { supabase } from "@/lib/api/supabaseClient";
@@ -70,7 +72,8 @@ const App = () => {
                 <Route path="/borrow/mensualites" element={<Mensualites />} />
                 <Route path="/borrow/frais-notaire" element={<FraisNotaire />} />
                 <Route path="/borrow/investissement-locatif" element={<InvestissementLocatif />} />
-                <Route path="/auctions" element={<Auctions />} />
+                <Route path="/auctions" element={<AuctionProperties />} />
+                <Route path="/create-auction" element={<CreateAuction />} />
                 <Route
                   path="/account"
                   element={<Account />}

@@ -410,7 +410,7 @@ const Properties = () => {
   useEffect(() => {
     if (listingTypeFromParams) {
       switch (listingTypeFromParams) {
-        case 'sell':
+        case 'sale':
           setActiveTab('filters');
           setListingType('sale');
           break;
@@ -422,7 +422,7 @@ const Properties = () => {
           setActiveTab('filters');
           setListingType('rent');
           break;
-        case 'daily-rent':
+        case 'rent_by_day':
           setActiveTab('filters');
           setListingType('rent_by_day');
           break;

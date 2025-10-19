@@ -9,6 +9,8 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { signInWithEmail, signUpWithEmail, signOut } from '@/lib/api/auth';
 import { supabase } from '@/lib/api/supabaseClient';
+import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuContent, NavigationMenuLink } from '@/components/ui/navigation-menu';
+import { cn } from '@/lib/utils';
 
 const Logo = () => (
   <Link to="/" className="flex items-center gap-2 text-xl font-bold text-slate-800 no-underline hover:no-underline">
@@ -32,6 +34,29 @@ const NavLink = ({ to, children }: { to: string; children: React.ReactNode }) =>
     </Link>
   );
 };
+
+const ListItem = React.forwardRef<React.ElementRef<'a'>, React.ComponentPropsWithoutRef<'a'>>(({ className, title, children, ...props }, ref) => {
+  return (
+    <li>
+      <NavigationMenuLink asChild>
+        <a
+          ref={ref}
+          className={cn(
+            'block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground',
+            className
+          )}
+          {...props}
+        >
+          <div className="text-sm font-medium leading-none">{title}</div>
+          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+            {children}
+          </p>
+        </a>
+      </NavigationMenuLink>
+    </li>
+  )
+})
+ListItem.displayName = 'ListItem'
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -109,9 +134,19 @@ const Navbar = () => {
     resetForm();
   };
 
-  const handleNavigationWithFilter = (type: string) => {
-    navigate(`/properties?type=${type}`);
-    setIsMenuOpen(false);
+  const borrowLinks = {
+    Emprunt: [
+        { title: "Votre crédit : comparez les offres", href: "/borrow/credit" },
+        { title: "Assurance de prêt : en savoir plus", href: "/borrow/assurance" },
+    ],
+    Outils: [
+        { title: "Votre capacité d'emprunt", href: "/borrow/capacite" },
+        { title: "Calculez vos mensualités", href: "/borrow/mensualites" },
+        { title: "Estimez vos frais de notaire", href: "/borrow/frais-notaire" },
+    ],
+    Investir: [
+        { title: "Investissement locatif", href: "/borrow/investissement-locatif" },
+    ]
   };
 
   const mainNavLinks = [
@@ -119,6 +154,7 @@ const Navbar = () => {
     { name: 'Louer', path: '/properties?type=rent' },
     { name: 'Bail Commercial', path: '/properties?type=lease' },
     { name: 'Location Journalière', path: '/properties?type=rent_by_day' },
+    { name: 'Emprunter', path: '/borrow', dropdown: borrowLinks },
     { name: 'Services de déménagement', path: '/moving-services' },
   ];
 
@@ -128,8 +164,38 @@ const Navbar = () => {
         <Logo />
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-8">
-          {mainNavLinks.map(link => <NavLink key={link.name} to={link.path}>{link.name}</NavLink>)}
+        <nav className="hidden md:flex items-center gap-1">
+          <NavigationMenu>
+            <NavigationMenuList>
+              {mainNavLinks.map(link => (
+                <NavigationMenuItem key={link.name}>
+                  {link.dropdown ? (
+                    <>
+                      <NavigationMenuTrigger>{link.name}</NavigationMenuTrigger>
+                      <NavigationMenuContent>
+                        <div className="grid w-[600px] grid-cols-3 gap-4 p-4">
+                          {Object.entries(link.dropdown).map(([category, links]) => (
+                            <div key={category}>
+                              <h3 className="font-medium text-lg mb-2">{category}</h3>
+                              <ul className="flex flex-col gap-1">
+                                {links.map(item => (
+                                  <ListItem key={item.title} href={item.href} title={item.title} />
+                                ))}
+                              </ul>
+                            </div>
+                          ))}
+                        </div>
+                      </NavigationMenuContent>
+                    </>
+                  ) : (
+                    <NavigationMenuLink asChild>
+                      <NavLink to={link.path}>{link.name}</NavLink>
+                    </NavigationMenuLink>
+                  )}
+                </NavigationMenuItem>
+              ))}
+            </NavigationMenuList>
+          </NavigationMenu>
         </nav>
 
         <div className="hidden md:flex items-center gap-2">

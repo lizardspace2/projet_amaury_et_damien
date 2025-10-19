@@ -11,6 +11,13 @@ import NotFound from "./pages/NotFound";
 import Sell from "./pages/Sell";
 import Account from "./pages/Account";
 import VerificationError from "./pages/VerificationError";
+import Borrow from "./pages/Borrow";
+import Credit from "./pages/borrow/Credit";
+import Assurance from "./pages/borrow/Assurance";
+import Capacite from "./pages/borrow/Capacite";
+import Mensualites from "./pages/borrow/Mensualites";
+import FraisNotaire from "./pages/borrow/FraisNotaire";
+import InvestissementLocatif from "./pages/borrow/InvestissementLocatif";
 import MovingServicesWrapper from "./pages/MovingServices"; // Import the new component
 import EditProperty from "./pages/EditProperty"; // Import EditProperty
 import { supabase } from "@/lib/api/supabaseClient";
@@ -55,6 +62,13 @@ const App = () => {
                 <Route path="/properties" element={<Properties />} />
                 <Route path="/sell" element={<Sell />} />
                 <Route path="/moving-services" element={<MovingServicesWrapper />} /> 
+                <Route path="/borrow" element={<Borrow />} />
+                <Route path="/borrow/credit" element={<Credit />} />
+                <Route path="/borrow/assurance" element={<Assurance />} />
+                <Route path="/borrow/capacite" element={<Capacite />} />
+                <Route path="/borrow/mensualites" element={<Mensualites />} />
+                <Route path="/borrow/frais-notaire" element={<FraisNotaire />} />
+                <Route path="/borrow/investissement-locatif" element={<InvestissementLocatif />} />
                 <Route
                   path="/account"
                   element={<Account />}

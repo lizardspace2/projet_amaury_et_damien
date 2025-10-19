@@ -432,7 +432,7 @@ export type Database = {
     }
     Enums: {
       kitchen_type: "american" | "open" | "closed"
-      listing_type: "sale" | "rent" | "rent_by_day"
+      listing_type: "sale" | "rent" | "rent_by_day" | "auction"
       property_condition: "new" | "good" | "needs_renovation"
       property_status: "free" | "under_caution" | "under_construction"
       property_type: "house" | "apartment" | "land" | "commercial"

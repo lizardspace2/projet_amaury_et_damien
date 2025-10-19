@@ -1,5 +1,5 @@
 export type PropertyType = 'house' | 'apartment' | 'land' | 'commercial';
-export type ListingType = 'sale' | 'rent' | 'rent_by_day' | 'lease';
+export type ListingType = 'sale' | 'rent' | 'rent_by_day' | 'lease' | 'auction';
 export type PropertyCondition = 'new' | 'good' | 'needs_renovation';
 export type KitchenType = 'american' | 'open' | 'closed';
 export type PropertyStatus = 'free' | 'under_caution' | 'under_construction';

@@ -156,6 +156,7 @@ const Navbar = () => {
     { name: 'Location Journalière', path: '/properties?type=rent_by_day' },
     { name: 'Emprunter', path: '/borrow', dropdown: borrowLinks },
     { name: 'Services de déménagement', path: '/moving-services' },
+    { name: 'Ventes aux enchères', path: '/auctions' },
   ];
 
   return (

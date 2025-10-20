@@ -32,6 +32,20 @@ const Logo = () => (
   </Link>
 );
 
+const MobileLogo = () => (
+  <Link to="/" className="flex items-center gap-2 text-slate-900 no-underline group flex-shrink-0">
+    <Building className="h-6 w-6 text-teal-600" />
+    <div className="flex flex-col">
+      <span className="font-serif text-lg leading-tight bg-gradient-to-r from-teal-600 to-emerald-700 bg-clip-text text-transparent">
+        AnnoncesImmo
+      </span>
+      <span className="text-xs font-medium text-slate-500 leading-tight">
+        Lyon
+      </span>
+    </div>
+  </Link>
+);
+
 const NavLink = ({ to, children, onClick, isActive }: { to: string; children: React.ReactNode; onClick?: () => void; isActive: boolean }) => {
   return (
     <Link
@@ -260,152 +274,174 @@ const Navbar = () => {
         ? "bg-white/95 shadow-lg border-b border-slate-200/60" 
         : "bg-white/80 shadow-sm border-b border-slate-200/40"
     )}>
-      <div className="container py-3 flex items-center justify-between">
-        <Logo />
+      {/* Desktop Header */}
+      <div className="hidden lg:block">
+        <div className="container py-3 flex items-center justify-between">
+          <Logo />
 
-        {/* Desktop Navigation */}
-        <nav className="hidden lg:flex items-center gap-1">
-          <NavigationMenu>
-            <NavigationMenuList>
-              {/* Liens de type propriété - logique exclusive */}
-              {propertyTypeLinks.map(link => (
-                <NavigationMenuItem key={link.name}>
-                  <NavigationMenuLink asChild>
-                    <NavLink 
-                      to={link.path} 
-                      isActive={getActiveState(link.type)}
-                    >
-                      {link.name}
-                    </NavLink>
-                  </NavigationMenuLink>
-                </NavigationMenuItem>
-              ))}
-              
-              {/* Autres liens avec dropdown */}
-              {otherLinks.map(link => (
-                <NavigationMenuItem key={link.name}>
-                  {link.dropdown ? (
-                    <>
-                      <NavigationMenuTrigger className="group data-[state=open]:bg-teal-50 data-[state=open]:text-teal-700">
-                        {link.name}
-                      </NavigationMenuTrigger>
-                      <NavigationMenuContent>
-                        <div className="grid w-[600px] grid-cols-3 gap-6 p-6">
-                          {Object.entries(link.dropdown).map(([category, links]) => (
-                            <div key={category} className="space-y-3">
-                              <h3 className="font-semibold text-slate-800 text-lg border-b border-slate-200 pb-2">
-                                {category}
-                              </h3>
-                              <ul className="flex flex-col gap-2">
-                                {links.map((item: any) => (
-                                  <ListItem 
-                                    key={item.title} 
-                                    href={item.href} 
-                                    title={item.title}
-                                  >
-                                    {item.title}
-                                  </ListItem>
-                                ))}
-                              </ul>
-                            </div>
-                          ))}
-                        </div>
-                      </NavigationMenuContent>
-                    </>
-                  ) : (
+          {/* Desktop Navigation */}
+          <nav className="flex items-center gap-1">
+            <NavigationMenu>
+              <NavigationMenuList>
+                {/* Liens de type propriété - logique exclusive */}
+                {propertyTypeLinks.map(link => (
+                  <NavigationMenuItem key={link.name}>
                     <NavigationMenuLink asChild>
                       <NavLink 
                         to={link.path} 
-                        isActive={location.pathname === link.path}
+                        isActive={getActiveState(link.type)}
                       >
                         {link.name}
                       </NavLink>
                     </NavigationMenuLink>
-                  )}
-                </NavigationMenuItem>
-              ))}
-            </NavigationMenuList>
-          </NavigationMenu>
-        </nav>
+                  </NavigationMenuItem>
+                ))}
+                
+                {/* Autres liens avec dropdown */}
+                {otherLinks.map(link => (
+                  <NavigationMenuItem key={link.name}>
+                    {link.dropdown ? (
+                      <>
+                        <NavigationMenuTrigger className="group data-[state=open]:bg-teal-50 data-[state=open]:text-teal-700">
+                          {link.name}
+                        </NavigationMenuTrigger>
+                        <NavigationMenuContent>
+                          <div className="grid w-[600px] grid-cols-3 gap-6 p-6">
+                            {Object.entries(link.dropdown).map(([category, links]) => (
+                              <div key={category} className="space-y-3">
+                                <h3 className="font-semibold text-slate-800 text-lg border-b border-slate-200 pb-2">
+                                  {category}
+                                </h3>
+                                <ul className="flex flex-col gap-2">
+                                  {links.map((item: any) => (
+                                    <ListItem 
+                                      key={item.title} 
+                                      href={item.href} 
+                                      title={item.title}
+                                    >
+                                      {item.title}
+                                    </ListItem>
+                                  ))}
+                                </ul>
+                              </div>
+                            ))}
+                          </div>
+                        </NavigationMenuContent>
+                      </>
+                    ) : (
+                      <NavigationMenuLink asChild>
+                        <NavLink 
+                          to={link.path} 
+                          isActive={location.pathname === link.path}
+                        >
+                          {link.name}
+                        </NavLink>
+                      </NavigationMenuLink>
+                    )}
+                  </NavigationMenuItem>
+                ))}
+              </NavigationMenuList>
+            </NavigationMenu>
+          </nav>
 
-        <div className="hidden lg:flex items-center gap-3">
-          {isLoggedIn ? (
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="ghost" className="flex items-center gap-2 rounded-full px-3 py-2 hover:bg-slate-100 transition-colors">
-                  <Avatar className="h-8 w-8 border-2 border-teal-200">
-                    <AvatarFallback className="bg-gradient-to-r from-teal-500 to-emerald-600 text-white text-sm font-semibold">
-                      {getUserInitials(userEmail)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col items-start">
-                    <span className="text-sm font-medium text-slate-700">Mon compte</span>
-                    <span className="text-xs text-slate-500">{userEmail}</span>
+          <div className="flex items-center gap-3">
+            {isLoggedIn ? (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" className="flex items-center gap-2 rounded-full px-3 py-2 hover:bg-slate-100 transition-colors">
+                    <Avatar className="h-8 w-8 border-2 border-teal-200">
+                      <AvatarFallback className="bg-gradient-to-r from-teal-500 to-emerald-600 text-white text-sm font-semibold">
+                        {getUserInitials(userEmail)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col items-start">
+                      <span className="text-sm font-medium text-slate-700">Mon compte</span>
+                      <span className="text-xs text-slate-500">{userEmail}</span>
+                    </div>
+                    <ChevronDown size={16} className="text-slate-400" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-64 p-3" align="end">
+                  <div className="flex flex-col gap-1">
+                    <Button asChild variant="ghost" className="justify-start h-10 rounded-lg">
+                      <Link to="/account" className="flex items-center gap-3">
+                        <User size={18} className="text-slate-600" />
+                        <span>Mon profil</span>
+                      </Link>
+                    </Button>
+                    <Button asChild variant="ghost" className="justify-start h-10 rounded-lg">
+                      <Link to="/account/properties" className="flex items-center gap-3">
+                        <Home size={18} className="text-slate-600" />
+                        <span>Mes annonces</span>
+                      </Link>
+                    </Button>
+                    <Separator className="my-2" />
+                    <Button 
+                      variant="ghost" 
+                      className="justify-start h-10 rounded-lg text-red-500 hover:text-red-600 hover:bg-red-50"
+                      onClick={handleLogout}
+                    >
+                      <LogOut size={18} className="mr-3" />
+                      Déconnexion
+                    </Button>
                   </div>
-                  <ChevronDown size={16} className="text-slate-400" />
+                </PopoverContent>
+              </Popover>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Button 
+                  variant="ghost" 
+                  onClick={() => { setIsAuthDialogOpen(true); setAuthMode('login'); }}
+                  className="text-slate-700 hover:text-teal-600"
+                >
+                  Connexion
                 </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-64 p-3" align="end">
-                <div className="flex flex-col gap-1">
-                  <Button asChild variant="ghost" className="justify-start h-10 rounded-lg">
-                    <Link to="/account" className="flex items-center gap-3">
-                      <User size={18} className="text-slate-600" />
-                      <span>Mon profil</span>
-                    </Link>
-                  </Button>
-                  <Button asChild variant="ghost" className="justify-start h-10 rounded-lg">
-                    <Link to="/account/properties" className="flex items-center gap-3">
-                      <Home size={18} className="text-slate-600" />
-                      <span>Mes annonces</span>
-                    </Link>
-                  </Button>
-                  <Separator className="my-2" />
-                  <Button 
-                    variant="ghost" 
-                    className="justify-start h-10 rounded-lg text-red-500 hover:text-red-600 hover:bg-red-50"
-                    onClick={handleLogout}
-                  >
-                    <LogOut size={18} className="mr-3" />
-                    Déconnexion
-                  </Button>
-                </div>
-              </PopoverContent>
-            </Popover>
-          ) : (
-            <div className="flex items-center gap-2">
-              <Button 
-                variant="ghost" 
-                onClick={() => { setIsAuthDialogOpen(true); setAuthMode('login'); }}
-                className="text-slate-700 hover:text-teal-600"
-              >
-                Connexion
-              </Button>
-              <Button 
-                onClick={() => { setIsAuthDialogOpen(true); setAuthMode('signup'); }}
-                className="bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 shadow-md hover:shadow-lg transition-all"
-              >
-                S'inscrire
-              </Button>
-            </div>
-          )}
-          <Button asChild className="bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 shadow-md hover:shadow-lg transition-all px-4">
-            <Link to="/sell" className="flex items-center gap-2 font-semibold">
-              <PlusCircle size={18} />
-              Publier
-              <Badge variant="secondary" className="ml-1 bg-white/20 text-white border-0 text-xs">
-                Gratuit
-              </Badge>
-            </Link>
-          </Button>
+                <Button 
+                  onClick={() => { setIsAuthDialogOpen(true); setAuthMode('signup'); }}
+                  className="bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 shadow-md hover:shadow-lg transition-all"
+                >
+                  S'inscrire
+                </Button>
+              </div>
+            )}
+            <Button asChild className="bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 shadow-md hover:shadow-lg transition-all px-4">
+              <Link to="/sell" className="flex items-center gap-2 font-semibold">
+                <PlusCircle size={18} />
+                Publier
+                <Badge variant="secondary" className="ml-1 bg-white/20 text-white border-0 text-xs">
+                  Gratuit
+                </Badge>
+              </Link>
+            </Button>
+          </div>
         </div>
+      </div>
 
-        {/* Mobile Menu Button */}
-        <button 
-          onClick={() => setIsMenuOpen(!isMenuOpen)} 
-          className="lg:hidden p-2 rounded-lg hover:bg-slate-100 transition-colors"
-        >
-          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+      {/* Mobile Header */}
+      <div className="lg:hidden">
+        <div className="container py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3 flex-1">
+            <MobileLogo />
+            {/* Bouton Publier visible sur mobile */}
+            <Button asChild className="bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 shadow-md hover:shadow-lg transition-all px-3 py-2 h-9 whitespace-nowrap flex-shrink-0">
+              <Link to="/sell" className="flex items-center gap-1 text-xs font-semibold">
+                <PlusCircle size={14} />
+                Publier
+                <Badge variant="secondary" className="ml-1 bg-white/20 text-white border-0 text-[10px] h-4">
+                  Gratuit
+                </Badge>
+              </Link>
+            </Button>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button 
+            onClick={() => setIsMenuOpen(!isMenuOpen)} 
+            className="p-2 rounded-lg hover:bg-slate-100 transition-colors flex-shrink-0"
+          >
+            {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Menu */}
@@ -479,7 +515,13 @@ const Navbar = () => {
                   Mon profil
                 </Link>
               </Button>
-              <Button variant="destructive" onClick={() => { handleLogout(); closeMobileMenu(); }} className="h-12 rounded-lg">
+              <Button asChild variant="ghost" className="justify-start h-12 rounded-lg">
+                <Link to="/account/properties" onClick={closeMobileMenu}>
+                  <Home size={18} className="mr-3" />
+                  Mes annonces
+                </Link>
+              </Button>
+              <Button variant="destructive" onClick={() => { handleLogout(); closeMobileMenu(); }} className="h-12 rounded-lg mt-2">
                 <LogOut size={18} className="mr-3" />
                 Déconnexion
               </Button>

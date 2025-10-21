@@ -191,6 +191,21 @@ const Navbar = () => {
     ]
   };
 
+  const auctionLinks = {
+    Enchères: [
+        { title: "Consulter les enchères", href: "/auctions" },
+        { title: "Salle d'enchères digitale", href: "/auctions/room" },
+    ],
+    Créer: [
+        { title: "Créer une enchère", href: "/create-auction" },
+        { title: "Mes enchères", href: "/account/auctions" },
+    ],
+    Participer: [
+        { title: "Comment ça marche", href: "/auctions/guide" },
+        { title: "Règles et conditions", href: "/auctions/rules" },
+    ]
+  };
+
   // Fonction pour déterminer l'état actif basée sur le type
   const getActiveState = (linkType: string) => {
     const searchParams = new URLSearchParams(location.search);
@@ -248,6 +263,7 @@ const Navbar = () => {
     { 
       name: 'Ventes aux enchères', 
       path: '/auctions',
+      dropdown: auctionLinks,
       mobileIcon: <Users size={18} />
     },
   ];

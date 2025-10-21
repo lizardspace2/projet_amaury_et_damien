@@ -21,6 +21,11 @@ import InvestissementLocatif from "./pages/borrow/InvestissementLocatif";
 import Auctions from "./pages/Auctions";
 import AuctionProperties from "./pages/AuctionProperties";
 import CreateAuction from "./pages/CreateAuction";
+import AuctionGuide from "./pages/auctions/AuctionGuide";
+import AuctionRules from "./pages/auctions/AuctionRules";
+import MyAuctions from "./pages/account/MyAuctions";
+import AuctionDetailPage from "./pages/AuctionDetailPage";
+import AuctionRoomPage from "./pages/auctions/AuctionRoomPage";
 import MovingServicesWrapper from "./pages/MovingServices"; // Import the new component
 import EditProperty from "./pages/EditProperty"; // Import EditProperty
 import { supabase } from "@/lib/api/supabaseClient";
@@ -74,6 +79,11 @@ const App = () => {
                 <Route path="/borrow/investissement-locatif" element={<InvestissementLocatif />} />
                 <Route path="/auctions" element={<AuctionProperties />} />
                 <Route path="/create-auction" element={<CreateAuction />} />
+                <Route path="/auctions/guide" element={<AuctionGuide />} />
+                <Route path="/auctions/rules" element={<AuctionRules />} />
+                <Route path="/auctions/room" element={<AuctionRoomPage />} />
+                <Route path="/account/auctions" element={<MyAuctions />} />
+                <Route path="/auction/:auctionId" element={<AuctionDetailPage />} />
                 <Route
                   path="/account"
                   element={<Account />}

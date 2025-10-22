@@ -487,15 +487,15 @@ const Navbar = () => {
 
       {/* Mobile Header */}
       <div className="lg:hidden">
-        <div className="container py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3 flex-1">
+        <div className="container py-2 px-4 flex items-center justify-between">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
             <MobileLogo />
             {/* Bouton Publier visible sur mobile */}
-            <Button asChild className="bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 shadow-md hover:shadow-lg transition-all px-3 py-2 h-9 whitespace-nowrap flex-shrink-0">
+            <Button asChild className="bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 shadow-md hover:shadow-lg transition-all px-2 py-1.5 h-8 whitespace-nowrap flex-shrink-0">
               <Link to="/sell" className="flex items-center gap-1 text-xs font-semibold">
-                <PlusCircle size={14} />
+                <PlusCircle size={12} />
                 Publier
-                <Badge variant="secondary" className="ml-1 bg-white/20 text-white border-0 text-[10px] h-4">
+                <Badge variant="secondary" className="ml-1 bg-white/20 text-white border-0 text-[9px] h-3 px-1">
                   Gratuit
                 </Badge>
               </Link>
@@ -507,7 +507,7 @@ const Navbar = () => {
             onClick={() => setIsMenuOpen(!isMenuOpen)} 
             className="p-2 rounded-lg hover:bg-slate-100 transition-colors flex-shrink-0"
           >
-            {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            {isMenuOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
         </div>
       </div>
@@ -517,22 +517,22 @@ const Navbar = () => {
         "lg:hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-lg shadow-xl border-t border-slate-200 transition-all duration-300 ease-in-out overflow-hidden",
         isMenuOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
       )}>
-        <nav className="flex flex-col gap-1 p-4">
+        <nav className="flex flex-col gap-0.5 p-3 max-h-[80vh] overflow-y-auto">
           {/* Liens de type propriété - logique exclusive */}
           {propertyTypeLinks.map(link => (
             <div key={link.name}>
               {link.dropdown ? (
-                <div className="space-y-1">
-                  <div className="flex items-center gap-3 text-sm font-semibold text-slate-800 px-4 py-2">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-800 px-3 py-2.5 bg-slate-50 rounded-lg">
                     <span className="text-teal-600">
                       {link.mobileIcon}
                     </span>
                     {link.name}
                   </div>
-                  <div className="ml-7 space-y-1">
+                  <div className="ml-4 space-y-0.5">
                     {Object.entries(link.dropdown).map(([category, links]) => (
-                      <div key={category} className="space-y-1">
-                        <div className="text-xs font-medium text-slate-500 px-2 py-1">
+                      <div key={category} className="space-y-0.5">
+                        <div className="text-xs font-medium text-slate-500 px-2 py-1.5 bg-slate-100 rounded">
                           {category}
                         </div>
                         {links.map((item: any) => (
@@ -543,13 +543,16 @@ const Navbar = () => {
                               navigate(item.href);
                             }}
                             className={cn(
-                              "flex items-center text-sm font-medium transition-all duration-200 px-3 py-2 rounded-lg w-full text-left",
+                              "flex flex-col items-start text-sm font-medium transition-all duration-200 px-3 py-2.5 rounded-lg w-full text-left",
                               getActiveState(item.href.split('type=')[1])
                                 ? "text-teal-700 bg-gradient-to-r from-teal-50 to-emerald-50 border border-teal-200 shadow-sm" 
                                 : "text-slate-600 hover:text-teal-600 hover:bg-slate-50"
                             )}
                           >
-                            {item.title}
+                            <span className="font-medium">{item.title}</span>
+                            {item.description && (
+                              <span className="text-xs text-slate-500 mt-0.5">{item.description}</span>
+                            )}
                           </button>
                         ))}
                       </div>
@@ -560,7 +563,7 @@ const Navbar = () => {
                 <button
                   onClick={() => handleMobileLinkClick(link)}
                   className={cn(
-                    "flex items-center gap-3 text-sm font-medium transition-all duration-200 px-4 py-3 rounded-lg no-underline w-full text-left",
+                    "flex items-center gap-2 text-sm font-medium transition-all duration-200 px-3 py-2.5 rounded-lg no-underline w-full text-left",
                     getActiveState(link.type)
                       ? "text-teal-700 bg-gradient-to-r from-teal-50 to-emerald-50 border border-teal-200 shadow-sm" 
                       : "text-slate-600 hover:text-teal-600 hover:bg-slate-50"
@@ -584,7 +587,7 @@ const Navbar = () => {
               key={link.name}
               onClick={() => handleMobileLinkClick(link)}
               className={cn(
-                "flex items-center gap-3 text-sm font-medium transition-all duration-200 px-4 py-3 rounded-lg no-underline w-full text-left",
+                "flex items-center gap-2 text-sm font-medium transition-all duration-200 px-3 py-2.5 rounded-lg no-underline w-full text-left",
                 location.pathname === link.path
                   ? "text-teal-700 bg-gradient-to-r from-teal-50 to-emerald-50 border border-teal-200 shadow-sm" 
                   : "text-slate-600 hover:text-teal-600 hover:bg-slate-50"
@@ -600,13 +603,13 @@ const Navbar = () => {
             </button>
           ))}
           
-          <Separator className="my-3" />
+          <Separator className="my-2" />
           
           {isLoggedIn ? (
-            <div className="flex flex-col gap-2 p-2">
-              <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg mb-2">
-                <Avatar className="h-10 w-10 border-2 border-teal-200">
-                  <AvatarFallback className="bg-gradient-to-r from-teal-500 to-emerald-600 text-white">
+            <div className="flex flex-col gap-1.5 p-2">
+              <div className="flex items-center gap-2 p-2.5 bg-slate-50 rounded-lg mb-1">
+                <Avatar className="h-8 w-8 border-2 border-teal-200">
+                  <AvatarFallback className="bg-gradient-to-r from-teal-500 to-emerald-600 text-white text-xs">
                     {getUserInitials(userEmail)}
                   </AvatarFallback>
                 </Avatar>
@@ -615,48 +618,48 @@ const Navbar = () => {
                   <p className="text-xs text-slate-500 truncate">{userEmail}</p>
                 </div>
               </div>
-              <Button asChild variant="ghost" className="justify-start h-12 rounded-lg">
+              <Button asChild variant="ghost" className="justify-start h-10 rounded-lg text-sm">
                 <Link to="/account" onClick={closeMobileMenu}>
-                  <User size={18} className="mr-3" />
+                  <User size={16} className="mr-2" />
                   Mon profil
                 </Link>
               </Button>
-              <Button asChild variant="ghost" className="justify-start h-12 rounded-lg">
+              <Button asChild variant="ghost" className="justify-start h-10 rounded-lg text-sm">
                 <Link to="/account/properties" onClick={closeMobileMenu}>
-                  <Home size={18} className="mr-3" />
+                  <Home size={16} className="mr-2" />
                   Mes annonces
                 </Link>
               </Button>
-              <Button variant="destructive" onClick={() => { handleLogout(); closeMobileMenu(); }} className="h-12 rounded-lg mt-2">
-                <LogOut size={18} className="mr-3" />
+              <Button variant="destructive" onClick={() => { handleLogout(); closeMobileMenu(); }} className="h-10 rounded-lg mt-1 text-sm">
+                <LogOut size={16} className="mr-2" />
                 Déconnexion
               </Button>
             </div>
           ) : (
-            <div className="flex flex-col gap-2 p-2">
+            <div className="flex flex-col gap-1.5 p-2">
               <Button 
                 variant="outline" 
                 onClick={() => { setIsAuthDialogOpen(true); setAuthMode('login'); closeMobileMenu(); }}
-                className="h-12 rounded-lg"
+                className="h-10 rounded-lg text-sm"
               >
-                <LogIn size={18} className="mr-3" />
+                <LogIn size={16} className="mr-2" />
                 Connexion
               </Button>
               <Button 
                 onClick={() => { setIsAuthDialogOpen(true); setAuthMode('signup'); closeMobileMenu(); }}
-                className="h-12 rounded-lg bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700"
+                className="h-10 rounded-lg bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 text-sm"
               >
-                <UserPlus size={18} className="mr-3" />
+                <UserPlus size={16} className="mr-2" />
                 S'inscrire
               </Button>
             </div>
           )}
           
-          <Button asChild className="bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 h-12 rounded-lg mt-2 font-semibold">
+          <Button asChild className="bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 h-10 rounded-lg mt-1 font-semibold text-sm">
             <Link to="/sell" onClick={closeMobileMenu}>
-              <PlusCircle size={18} className="mr-3" />
+              <PlusCircle size={16} className="mr-2" />
               Publier une annonce
-              <Badge variant="secondary" className="ml-2 bg-white/20 text-white border-0">
+              <Badge variant="secondary" className="ml-2 bg-white/20 text-white border-0 text-xs">
                 Gratuit
               </Badge>
             </Link>

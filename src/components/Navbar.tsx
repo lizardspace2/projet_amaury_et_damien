@@ -63,7 +63,7 @@ const NavLink = ({ to, children, onClick, isActive }: { to: string; children: Re
   );
 };
 
-const ListItem = React.forwardRef<React.ElementRef<'a'>, React.ComponentPropsWithoutRef<'a'>>(({ className, title, children, ...props }, ref) => {
+const ListItem = React.forwardRef<React.ElementRef<'a'>, React.ComponentPropsWithoutRef<'a'> & { description?: string }>(({ className, title, children, description, ...props }, ref) => {
   return (
     <li>
       <NavigationMenuLink asChild>
@@ -80,7 +80,7 @@ const ListItem = React.forwardRef<React.ElementRef<'a'>, React.ComponentPropsWit
               {title}
             </div>
             <p className="text-sm leading-snug text-slate-600 line-clamp-2">
-              {children}
+              {description || children}
             </p>
           </div>
         </a>
@@ -178,24 +178,31 @@ const Navbar = () => {
 
   const buyLinks = {
     "Types de vente": [
-        { title: "À vendre", href: "/properties?type=sale" },
-        { title: "Bail à céder", href: "/properties?type=lease" },
-        { title: "Enchères", href: "/properties?type=auction" },
-        { title: "Viager", href: "/properties?type=viager" },
-        { title: "Biens d'exception", href: "/properties?type=exceptional_property" },
-        { title: "Réméré", href: "/properties?type=remere" },
+        { title: "À vendre", description: "Achat classique de biens immobiliers", href: "/properties?type=sale" },
+        { title: "Bail à céder", description: "Reprendre un bail commercial existant", href: "/properties?type=lease" },
+        { title: "Enchères", description: "Acheter aux enchères publiques", href: "/properties?type=auction" },
+        { title: "Viager", description: "Achat avec rente viagère", href: "/properties?type=viager" },
+        { title: "Biens d'exception", description: "Propriétés de luxe et prestige", href: "/properties?type=exceptional_property" },
+        { title: "Réméré", description: "Achat avec option de rachat", href: "/properties?type=remere" },
     ],
     "Ventes spécialisées": [
-        { title: "VEFA", href: "/properties?type=vefa" },
-        { title: "Vente à terme", href: "/properties?type=vente_a_terme" },
-        { title: "Réméré inversé", href: "/properties?type=remere_inverse" },
-        { title: "Indivision/Nue-propriété", href: "/properties?type=indivision_nue_propriete" },
-        { title: "BRS", href: "/properties?type=brs" },
-        { title: "Démembrement temporaire", href: "/properties?type=demenbrement_temporaire" },
+        { title: "VEFA", description: "Vente en l'état futur d'achèvement", href: "/properties?type=vefa" },
+        { title: "Vente à terme", description: "Achat avec paiement différé", href: "/properties?type=vente_a_terme" },
+        { title: "Réméré inversé", description: "Vente avec option de rachat inversée", href: "/properties?type=remere_inverse" },
+        { title: "Indivision/Nue-propriété", description: "Achat en parts ou nue-propriété", href: "/properties?type=indivision_nue_propriete" },
+        { title: "BRS", description: "Bail réel solidaire", href: "/properties?type=brs" },
+        { title: "Démembrement temporaire", description: "Achat avec démembrement de propriété", href: "/properties?type=demenbrement_temporaire" },
     ],
     "Financement": [
-        { title: "Crédit-vendeur", href: "/properties?type=credit_vendeur" },
-        { title: "Copropriété/Lot de volume", href: "/properties?type=copropriete_lot_volume" },
+        { title: "Crédit-vendeur", description: "Achat avec financement par le vendeur", href: "/properties?type=credit_vendeur" },
+        { title: "Copropriété/Lot de volume", description: "Achat en copropriété ou lot de volume", href: "/properties?type=copropriete_lot_volume" },
+    ]
+  };
+
+  const rentLinks = {
+    "Types de location": [
+        { title: "À louer", description: "Location classique de biens immobiliers", href: "/properties?type=rent" },
+        { title: "Location journalière", description: "Location courte durée et séjours", href: "/properties?type=rent_by_day" },
     ]
   };
 
@@ -256,19 +263,8 @@ const Navbar = () => {
       name: 'Louer', 
       path: '/properties?type=rent',
       type: 'rent',
-      mobileIcon: <Key size={18} />
-    },
-    { 
-      name: 'Bail Commercial', 
-      path: '/properties?type=lease',
-      type: 'lease',
-      mobileIcon: <Building size={18} />
-    },
-    { 
-      name: 'Location Journalière', 
-      path: '/properties?type=rent_by_day',
-      type: 'rent_by_day',
-      mobileIcon: <CalendarDays size={18} />
+      mobileIcon: <Key size={18} />,
+      dropdown: rentLinks
     },
   ];
 
@@ -344,9 +340,8 @@ const Navbar = () => {
                                       key={item.title} 
                                       href={item.href} 
                                       title={item.title}
-                                    >
-                                      {item.title}
-                                    </ListItem>
+                                      description={item.description}
+                                    />
                                   ))}
                                 </ul>
                               </div>
@@ -375,8 +370,12 @@ const Navbar = () => {
                         <NavigationMenuTrigger className="group data-[state=open]:bg-teal-50 data-[state=open]:text-teal-700">
                           {link.name}
                         </NavigationMenuTrigger>
-                        <NavigationMenuContent>
-                          <div className="grid w-[600px] grid-cols-3 gap-6 p-6">
+                        <NavigationMenuContent align={link.name === 'Ventes aux enchères' ? 'center' : 'start'}>
+                          <div className={`grid gap-6 p-6 ${
+                            link.name === 'Ventes aux enchères' ? 'w-[500px] grid-cols-3' : 
+                            link.name === 'Louer' ? 'w-[300px] grid-cols-1' : 
+                            'w-[600px] grid-cols-3'
+                          }`}>
                             {Object.entries(link.dropdown).map(([category, links]) => (
                               <div key={category} className="space-y-3">
                                 <h3 className="font-semibold text-slate-800 text-lg border-b border-slate-200 pb-2">
@@ -388,9 +387,8 @@ const Navbar = () => {
                                       key={item.title} 
                                       href={item.href} 
                                       title={item.title}
-                                    >
-                                      {item.title}
-                                    </ListItem>
+                                      description={item.description}
+                                    />
                                   ))}
                                 </ul>
                               </div>

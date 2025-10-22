@@ -58,7 +58,18 @@ const Properties = () => {
     { value: "sale", label: "À vendre" },
     { value: "rent", label: "À louer" },
     { value: "rent_by_day", label: "Location journalière" },
-    { value: "lease", label: "Bail à céder" }
+    { value: "lease", label: "Bail à céder" },
+    { value: "viager", label: "Viager" },
+    { value: "exceptional_property", label: "Biens d'exception" },
+    { value: "remere", label: "Réméré" },
+    { value: "vefa", label: "VEFA" },
+    { value: "vente_a_terme", label: "Vente à terme" },
+    { value: "remere_inverse", label: "Réméré inversé" },
+    { value: "indivision_nue_propriete", label: "Indivision/Nue-propriété" },
+    { value: "brs", label: "BRS" },
+    { value: "demenbrement_temporaire", label: "Démembrement temporaire" },
+    { value: "credit_vendeur", label: "Crédit-vendeur" },
+    { value: "copropriete_lot_volume", label: "Copropriété/Lot de volume" }
   ];
 
   const handleListingTypeChange = (value: ListingType) => {
@@ -425,6 +436,50 @@ const Properties = () => {
         case 'rent_by_day':
           setActiveTab('filters');
           setListingType('rent_by_day');
+          break;
+        case 'viager':
+          setActiveTab('filters');
+          setListingType('viager');
+          break;
+        case 'exceptional_property':
+          setActiveTab('filters');
+          setListingType('exceptional_property');
+          break;
+        case 'remere':
+          setActiveTab('filters');
+          setListingType('remere');
+          break;
+        case 'vefa':
+          setActiveTab('filters');
+          setListingType('vefa');
+          break;
+        case 'vente_a_terme':
+          setActiveTab('filters');
+          setListingType('vente_a_terme');
+          break;
+        case 'remere_inverse':
+          setActiveTab('filters');
+          setListingType('remere_inverse');
+          break;
+        case 'indivision_nue_propriete':
+          setActiveTab('filters');
+          setListingType('indivision_nue_propriete');
+          break;
+        case 'brs':
+          setActiveTab('filters');
+          setListingType('brs');
+          break;
+        case 'demenbrement_temporaire':
+          setActiveTab('filters');
+          setListingType('demenbrement_temporaire');
+          break;
+        case 'credit_vendeur':
+          setActiveTab('filters');
+          setListingType('credit_vendeur');
+          break;
+        case 'copropriete_lot_volume':
+          setActiveTab('filters');
+          setListingType('copropriete_lot_volume');
           break;
         default:
           break;
@@ -1535,7 +1590,23 @@ const Properties = () => {
           <div className="w-full lg:w-3/4 xl:w-4/5">
             <div className="flex justify-between items-center mb-4">
               <h1 className="text-3xl font-bold">
-                {listingType === 'all' ? 'Toutes les propriétés' : `Propriétés à ${listingType === 'sale' ? 'vendre' : listingType === 'rent' ? 'louer' : 'louer par jour'}`}
+                {listingType === 'all' ? 'Toutes les propriétés' : 
+                 listingType === 'sale' ? 'Propriétés à vendre' :
+                 listingType === 'rent' ? 'Propriétés à louer' :
+                 listingType === 'rent_by_day' ? 'Propriétés à louer par jour' :
+                 listingType === 'lease' ? 'Baux à céder' :
+                 listingType === 'viager' ? 'Propriétés en viager' :
+                 listingType === 'exceptional_property' ? 'Biens d\'exception' :
+                 listingType === 'remere' ? 'Propriétés en réméré' :
+                 listingType === 'vefa' ? 'Vente en l\'état futur d\'achèvement (VEFA)' :
+                 listingType === 'vente_a_terme' ? 'Vente à terme' :
+                 listingType === 'remere_inverse' ? 'Vente à réméré inversé' :
+                 listingType === 'indivision_nue_propriete' ? 'Vente en indivision ou en nue-propriété' :
+                 listingType === 'brs' ? 'Vente en bail réel solidaire (BRS)' :
+                 listingType === 'demenbrement_temporaire' ? 'Vente en démembrement temporaire' :
+                 listingType === 'credit_vendeur' ? 'Vente avec crédit-vendeur' :
+                 listingType === 'copropriete_lot_volume' ? 'Vente en copropriété ou en lot de volume' :
+                 'Propriétés'}
               </h1>
               <div className="flex items-center gap-4">
                 <Button
@@ -1578,7 +1649,6 @@ const Properties = () => {
                   <PropertyCard
                     key={property.id}
                     property={property}
-                    isLiked={userLikedProperties?.includes(property.id) ?? false}
                   />
                 ))}
               </div>

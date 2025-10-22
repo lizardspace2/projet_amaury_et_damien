@@ -176,6 +176,29 @@ const Navbar = () => {
     resetForm();
   };
 
+  const buyLinks = {
+    "Types de vente": [
+        { title: "À vendre", href: "/properties?type=sale" },
+        { title: "Bail à céder", href: "/properties?type=lease" },
+        { title: "Enchères", href: "/properties?type=auction" },
+        { title: "Viager", href: "/properties?type=viager" },
+        { title: "Biens d'exception", href: "/properties?type=exceptional_property" },
+        { title: "Réméré", href: "/properties?type=remere" },
+    ],
+    "Ventes spécialisées": [
+        { title: "VEFA", href: "/properties?type=vefa" },
+        { title: "Vente à terme", href: "/properties?type=vente_a_terme" },
+        { title: "Réméré inversé", href: "/properties?type=remere_inverse" },
+        { title: "Indivision/Nue-propriété", href: "/properties?type=indivision_nue_propriete" },
+        { title: "BRS", href: "/properties?type=brs" },
+        { title: "Démembrement temporaire", href: "/properties?type=demenbrement_temporaire" },
+    ],
+    "Financement": [
+        { title: "Crédit-vendeur", href: "/properties?type=credit_vendeur" },
+        { title: "Copropriété/Lot de volume", href: "/properties?type=copropriete_lot_volume" },
+    ]
+  };
+
   const borrowLinks = {
     Emprunt: [
         { title: "Votre crédit : comparez les offres", href: "/borrow/credit" },
@@ -226,7 +249,8 @@ const Navbar = () => {
       name: 'Acheter', 
       path: '/properties?type=sale',
       type: 'sale',
-      mobileIcon: <Home size={18} />
+      mobileIcon: <Home size={18} />,
+      dropdown: buyLinks
     },
     { 
       name: 'Louer', 
@@ -302,14 +326,44 @@ const Navbar = () => {
                 {/* Liens de type propriété - logique exclusive */}
                 {propertyTypeLinks.map(link => (
                   <NavigationMenuItem key={link.name}>
-                    <NavigationMenuLink asChild>
-                      <NavLink 
-                        to={link.path} 
-                        isActive={getActiveState(link.type)}
-                      >
-                        {link.name}
-                      </NavLink>
-                    </NavigationMenuLink>
+                    {link.dropdown ? (
+                      <>
+                        <NavigationMenuTrigger className="group data-[state=open]:bg-teal-50 data-[state=open]:text-teal-700">
+                          {link.name}
+                        </NavigationMenuTrigger>
+                        <NavigationMenuContent>
+                          <div className="grid w-[600px] grid-cols-3 gap-6 p-6">
+                            {Object.entries(link.dropdown).map(([category, links]) => (
+                              <div key={category} className="space-y-3">
+                                <h3 className="font-semibold text-slate-800 text-lg border-b border-slate-200 pb-2">
+                                  {category}
+                                </h3>
+                                <ul className="flex flex-col gap-2">
+                                  {links.map((item: any) => (
+                                    <ListItem 
+                                      key={item.title} 
+                                      href={item.href} 
+                                      title={item.title}
+                                    >
+                                      {item.title}
+                                    </ListItem>
+                                  ))}
+                                </ul>
+                              </div>
+                            ))}
+                          </div>
+                        </NavigationMenuContent>
+                      </>
+                    ) : (
+                      <NavigationMenuLink asChild>
+                        <NavLink 
+                          to={link.path} 
+                          isActive={getActiveState(link.type)}
+                        >
+                          {link.name}
+                        </NavLink>
+                      </NavigationMenuLink>
+                    )}
                   </NavigationMenuItem>
                 ))}
                 
@@ -468,24 +522,62 @@ const Navbar = () => {
         <nav className="flex flex-col gap-1 p-4">
           {/* Liens de type propriété - logique exclusive */}
           {propertyTypeLinks.map(link => (
-            <button
-              key={link.name}
-              onClick={() => handleMobileLinkClick(link)}
-              className={cn(
-                "flex items-center gap-3 text-sm font-medium transition-all duration-200 px-4 py-3 rounded-lg no-underline w-full text-left",
-                getActiveState(link.type)
-                  ? "text-teal-700 bg-gradient-to-r from-teal-50 to-emerald-50 border border-teal-200 shadow-sm" 
-                  : "text-slate-600 hover:text-teal-600 hover:bg-slate-50"
+            <div key={link.name}>
+              {link.dropdown ? (
+                <div className="space-y-1">
+                  <div className="flex items-center gap-3 text-sm font-semibold text-slate-800 px-4 py-2">
+                    <span className="text-teal-600">
+                      {link.mobileIcon}
+                    </span>
+                    {link.name}
+                  </div>
+                  <div className="ml-7 space-y-1">
+                    {Object.entries(link.dropdown).map(([category, links]) => (
+                      <div key={category} className="space-y-1">
+                        <div className="text-xs font-medium text-slate-500 px-2 py-1">
+                          {category}
+                        </div>
+                        {links.map((item: any) => (
+                          <button
+                            key={item.title}
+                            onClick={() => {
+                              closeMobileMenu();
+                              navigate(item.href);
+                            }}
+                            className={cn(
+                              "flex items-center text-sm font-medium transition-all duration-200 px-3 py-2 rounded-lg w-full text-left",
+                              getActiveState(item.href.split('type=')[1])
+                                ? "text-teal-700 bg-gradient-to-r from-teal-50 to-emerald-50 border border-teal-200 shadow-sm" 
+                                : "text-slate-600 hover:text-teal-600 hover:bg-slate-50"
+                            )}
+                          >
+                            {item.title}
+                          </button>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={() => handleMobileLinkClick(link)}
+                  className={cn(
+                    "flex items-center gap-3 text-sm font-medium transition-all duration-200 px-4 py-3 rounded-lg no-underline w-full text-left",
+                    getActiveState(link.type)
+                      ? "text-teal-700 bg-gradient-to-r from-teal-50 to-emerald-50 border border-teal-200 shadow-sm" 
+                      : "text-slate-600 hover:text-teal-600 hover:bg-slate-50"
+                  )}
+                >
+                  <span className={cn(
+                    "transition-colors",
+                    getActiveState(link.type) ? "text-teal-600" : "text-slate-400 group-hover:text-teal-500"
+                  )}>
+                    {link.mobileIcon}
+                  </span>
+                  {link.name}
+                </button>
               )}
-            >
-              <span className={cn(
-                "transition-colors",
-                getActiveState(link.type) ? "text-teal-600" : "text-slate-400 group-hover:text-teal-500"
-              )}>
-                {link.mobileIcon}
-              </span>
-              {link.name}
-            </button>
+            </div>
           ))}
           
           {/* Autres liens */}

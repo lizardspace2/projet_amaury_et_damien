@@ -438,7 +438,7 @@ const Navbar = () => {
                       </Link>
                     </Button>
                     <Button asChild variant="ghost" className="justify-start h-10 rounded-lg">
-                      <Link to="/account/properties" className="flex items-center gap-3">
+                      <Link to="/account" className="flex items-center gap-3">
                         <Home size={18} className="text-slate-600" />
                         <span>Mes annonces</span>
                       </Link>
@@ -625,7 +625,7 @@ const Navbar = () => {
                 </Link>
               </Button>
               <Button asChild variant="ghost" className="justify-start h-10 rounded-lg text-sm">
-                <Link to="/account/properties" onClick={closeMobileMenu}>
+                <Link to="/account" onClick={closeMobileMenu}>
                   <Home size={16} className="mr-2" />
                   Mes annonces
                 </Link>

@@ -6,10 +6,19 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { CreatePropertyInput, ListingType } from "@/lib/api/properties";
+import { CreatePropertyInput } from "@/lib/api/properties";
+import { ListingType } from "@/types/property";
+
+type CreateListingType = Exclude<ListingType, 'all'>;
 
 const formSchema = z.object({
-  listing_type: z.enum(["sale", "rent", "rent_by_day", "lease", "auction"], {
+  listing_type: z.enum([
+    "sale", "rent", "rent_by_day", "lease", "auction", 
+    "viager", "exceptional_property", "remere", "vefa", 
+    "vente_a_terme", "remere_inverse", "indivision_nue_propriete", 
+    "brs", "demenbrement_temporaire", "credit_vendeur", 
+    "copropriete_lot_volume"
+  ], {
     required_error: "Veuillez sélectionner un type d'annonce",
   }),
   property_type: z.enum(["house", "apartment", "land", "commercial"], {
@@ -21,22 +30,41 @@ interface PropertyTypeStepProps {
   onNext: (data: Partial<CreatePropertyInput>) => void;
   onBack?: () => void;
   initialData?: Partial<CreatePropertyInput>;
-  fixedListingType?: ListingType;
+  fixedListingType?: CreateListingType;
 }
 
 const PropertyTypeStep: React.FC<PropertyTypeStepProps> = ({ onNext, onBack, initialData, fixedListingType }) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      listing_type: fixedListingType || initialData?.listing_type,
+      listing_type: fixedListingType || (initialData?.listing_type && initialData.listing_type !== 'all' ? initialData.listing_type as CreateListingType : undefined),
       property_type: initialData?.property_type,
     },
   });
 
+  const listingTypeOptions = [
+    { value: "sale", label: "À vendre" },
+    { value: "rent", label: "À louer" },
+    { value: "rent_by_day", label: "Location journalière" },
+    { value: "lease", label: "Bail commercial" },
+    { value: "auction", label: "Enchères" },
+    { value: "viager", label: "Viager" },
+    { value: "exceptional_property", label: "Biens d'exception" },
+    { value: "remere", label: "Réméré" },
+    { value: "vefa", label: "VEFA" },
+    { value: "vente_a_terme", label: "Vente à terme" },
+    { value: "remere_inverse", label: "Réméré inversé" },
+    { value: "indivision_nue_propriete", label: "Indivision/Nue-propriété" },
+    { value: "brs", label: "BRS" },
+    { value: "demenbrement_temporaire", label: "Démembrement temporaire" },
+    { value: "credit_vendeur", label: "Crédit-vendeur" },
+    { value: "copropriete_lot_volume", label: "Copropriété/Lot de volume" }
+  ];
+
   useEffect(() => {
     if (initialData) {
       form.reset({
-        listing_type: fixedListingType || initialData.listing_type,
+        listing_type: fixedListingType || (initialData.listing_type && initialData.listing_type !== 'all' ? initialData.listing_type as CreateListingType : undefined),
         property_type: initialData.property_type,
       });
     }
@@ -70,44 +98,19 @@ const PropertyTypeStep: React.FC<PropertyTypeStepProps> = ({ onNext, onBack, ini
                   <RadioGroup
                     onValueChange={field.onChange}
                     value={field.value || ''}
-                    className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"
                   >
-                    <div>
-                      <RadioGroupItem value="sale" id="sale" className="peer sr-only" />
-                      <Label
-                        htmlFor="sale"
-                        className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                      >
-                        <span className="font-medium">{"À vendre"}</span>
-                      </Label>
-                    </div>
-                    <div>
-                      <RadioGroupItem value="rent" id="rent" className="peer sr-only" />
-                      <Label
-                        htmlFor="rent"
-                        className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                      >
-                        <span className="font-medium">{"À louer"}</span>
-                      </Label>
-                    </div>
-                    <div>
-                      <RadioGroupItem value="rent_by_day" id="rent_by_day" className="peer sr-only" />
-                      <Label
-                        htmlFor="rent_by_day"
-                        className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                      >
-                        <span className="font-medium">{"Location journalière"}</span>
-                      </Label>
-                    </div>
-                    <div>
-                      <RadioGroupItem value="lease" id="lease" className="peer sr-only" />
-                      <Label
-                        htmlFor="lease"
-                        className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                      >
-                        <span className="font-medium">{"Bail commercial"}</span>
-                      </Label>
-                    </div>
+                    {listingTypeOptions.map((option) => (
+                      <div key={option.value}>
+                        <RadioGroupItem value={option.value} id={option.value} className="peer sr-only" />
+                        <Label
+                          htmlFor={option.value}
+                          className="flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer min-h-[60px]"
+                        >
+                          <span className="font-medium text-sm text-center leading-tight">{option.label}</span>
+                        </Label>
+                      </div>
+                    ))}
                   </RadioGroup>
                 </FormControl>
                 <FormMessage />

@@ -59,6 +59,7 @@ const Properties = () => {
     { value: "rent", label: "À louer" },
     { value: "rent_by_day", label: "Location journalière" },
     { value: "lease", label: "Bail à céder" },
+    { value: "auction", label: "Enchères" },
     { value: "viager", label: "Viager" },
     { value: "exceptional_property", label: "Biens d'exception" },
     { value: "remere", label: "Réméré" },
@@ -436,6 +437,10 @@ const Properties = () => {
         case 'rent_by_day':
           setActiveTab('filters');
           setListingType('rent_by_day');
+          break;
+        case 'auction':
+          setActiveTab('filters');
+          setListingType('auction');
           break;
         case 'viager':
           setActiveTab('filters');
@@ -1595,6 +1600,7 @@ const Properties = () => {
                  listingType === 'rent' ? 'Propriétés à louer' :
                  listingType === 'rent_by_day' ? 'Propriétés à louer par jour' :
                  listingType === 'lease' ? 'Baux à céder' :
+                 listingType === 'auction' ? 'Enchères' :
                  listingType === 'viager' ? 'Propriétés en viager' :
                  listingType === 'exceptional_property' ? 'Biens d\'exception' :
                  listingType === 'remere' ? 'Propriétés en réméré' :

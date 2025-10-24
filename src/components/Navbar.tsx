@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
@@ -99,6 +100,7 @@ const Navbar = () => {
     password: '',
     phone: '',
     address: '',
+    profession: '',
     instagram: '',
     twitter: '',
     facebook: ''
@@ -734,6 +736,30 @@ const Navbar = () => {
                       onChange={handleInputChange} 
                       className="h-11"
                     />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="profession" className="text-sm font-medium">Profession</Label>
+                    <Select value={formData.profession} onValueChange={(value) => setFormData(prev => ({ ...prev, profession: value }))}>
+                      <SelectTrigger className="h-11">
+                        <SelectValue placeholder="Sélectionnez votre profession" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="regie">Régie</SelectItem>
+                        <SelectItem value="service-transaction">Service transaction</SelectItem>
+                        <SelectItem value="service-location">Service location</SelectItem>
+                        <SelectItem value="agent-immobilier">Agent immobilier</SelectItem>
+                        <SelectItem value="mandataires">Mandataires</SelectItem>
+                        <SelectItem value="independants-franchises">Indépendants ou franchisés</SelectItem>
+                        <SelectItem value="promoteur">Promoteur</SelectItem>
+                        <SelectItem value="fonciere">Foncière</SelectItem>
+                        <SelectItem value="notaire">Notaire</SelectItem>
+                        <SelectItem value="avocat">Avocat</SelectItem>
+                        <SelectItem value="expert-comptable">Expert-comptable</SelectItem>
+                        <SelectItem value="architecte">Architecte</SelectItem>
+                        <SelectItem value="decorateur">Décorateur</SelectItem>
+                        <SelectItem value="autre">Autre</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
                 

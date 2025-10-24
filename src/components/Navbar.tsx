@@ -23,7 +23,7 @@ const Logo = () => (
     </div>
     <div className="flex flex-col">
       <span className="font-serif text-2xl leading-tight bg-gradient-to-r from-teal-600 to-emerald-700 bg-clip-text text-transparent">
-        AnnoncesImmo
+        Trocadimmo
       </span>
       <span className="text-xs font-medium text-slate-500 leading-tight tracking-wide">
         RÉGION LYONNAISE
@@ -37,7 +37,7 @@ const MobileLogo = () => (
     <Building className="h-6 w-6 text-teal-600" />
     <div className="flex flex-col">
       <span className="font-serif text-lg leading-tight bg-gradient-to-r from-teal-600 to-emerald-700 bg-clip-text text-transparent">
-        AnnoncesImmo
+        Trocadimmo
       </span>
       <span className="text-xs font-medium text-slate-500 leading-tight">
         Lyon
@@ -680,7 +680,7 @@ const Navbar = () => {
             <DialogDescription className="text-center text-slate-600">
               {authMode === 'login' 
                 ? 'Content de vous revoir ! Connectez-vous à votre compte.' 
-                : 'Rejoignez AnnoncesImmo et commencez dès aujourd\'hui.'}
+                : 'Rejoignez Trocadimmo et commencez dès aujourd\'hui.'}
             </DialogDescription>
           </DialogHeader>
           

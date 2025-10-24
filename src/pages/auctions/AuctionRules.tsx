@@ -293,7 +293,7 @@ const AuctionRules = () => {
                 <div>
                   <h3 className="text-lg font-semibold mb-4">Service client</h3>
                   <div className="space-y-2 text-gray-600">
-                    <p>📧 Email: support@annoncesimmo.fr</p>
+                    <p>📧 Email: support@trocadimmo.fr</p>
                     <p>📞 Téléphone: 04 72 00 00 00</p>
                     <p>🕒 Horaires: Lun-Ven 9h-18h</p>
                   </div>
@@ -301,7 +301,7 @@ const AuctionRules = () => {
                 <div>
                   <h3 className="text-lg font-semibold mb-4">Réclamations</h3>
                   <div className="space-y-2 text-gray-600">
-                    <p>📧 Email: reclamations@annoncesimmo.fr</p>
+                    <p>📧 Email: reclamations@trocadimmo.fr</p>
                     <p>📮 Adresse: 123 Rue de la République, 69002 Lyon</p>
                     <p>⏱️ Délai de réponse: 48h</p>
                   </div>

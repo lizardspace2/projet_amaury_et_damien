@@ -1,14 +1,14 @@
-# Annonces Immobilières Région Lyonnaise
+# Trocadimmo
 
 ## Votre partenaire immobilier dans la région lyonnaise
 
-Annonces Immobilières Région Lyonnaise est une plateforme moderne pour l'achat, la vente et la location de biens immobiliers dans la région de Lyon. Trouvez facilement et rapidement des appartements, des maisons, des locaux commerciaux et des terrains.
+Trocadimmo est une plateforme moderne pour l'achat, la vente et la location de biens immobiliers dans la région de Lyon. Trouvez facilement et rapidement des appartements, des maisons, des locaux commerciaux et des terrains.
 
 ---
 
 ## Informations sur le projet
 
-- **URL de démo:** [https://immo-lyon.fr](https://immo-lyon.fr) (exemple)
+- **URL de démo:** [https://trocadimmo.fr](https://trocadimmo.fr) (exemple)
 
 ## Démarrage
 
@@ -44,5 +44,5 @@ npm run build
 ---
 
 ### Contact
-- Email: contact@immo-lyon.fr
+- Email: contact@trocadimmo.fr
 - Lyon, France

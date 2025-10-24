@@ -1,7 +1,7 @@
 {
-  "name": "Annonces Immobilières Région Lyonnaise",
-  "short_name": "Immo Lyon",
-  "description": "Achetez, vendez et louez des biens immobiliers dans la région lyonnaise : appartements, maisons, locaux commerciaux et terrains.",
+  "name": "Trocadimmo",
+  "short_name": "Trocadimmo",
+  "description": "Achetez, vendez et louez des biens immobiliers dans la région lyonnaise : appartements, maisons, locaux commerciaux et terrains sur Trocadimmo.",
   "lang": "fr",
   "start_url": "/",
   "display": "standalone",

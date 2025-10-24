@@ -16,7 +16,7 @@ const Footer = () => {
               </div>
               <div className="flex flex-col">
                 <span className="font-serif text-2xl font-bold bg-gradient-to-r from-teal-400 to-emerald-400 bg-clip-text text-transparent">
-                  AnnoncesImmo
+                  Trocadimmo
                 </span>
                 <span className="text-sm font-medium text-slate-400 leading-tight">
                   RÉGION LYONNAISE
@@ -194,7 +194,7 @@ const Footer = () => {
         <div className="container py-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-slate-400 text-sm">
-              © 2025 <span className="text-teal-400 font-semibold">AnnoncesImmo Région Lyonnaise</span>. Tous droits réservés.
+              © 2025 <span className="text-teal-400 font-semibold">Trocadimmo</span>. Tous droits réservés.
             </p>
             <div className="flex gap-6">
               {[

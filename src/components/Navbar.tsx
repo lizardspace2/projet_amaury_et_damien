@@ -175,16 +175,41 @@ const Step2 = ({ formData, handleInputChange, setFormData }: { formData: any; ha
           <SelectItem value="agent-immobilier">Agent immobilier</SelectItem>
           <SelectItem value="mandataires">Mandataires</SelectItem>
           <SelectItem value="independants-franchises">Indépendants ou franchisés</SelectItem>
-          <SelectItem value="promoteur">Promoteur</SelectItem>
-          <SelectItem value="fonciere">Foncière</SelectItem>
+          <SelectItem value="courtier">Courtier</SelectItem>
           <SelectItem value="notaire">Notaire</SelectItem>
+          <SelectItem value="banque">Banque</SelectItem>
+          <SelectItem value="entreprise-travaux">Entreprise de travaux</SelectItem>
+          <SelectItem value="diagnostiqueur">Diagnostiqueur</SelectItem>
+          <SelectItem value="assureurs">Assureurs</SelectItem>
+          <SelectItem value="demenageurs">Déménageurs</SelectItem>
+          <SelectItem value="artisans">Artisans</SelectItem>
+          <SelectItem value="gestionnaire-patrimoine">Gestionnaire de patrimoine</SelectItem>
+          <SelectItem value="geometre">Géomètre</SelectItem>
+          <SelectItem value="metreur">Métreur</SelectItem>
+          <SelectItem value="architecte">Architecte</SelectItem>
+          <SelectItem value="assistant-maitrise-ouvrage">Assistant maîtrise d'ouvrage</SelectItem>
+          <SelectItem value="promoteur">Promoteur</SelectItem>
+          <SelectItem value="lotisseur">Lotisseur</SelectItem>
+          <SelectItem value="fonciere">Foncière</SelectItem>
           <SelectItem value="avocat">Avocat</SelectItem>
           <SelectItem value="expert-comptable">Expert-comptable</SelectItem>
-          <SelectItem value="architecte">Architecte</SelectItem>
           <SelectItem value="decorateur">Décorateur</SelectItem>
           <SelectItem value="autre">Autre</SelectItem>
         </SelectContent>
       </Select>
+    </div>
+    <div className="space-y-2">
+      <Label htmlFor="siret" className="text-sm font-medium">Numéro SIRET</Label>
+      <Input 
+        id="siret" 
+        type="text" 
+        placeholder="12345678901234" 
+        value={formData.siret} 
+        onChange={handleInputChange} 
+        className="h-11"
+        maxLength={14}
+      />
+      <p className="text-xs text-slate-500">14 chiffres (optionnel)</p>
     </div>
   </div>
 );
@@ -241,6 +266,7 @@ const Navbar = () => {
     phone: '',
     address: '',
     profession: '',
+    siret: '',
     instagram: '',
     twitter: '',
     facebook: ''
@@ -316,6 +342,7 @@ const Navbar = () => {
       phone: '', 
       address: '', 
       profession: '',
+      siret: '',
       instagram: '', 
       twitter: '', 
       facebook: '' 

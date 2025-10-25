@@ -2,7 +2,7 @@ export type PropertyType = 'house' | 'apartment' | 'land' | 'commercial';
 export type ListingType = 'all' | 'sale' | 'rent' | 'rent_by_day' | 'lease' | 'auction' | 'viager' | 'exceptional_property' | 'remere' | 'vefa' | 'vente_a_terme' | 'remere_inverse' | 'indivision_nue_propriete' | 'brs' | 'demenbrement_temporaire' | 'credit_vendeur' | 'copropriete_lot_volume';
 export type PropertyCondition = 'new' | 'good' | 'needs_renovation';
 export type KitchenType = 'american' | 'open' | 'closed';
-export type PropertyStatus = 'free' | 'under_caution' | 'under_construction';
+export type PropertyStatus = 'free' | 'under_caution' | 'under_construction' | 'pause' | 'sold';
 
 export interface Property {
   id: string;

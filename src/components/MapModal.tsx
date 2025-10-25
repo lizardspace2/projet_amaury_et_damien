@@ -3,7 +3,8 @@ import { X, MapPin, Filter, Layers } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Property } from '@/types/property';
-import PropertiesMap from './PropertiesMap';
+import SimpleMap from './SimpleMap';
+import TestMap from './TestMap';
 
 interface MapModalProps {
   isOpen: boolean;
@@ -23,6 +24,8 @@ const MapModal = ({
   const [showFilters, setShowFilters] = useState(false);
   const [selectedType, setSelectedType] = useState<string>('all');
 
+  console.log('MapModal render - isOpen:', isOpen, 'properties:', properties.length);
+
   const filteredProperties = selectedType === 'all' 
     ? properties 
     : properties.filter(p => p.listing_type === selectedType);
@@ -34,9 +37,14 @@ const MapModal = ({
     { value: 'auction', label: 'Enchères', count: properties.filter(p => p.listing_type === 'auction').length },
   ];
 
+  console.log('MapModal - Rendu du modal, isOpen:', isOpen);
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0">
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      console.log('MapModal - onOpenChange appelé avec:', open);
+      onClose();
+    }}>
+      <DialogContent className="max-w-[95vw] max-h-[95vh] w-[95vw] h-[95vh] p-0">
         <DialogHeader className="p-6 pb-0">
           <div className="flex items-center justify-between">
             <DialogTitle className="flex items-center gap-2 text-xl font-bold">
@@ -66,7 +74,7 @@ const MapModal = ({
           </div>
         </DialogHeader>
 
-        <div className="flex flex-1 overflow-hidden">
+        <div className="flex flex-1 overflow-hidden" style={{ height: 'calc(95vh - 120px)' }}>
           {/* Filtres latéraux */}
           {showFilters && (
             <div className="w-80 bg-white border-r border-gray-200 p-4 overflow-y-auto">
@@ -108,10 +116,9 @@ const MapModal = ({
           )}
 
           {/* Carte */}
-          <div className="flex-1 relative">
-            <PropertiesMap
-              properties={filteredProperties}
-              onPropertyClick={onPropertyClick}
+          <div className="flex-1 relative" style={{ minHeight: '500px' }}>
+            {console.log('MapModal - Rendu de la carte, showFilters:', showFilters)}
+            <SimpleMap
               className="h-full w-full"
               center={[46.2276, 2.2137]}
               zoom={6}

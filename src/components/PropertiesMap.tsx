@@ -6,6 +6,14 @@ import { MapPin, Home, Euro, Eye } from 'lucide-react';
 import { Property } from '@/types/property';
 import { useCurrency } from '@/CurrencyContext';
 
+// Fix for Leaflet default markers in Vite
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
+
 interface PropertiesMapProps {
   properties: Property[];
   onPropertyClick?: (property: Property) => void;
@@ -136,48 +144,45 @@ const PropertiesMap = ({
   useEffect(() => {
     if (mapRef.current || !mapContainerRef.current) return;
 
-    // Configuration de l'icône par défaut de Leaflet
-    const DefaultIcon = L.icon({
-      iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
-      iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
-      shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
-      iconSize: [25, 41],
-      iconAnchor: [12, 41],
-      popupAnchor: [1, -34],
-      shadowSize: [41, 41]
-    });
-    L.Marker.prototype.options.icon = DefaultIcon;
+    // Délai pour s'assurer que le conteneur est prêt
+    const initMap = () => {
+      if (!mapContainerRef.current) return;
 
-    // Initialisation de la carte
-    mapRef.current = L.map(mapContainerRef.current, {
-      center,
-      zoom,
-      scrollWheelZoom: true,
-      zoomControl: true
-    });
+      // Initialisation de la carte
+      mapRef.current = L.map(mapContainerRef.current, {
+        center,
+        zoom,
+        scrollWheelZoom: true,
+        zoomControl: true
+      });
 
-    // Ajout de la couche OpenStreetMap
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      maxZoom: 19
-    }).addTo(mapRef.current);
+      // Ajout de la couche OpenStreetMap
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19
+      }).addTo(mapRef.current);
 
-    // Fonctions globales pour les popups
-    (window as any).selectProperty = (propertyId: string) => {
-      const property = properties.find(p => p.id === propertyId);
-      if (property && onPropertyClick) {
-        onPropertyClick(property);
-      }
+      // Fonctions globales pour les popups
+      (window as any).selectProperty = (propertyId: string) => {
+        const property = properties.find(p => p.id === propertyId);
+        if (property && onPropertyClick) {
+          onPropertyClick(property);
+        }
+      };
+
+      (window as any).viewProperty = (propertyId: string) => {
+        const property = properties.find(p => p.id === propertyId);
+        if (property) {
+          setSelectedProperty(property);
+        }
+      };
     };
 
-    (window as any).viewProperty = (propertyId: string) => {
-      const property = properties.find(p => p.id === propertyId);
-      if (property) {
-        setSelectedProperty(property);
-      }
-    };
+    // Initialiser la carte avec un petit délai
+    const timer = setTimeout(initMap, 100);
 
     return () => {
+      clearTimeout(timer);
       mapRef.current?.remove();
       mapRef.current = null;
     };

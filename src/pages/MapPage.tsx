@@ -62,26 +62,45 @@ const MapPage = () => {
             const marker = L.marker([property.lat, property.lng]).addTo(map);
             
             const popupContent = `
-              <div style="width: 200px; padding: 10px;">
-                <h3 style="margin: 0 0 10px 0; font-size: 16px;">${property.title}</h3>
-                <p style="margin: 0 0 5px 0; font-size: 18px; font-weight: bold; color: #e74c3c;">
-                  ${formatPrice(property.price)}
-                </p>
-                <p style="margin: 0 0 10px 0; color: #666;">
-                  📐 ${property.m2} m²
-                </p>
-                <button onclick="window.openProperty('${property.id}')" style="
-                  width: 100%; 
-                  background: #3498db; 
-                  color: white; 
-                  border: none; 
-                  padding: 8px; 
-                  border-radius: 4px; 
-                  cursor: pointer;
-                  font-size: 14px;
-                ">
-                  Voir détails
-                </button>
+              <div style="width: 250px; padding: 0; margin: 0;">
+                <!-- Photo -->
+                <div style="width: 100%; height: 150px; background-color: #f3f4f6; border-radius: 8px 8px 0 0; overflow: hidden; position: relative;">
+                  ${property.images && property.images.length > 0 ? `
+                    <img 
+                      src="${property.images[0]}" 
+                      alt="${property.title}"
+                      style="width: 100%; height: 100%; object-fit: cover;"
+                    />
+                  ` : `
+                    <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 24px;">
+                      🏠
+                    </div>
+                  `}
+                </div>
+                
+                <!-- Contenu -->
+                <div style="padding: 12px;">
+                  <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1f2937;">${property.title}</h3>
+                  <p style="margin: 0 0 6px 0; font-size: 18px; font-weight: bold; color: #e74c3c;">
+                    ${formatPrice(property.price)}
+                  </p>
+                  <p style="margin: 0 0 12px 0; color: #666; font-size: 14px;">
+                    📐 ${property.m2} m²
+                  </p>
+                  <button onclick="window.openProperty('${property.id}')" style="
+                    width: 100%; 
+                    background: #3498db; 
+                    color: white; 
+                    border: none; 
+                    padding: 8px; 
+                    border-radius: 4px; 
+                    cursor: pointer;
+                    font-size: 14px;
+                    font-weight: 500;
+                  ">
+                    Voir détails
+                  </button>
+                </div>
               </div>
             `;
 

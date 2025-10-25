@@ -1,7 +1,7 @@
 // src/components/PropertyCard.tsx
 import React from "react";
 import { Link } from "react-router-dom";
-import { MapPin, Bed, Bath, Square, Calendar } from "lucide-react";
+import { MapPin, Bed, Bath, Square, Calendar, Pause, Play } from "lucide-react";
 import { Property } from "@/types/property";
 import { Badge } from "@/components/ui/badge";
 import MissingImagePlaceholder from "@/components/ui/MissingImagePlaceholder"; // Added import
@@ -15,9 +15,11 @@ interface PropertyCardProps {
   isEditable?: boolean;
   onEdit?: (propertyId: string) => void;
   onDelete?: (propertyId: string) => void;
+  onPause?: (propertyId: string) => void;
+  onResume?: (propertyId: string) => void;
 }
 
-const PropertyCard = ({ property, isEditable, onEdit, onDelete }: PropertyCardProps) => {
+const PropertyCard = ({ property, isEditable, onEdit, onDelete, onPause, onResume }: PropertyCardProps) => {
   const { formatPrice } = useCurrency();
 
   const getFormattedDate = () => {
@@ -52,7 +54,12 @@ const PropertyCard = ({ property, isEditable, onEdit, onDelete }: PropertyCardPr
           <Badge className="absolute top-3 left-3 bg-teal-500 hover:bg-teal-500">
             {property.listing_type === "sale" ? "À vendre" : "À louer"}
           </Badge>
-          {property.featured && (
+          {property.status === "pause" && (
+            <Badge className="absolute top-3 right-3 bg-orange-500 hover:bg-orange-500">
+              En pause
+            </Badge>
+          )}
+          {property.featured && property.status !== "pause" && (
             <Badge className="absolute top-3 right-3 bg-estate-800 hover:bg-estate-800">
               En vedette
             </Badge>
@@ -70,7 +77,9 @@ const PropertyCard = ({ property, isEditable, onEdit, onDelete }: PropertyCardPr
           <div className="flex items-center text-estate-neutral-600 mb-3">
             <MapPin size={14} className="mr-1" />
             <p className="text-sm line-clamp-1">
-              {property.address_street}, {property.address_district}, {property.address_city}
+              {[property.address_street, property.address_district, property.address_city]
+                .filter(Boolean)
+                .join(', ') || 'Localisation non spécifiée'}
             </p>
           </div>
 
@@ -114,19 +123,50 @@ const PropertyCard = ({ property, isEditable, onEdit, onDelete }: PropertyCardPr
           </div>
         </div>
         {isEditable && (
-          <div className="p-4 flex justify-end gap-2 border-t border-estate-neutral-100">
-            <Button variant="outline" size="sm" onClick={(e) => {
-              e.preventDefault();
-              onEdit?.(property.id);
-            }}>
-              Modifier
-            </Button>
-            <Button variant="destructive" size="sm" onClick={(e) => {
-              e.preventDefault();
-              onDelete?.(property.id);
-            }}>
-              Supprimer
-            </Button>
+          <div className="p-4 flex justify-between gap-2 border-t border-estate-neutral-100">
+            <div className="flex gap-2">
+              {property.status === "pause" ? (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onResume?.(property.id);
+                  }}
+                  className="flex items-center gap-1"
+                >
+                  <Play size={14} />
+                  Reprendre
+                </Button>
+              ) : (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onPause?.(property.id);
+                  }}
+                  className="flex items-center gap-1"
+                >
+                  <Pause size={14} />
+                  Pause
+                </Button>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={(e) => {
+                e.preventDefault();
+                onEdit?.(property.id);
+              }}>
+                Modifier
+              </Button>
+              <Button variant="destructive" size="sm" onClick={(e) => {
+                e.preventDefault();
+                onDelete?.(property.id);
+              }}>
+                Supprimer
+              </Button>
+            </div>
           </div>
         )}
       </div>

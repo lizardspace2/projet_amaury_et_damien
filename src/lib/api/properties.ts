@@ -156,11 +156,11 @@ export const createProperty = async (input: CreatePropertyInput) => {
   }
 };
 
-export const getProperties = async (type?: 'sale' | 'rent' | 'rent_by_day' | 'lease'): Promise<Property[]> => {
+export const getProperties = async (type?: ListingType): Promise<Property[]> => {
   try {
     let query = supabase.from('properties').select('*');
 
-    if (type) {
+    if (type && type !== 'all') {
       query = query.eq('listing_type', type);
     }
 
@@ -354,5 +354,47 @@ export const getPropertyById = async (id: string): Promise<Property | null> => {
     console.error('Error fetching property by ID:', error);
     toast.error("Échec de la récupération des détails de la propriété. Veuillez réessayer.");
     return null;
+  }
+};
+
+export const pauseProperty = async (propertyId: string) => {
+  try {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) throw new Error("User not authenticated");
+
+    const { error } = await supabase
+      .from('properties')
+      .update({ status: 'pause' })
+      .eq('id', propertyId)
+      .eq('user_id', user.id);
+
+    if (error) throw error;
+    toast.success("Propriété mise en pause avec succès");
+    return true;
+  } catch (error) {
+    console.error('Error pausing property:', error);
+    toast.error("Échec de la mise en pause de la propriété. Veuillez réessayer.");
+    return false;
+  }
+};
+
+export const resumeProperty = async (propertyId: string) => {
+  try {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) throw new Error("User not authenticated");
+
+    const { error } = await supabase
+      .from('properties')
+      .update({ status: 'free' })
+      .eq('id', propertyId)
+      .eq('user_id', user.id);
+
+    if (error) throw error;
+    toast.success("Propriété reprise avec succès");
+    return true;
+  } catch (error) {
+    console.error('Error resuming property:', error);
+    toast.error("Échec de la reprise de la propriété. Veuillez réessayer.");
+    return false;
   }
 };

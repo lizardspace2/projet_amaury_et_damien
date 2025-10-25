@@ -17,10 +17,177 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Wrapper } from "@googlemaps/react-wrapper";
+import { signInWithEmail, signUpWithEmail } from "@/lib/api/auth";
+
+// Composants pour les étapes d'inscription
+const StepIndicator = ({ currentStep, totalSteps }: { currentStep: number; totalSteps: number }) => (
+  <div className="flex items-center justify-center space-x-2 mb-6">
+    {Array.from({ length: totalSteps }, (_, i) => (
+      <div
+        key={i}
+        className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+          i + 1 <= currentStep
+            ? 'bg-teal-500 text-white'
+            : 'bg-slate-200 text-slate-500'
+        }`}
+      >
+        {i + 1}
+      </div>
+    ))}
+  </div>
+);
+
+const Step1 = ({ formData, handleInputChange }: { formData: any; handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void }) => (
+  <div className="space-y-4">
+    <div className="space-y-2">
+      <Label htmlFor="email" className="text-sm font-medium">Email</Label>
+      <Input 
+        id="email" 
+        type="email" 
+        placeholder="votre@email.com" 
+        value={formData.email} 
+        onChange={handleInputChange} 
+        className="h-11"
+        required 
+      />
+    </div>
+    <div className="space-y-2">
+      <Label htmlFor="password" className="text-sm font-medium">Mot de passe</Label>
+      <Input 
+        id="password" 
+        type="password" 
+        placeholder="Votre mot de passe" 
+        value={formData.password} 
+        onChange={handleInputChange} 
+        className="h-11"
+        required 
+      />
+    </div>
+  </div>
+);
+
+const Step2 = ({ formData, handleInputChange, setFormData }: { formData: any; handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void; setFormData: React.Dispatch<React.SetStateAction<any>> }) => (
+  <div className="space-y-4">
+    <div className="space-y-2">
+      <Label htmlFor="phone" className="text-sm font-medium">Téléphone</Label>
+      <Input 
+        id="phone" 
+        type="tel" 
+        placeholder="+33 1 23 45 67 89" 
+        value={formData.phone} 
+        onChange={handleInputChange} 
+        className="h-11"
+      />
+    </div>
+    <div className="space-y-2">
+      <Label htmlFor="address" className="text-sm font-medium">Adresse</Label>
+      <Input 
+        id="address" 
+        type="text" 
+        placeholder="Votre adresse complète" 
+        value={formData.address} 
+        onChange={handleInputChange} 
+        className="h-11"
+      />
+    </div>
+    <div className="space-y-2">
+      <Label htmlFor="profession" className="text-sm font-medium">Profession</Label>
+      <Select value={formData.profession} onValueChange={(value) => setFormData(prev => ({ ...prev, profession: value }))}>
+        <SelectTrigger className="h-11">
+          <SelectValue placeholder="Sélectionnez votre profession" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="regie">Régie</SelectItem>
+          <SelectItem value="service-transaction">Service transaction</SelectItem>
+          <SelectItem value="service-location">Service location</SelectItem>
+          <SelectItem value="agent-immobilier">Agent immobilier</SelectItem>
+          <SelectItem value="mandataires">Mandataires</SelectItem>
+          <SelectItem value="independants-franchises">Indépendants ou franchisés</SelectItem>
+          <SelectItem value="courtier">Courtier</SelectItem>
+          <SelectItem value="notaire">Notaire</SelectItem>
+          <SelectItem value="banque">Banque</SelectItem>
+          <SelectItem value="entreprise-travaux">Entreprise de travaux</SelectItem>
+          <SelectItem value="diagnostiqueur">Diagnostiqueur</SelectItem>
+          <SelectItem value="assureurs">Assureurs</SelectItem>
+          <SelectItem value="demenageurs">Déménageurs</SelectItem>
+          <SelectItem value="artisans">Artisans</SelectItem>
+          <SelectItem value="gestionnaire-patrimoine">Gestionnaire de patrimoine</SelectItem>
+          <SelectItem value="geometre">Géomètre</SelectItem>
+          <SelectItem value="metreur">Métreur</SelectItem>
+          <SelectItem value="architecte">Architecte</SelectItem>
+          <SelectItem value="assistant-maitrise-ouvrage">Assistant maîtrise d'ouvrage</SelectItem>
+          <SelectItem value="promoteur">Promoteur</SelectItem>
+          <SelectItem value="lotisseur">Lotisseur</SelectItem>
+          <SelectItem value="fonciere">Foncière</SelectItem>
+          <SelectItem value="avocat">Avocat</SelectItem>
+          <SelectItem value="expert-comptable">Expert-comptable</SelectItem>
+          <SelectItem value="decorateur">Décorateur</SelectItem>
+          <SelectItem value="autre">Autre</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
+    <div className="space-y-2">
+      <Label htmlFor="siret" className="text-sm font-medium">Numéro SIRET</Label>
+      <Input 
+        id="siret" 
+        type="text" 
+        placeholder="12345678901234" 
+        value={formData.siret} 
+        onChange={handleInputChange} 
+        className="h-11"
+        maxLength={14}
+      />
+      <p className="text-xs text-slate-500">14 chiffres (optionnel)</p>
+    </div>
+  </div>
+);
+
+const Step3 = ({ formData, handleInputChange }: { formData: any; handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void }) => (
+  <div className="space-y-4">
+    <h4 className="font-medium text-slate-700">Réseaux sociaux (optionnel)</h4>
+    <div className="space-y-3">
+      <div className="space-y-2">
+        <Label htmlFor="instagram" className="text-sm">Instagram</Label>
+        <Input 
+          id="instagram" 
+          type="text" 
+          placeholder="@votrenom" 
+          value={formData.instagram} 
+          onChange={handleInputChange} 
+          className="h-10"
+        />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="twitter" className="text-sm">Twitter</Label>
+        <Input 
+          id="twitter" 
+          type="text" 
+          placeholder="@votrenom" 
+          value={formData.twitter} 
+          onChange={handleInputChange} 
+          className="h-10"
+        />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="facebook" className="text-sm">Facebook</Label>
+        <Input 
+          id="facebook" 
+          type="text" 
+          placeholder="Lien vers votre profil" 
+          value={formData.facebook} 
+          onChange={handleInputChange} 
+          className="h-10"
+        />
+      </div>
+    </div>
+  </div>
+);
 
 const SellPage = () => {
   const steps = [
@@ -37,11 +204,14 @@ const SellPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
+  const [signupStep, setSignupStep] = useState(1);
   const [authFormData, setAuthFormData] = useState({
     email: "",
     password: "",
     phone: "",
     address: "",
+    profession: "",
+    siret: "",
     instagram: "",
     twitter: "",
     facebook: ""
@@ -68,21 +238,41 @@ const SellPage = () => {
     setAuthFormData(prev => ({ ...prev, [id]: value }));
   };
 
+  const resetAuthForm = () => {
+    setAuthFormData({ 
+      email: "", 
+      password: "", 
+      phone: "", 
+      address: "", 
+      profession: "",
+      siret: "",
+      instagram: "", 
+      twitter: "", 
+      facebook: "" 
+    });
+    setSignupStep(1);
+  };
+
+  const nextStep = () => {
+    setSignupStep(prev => prev + 1);
+  };
+
+  const prevStep = () => {
+    setSignupStep(prev => prev - 1);
+  };
+
+  const toggleAuthMode = () => {
+    setAuthMode(prev => prev === 'login' ? 'signup' : 'login');
+    resetAuthForm();
+  };
+
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     const success = await signInWithEmail(authFormData.email, authFormData.password);
 
     if (success) {
       setIsAuthDialogOpen(false);
-      setAuthFormData({
-        email: "",
-        password: "",
-        phone: "",
-        address: "",
-        instagram: "",
-        twitter: "",
-        facebook: ""
-      });
+      resetAuthForm();
       toast.success("Connexion réussie");
     }
   };
@@ -101,6 +291,8 @@ const SellPage = () => {
           .update({
             phone: authFormData.phone,
             address: authFormData.address,
+            profession: authFormData.profession,
+            siret: authFormData.siret,
             instagram: authFormData.instagram,
             twitter: authFormData.twitter,
             facebook: authFormData.facebook,
@@ -110,15 +302,7 @@ const SellPage = () => {
       }
 
       setIsAuthDialogOpen(false);
-      setAuthFormData({
-        email: "",
-        password: "",
-        phone: "",
-        address: "",
-        instagram: "",
-        twitter: "",
-        facebook: ""
-      });
+      resetAuthForm();
       toast.success("Inscription réussie");
     }
   };
@@ -293,121 +477,84 @@ const SellPage = () => {
       <Dialog open={isAuthDialogOpen} onOpenChange={setIsAuthDialogOpen}>
         <DialogContent className="max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-estate-800">
-              {authMode === "login" ? "Se connecter" : "Créer un compte"}
+            <DialogTitle className="text-2xl font-bold text-center text-slate-800">
+              {authMode === 'login' ? 'Connexion' : 'Créer un compte'}
             </DialogTitle>
+            <DialogDescription className="text-center text-slate-600">
+              {authMode === 'login' 
+                ? 'Content de vous revoir ! Connectez-vous à votre compte.' 
+                : 'Rejoignez Trocadimmo et commencez dès aujourd\'hui.'}
+            </DialogDescription>
           </DialogHeader>
-
-          <div className="space-y-4">
-            <form onSubmit={authMode === "login" ? handleEmailLogin : handleEmailSignUp} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">{"Email"}</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Entrez votre email"
-                  value={authFormData.email}
-                  onChange={handleAuthInputChange}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">{"Mot de passe"}</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Entrez votre mot de passe"
-                  value={authFormData.password}
-                  onChange={handleAuthInputChange}
-                  required
-                />
-              </div>
-
-              {authMode === "signup" && (
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">{"Téléphone"}</Label>
-                    <Input
-                      id="phone"
-                      type="tel"
-                      placeholder="Entrez votre numéro de téléphone"
-                      value={authFormData.phone}
-                      onChange={handleAuthInputChange}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="address">{"Adresse"}</Label>
-                    <Input
-                      id="address"
-                      type="text"
-                      placeholder="Entrez votre adresse"
-                      value={authFormData.address}
-                      onChange={handleAuthInputChange}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="instagram">{"Instagram"}</Label>
-                    <Input
-                      id="instagram"
-                      type="text"
-                      placeholder="@yourusername"
-                      value={authFormData.instagram}
-                      onChange={handleAuthInputChange}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="twitter">{"Twitter"}</Label>
-                    <Input
-                      id="twitter"
-                      type="text"
-                      placeholder="@yourusername"
-                      value={authFormData.twitter}
-                      onChange={handleAuthInputChange}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="facebook">{"Facebook"}</Label>
-                    <Input
-                      id="facebook"
-                      type="text"
-                      placeholder="Lien vers votre profil"
-                      value={authFormData.facebook}
-                      onChange={handleAuthInputChange}
-                    />
-                  </div>
-                </div>
-              )}
-
-              <Button type="submit" className="w-full bg-teal-500 hover:bg-teal-600">
-                {authMode === "login" ? "Se connecter" : "S'inscrire"}
+          
+          {authMode === 'login' ? (
+            <form onSubmit={handleEmailLogin} className="space-y-4">
+              <Step1 formData={authFormData} handleInputChange={handleAuthInputChange} />
+              <Button 
+                type="submit" 
+                className="w-full h-11 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 shadow-md"
+              >
+                Se connecter
               </Button>
             </form>
-
-            <div className="text-center text-sm">
-              {authMode === "login" ? (
-                <>
-                  {"Vous n'avez pas de compte ?"}{" "}
-                  <button
-                    type="button"
-                    className="text-teal-600 hover:underline"
-                    onClick={() => setAuthMode("signup")}
-                  >
-                    {"S'inscrire"}
-                  </button>
-                </>
-              ) : (
-                <>
-                  {"Vous avez déjà un compte ?"}{" "}
-                  <button
-                    type="button"
-                    className="text-teal-600 hover:underline"
-                    onClick={() => setAuthMode("login")}
-                  >
-                    {"Se connecter"}
-                  </button>
-                </>
-              )}
+          ) : (
+            <div className="space-y-6">
+              <StepIndicator currentStep={signupStep} totalSteps={3} />
+              
+              <form onSubmit={handleEmailSignUp} className="space-y-4">
+                {signupStep === 1 && <Step1 formData={authFormData} handleInputChange={handleAuthInputChange} />}
+                {signupStep === 2 && <Step2 formData={authFormData} handleInputChange={handleAuthInputChange} setFormData={setAuthFormData} />}
+                {signupStep === 3 && <Step3 formData={authFormData} handleInputChange={handleAuthInputChange} />}
+                
+                <div className="flex justify-between pt-4">
+                  {signupStep > 1 && (
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={prevStep}
+                      className="h-11"
+                    >
+                      Précédent
+                    </Button>
+                  )}
+                  
+                  {signupStep < 3 ? (
+                    <Button 
+                      type="button" 
+                      onClick={nextStep}
+                      className="h-11 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 shadow-md ml-auto"
+                    >
+                      Suivant
+                    </Button>
+                  ) : (
+                    <Button 
+                      type="submit" 
+                      className="h-11 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 shadow-md ml-auto"
+                    >
+                      Créer mon compte
+                    </Button>
+                  )}
+                </div>
+              </form>
             </div>
+          )}
+          
+          <div className="text-center text-sm">
+            {authMode === 'login' ? (
+              <p className="text-slate-600">
+                Pas encore de compte ?{' '}
+                <button type="button" className="font-semibold text-teal-600 hover:text-teal-700 hover:underline" onClick={toggleAuthMode}>
+                  S'inscrire
+                </button>
+              </p>
+            ) : (
+              <p className="text-slate-600">
+                Déjà un compte ?{' '}
+                <button type="button" className="font-semibold text-teal-600 hover:text-teal-700 hover:underline" onClick={toggleAuthMode}>
+                  Se connecter
+                </button>
+              </p>
+            )}
           </div>
         </DialogContent>
       </Dialog>

@@ -18,6 +18,8 @@ import { Property, PropertyType, ListingType } from "@/types/property";
 import { supabase } from "@/lib/api/supabaseClient";
 import { getUserProfile } from "@/lib/profiles";
 import { FRENCH_CITIES } from "@/data/FrenchCities";
+import MapModal from "@/components/MapModal";
+import ViewOnMapButton from "@/components/ViewOnMapButton";
 
 // Properties Component
 const Properties = () => {
@@ -36,11 +38,11 @@ const Properties = () => {
   const [listingType, setListingType] = useState<ListingType>(initialListingType);
   const [propertyTypes, setPropertyTypes] = useState<PropertyType[]>([]);
   const [minPrice, setMinPrice] = useState(0);
-  const [maxPrice, setMaxPrice] = useState(5000000);
+  const [maxPrice, setMaxPrice] = useState(50000000);
   const [minBeds, setMinBeds] = useState(0);
   const [minBaths, setMinBaths] = useState(0);
   const [minM2, setMinM2] = useState(0);
-  const [maxM2, setMaxM2] = useState(500);
+  const [maxM2, setMaxM2] = useState(50000);
   const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [minPriceInput, setMinPriceInput] = useState(minPrice.toString());
@@ -51,6 +53,7 @@ const Properties = () => {
   const [activeTab, setActiveTab] = useState("filters");
   const [selectedCities, setSelectedCities] = useState<string[]>([]);
   const [userLikedProperties, setUserLikedProperties] = useState<string[] | null>(null); // Added state
+  const [isMapModalOpen, setIsMapModalOpen] = useState(false);
 
   // Listing type buttons with translations
   const listingTypeButtons = [
@@ -202,10 +205,12 @@ const Properties = () => {
   };
 
   // Fetch properties
-  const { data: properties = [], isLoading } = useQuery({
+  const { data: properties = [], isLoading, error } = useQuery({
     queryKey: ['properties', listingType],
     queryFn: () => getProperties(listingType === 'all' ? undefined : listingType as any),
   });
+
+
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -296,31 +301,37 @@ const Properties = () => {
   // Apply all filters
   useEffect(() => {
     let filtered = [...properties];
+    
 
     // Search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
+      const beforeSearch = filtered.length;
       filtered = filtered.filter(property => {
         const title = property.title || '';
         const addressStreet = property.address_street || '';
         const addressCity = property.address_city || '';
+        const description = property.description || '';
 
         return (
           title.toLowerCase().includes(query) ||
           addressStreet.toLowerCase().includes(query) ||
-          addressCity.toLowerCase().includes(query)
+          addressCity.toLowerCase().includes(query) ||
+          description.toLowerCase().includes(query)
         );
       });
     }
 
     // Property type filter
     if (propertyTypes.length > 0) {
+      const beforeType = filtered.length;
       filtered = filtered.filter(property =>
         property.property_type && propertyTypes.includes(property.property_type)
       );
     }
 
     // Price filter
+    const beforePrice = filtered.length;
     filtered = filtered.filter(property =>
       property.price >= minPrice && property.price <= maxPrice
     );
@@ -335,9 +346,12 @@ const Properties = () => {
       filtered = filtered.filter(property => (property.baths || 0) >= minBaths);
     }
 
+    const beforeM2 = filtered.length;
     filtered = filtered.filter(property =>
       (property.m2 || 0) >= minM2 && (property.m2 || 0) <= maxM2
     );
+    // Status filter - exclude only "pause" status
+    filtered = filtered.filter(property => property.status !== 'pause');
 
     // City filter
     if (selectedCities.length > 0) {
@@ -400,6 +414,8 @@ const Properties = () => {
 
     // Appliquer le tri final avant de mettre à jour l'état
     const sortedProperties = sortProperties(filtered);
+    
+    
     setFilteredProperties(sortedProperties);
 
   }, [
@@ -516,11 +532,11 @@ const Properties = () => {
   const handleClearFilters = () => {
     setPropertyTypes([]);
     setMinPrice(0);
-    setMaxPrice(5000000);
+    setMaxPrice(50000000);
     setMinBeds(0);
     setMinBaths(0);
     setMinM2(0);
-    setMaxM2(500);
+    setMaxM2(50000);
     setFeatures({
         has_elevator: false,
         has_air_conditioning: false,
@@ -1209,8 +1225,8 @@ const Properties = () => {
                 <div className="px-2">
                   <Slider
                     value={[minPrice, maxPrice]}
-                    max={5000000}
-                    step={100000}
+                    max={50000000}
+                    step={500000}
                     onValueChange={(values) => {
                       setMinPrice(values[0]);
                       setMaxPrice(values[1]);
@@ -1247,8 +1263,8 @@ const Properties = () => {
                 <div className="px-2">
                   <Slider
                     value={[minM2, maxM2]}
-                    max={500}
-                    step={10}
+                    max={50000}
+                    step={100}
                     onValueChange={(values) => {
                       setMinM2(values[0]);
                       setMaxM2(values[1]);
@@ -1365,6 +1381,7 @@ const Properties = () => {
                 <h3 className="font-medium">{"Type de cuisine"}</h3>
                 {renderMultiSelectFilter(kitchenTypeOptions, kitchenType, setKitchenType, "", "mobile-kitchen-")}
               </div>
+
             </div>
           </TabsContent>
           <TabsContent value="keyword">
@@ -1384,6 +1401,7 @@ const Properties = () => {
     <div className="flex flex-col min-h-screen bg-estate-background">
       <Navbar />
       <main className="flex-grow container mx-auto px-4 py-8">
+        
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Filters Sidebar (Desktop) */}
           <aside className="hidden lg:block w-full lg:w-1/4 xl:w-1/5 space-y-6">
@@ -1426,8 +1444,8 @@ const Properties = () => {
                       <div className="px-2">
                         <Slider
                           value={[minPrice, maxPrice]}
-                          max={5000000}
-                          step={100000}
+                          max={50000000}
+                          step={500000}
                           onValueChange={(values) => {
                             setMinPrice(values[0]);
                             setMaxPrice(values[1]);
@@ -1462,8 +1480,8 @@ const Properties = () => {
                       <div className="px-2">
                         <Slider
                           value={[minM2, maxM2]}
-                          max={500}
-                          step={10}
+                          max={50000}
+                          step={100}
                           onValueChange={(values) => {
                             setMinM2(values[0]);
                             setMaxM2(values[1]);
@@ -1580,6 +1598,7 @@ const Properties = () => {
                       <h3 className="font-medium">{"Type de cuisine"}</h3>
                       {renderMultiSelectFilter(kitchenTypeOptions, kitchenType, setKitchenType, "")}
                     </div>
+
                   </div>
                 </TabsContent>
                 <TabsContent value="keyword">
@@ -1615,6 +1634,9 @@ const Properties = () => {
                  'Propriétés'}
               </h1>
               <div className="flex items-center gap-4">
+                <ViewOnMapButton
+                  onClick={() => setIsMapModalOpen(true)}
+                />
                 <Button
                   variant="ghost"
                   size="icon"
@@ -1663,6 +1685,19 @@ const Properties = () => {
         </div>
       </main>
       {renderMobileFilters()}
+      
+      {/* Modal de la carte */}
+      <MapModal
+        isOpen={isMapModalOpen}
+        onClose={() => setIsMapModalOpen(false)}
+        properties={filteredProperties}
+        onPropertyClick={(property) => {
+          // Rediriger vers la page de détail de la propriété
+          navigate(`/property/${property.id}`);
+        }}
+        title="Propriétés sur la carte"
+      />
+      
       <Footer />
     </div>
   );

@@ -5,7 +5,7 @@ import { getUserProfile } from "@/lib/profiles";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PropertyCard from "@/components/PropertyCard";
 import { useQuery } from "@tanstack/react-query";
-import { getMyProperties } from "@/lib/api/properties";
+import { getMyProperties, pauseProperty, resumeProperty } from "@/lib/api/properties";
 import { Property } from "@/types/property";
 import { supabase } from "@/lib/api/supabaseClient";
 import { toast } from "sonner";
@@ -56,6 +56,26 @@ const Account = () => {
     },
   });
 
+  const pausePropertyMutation = useMutation({
+    mutationFn: pauseProperty,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-properties'] });
+    },
+    onError: (error) => {
+      console.error("Error pausing property:", error);
+    },
+  });
+
+  const resumePropertyMutation = useMutation({
+    mutationFn: resumeProperty,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-properties'] });
+    },
+    onError: (error) => {
+      console.error("Error resuming property:", error);
+    },
+  });
+
   const handleEdit = (propertyId: string) => {
     navigate(`/edit-property/${propertyId}`);
   };
@@ -63,6 +83,14 @@ const Account = () => {
   const handleDelete = (propertyId: string) => {
     setPropertyToDelete(propertyId);
     setIsDeleteDialogOpen(true);
+  };
+
+  const handlePause = (propertyId: string) => {
+    pausePropertyMutation.mutate(propertyId);
+  };
+
+  const handleResume = (propertyId: string) => {
+    resumePropertyMutation.mutate(propertyId);
   };
 
   const confirmDelete = () => {
@@ -120,6 +148,8 @@ const Account = () => {
                       isEditable={true}
                       onEdit={handleEdit}
                       onDelete={handleDelete}
+                      onPause={handlePause}
+                      onResume={handleResume}
                     />
                   ))}
                 </div>

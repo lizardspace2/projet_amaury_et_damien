@@ -32,7 +32,6 @@ import MapPage from "./pages/MapPage"; // Import MapPage
 import { supabase } from "@/lib/api/supabaseClient";
 import { useEffect, useState } from "react";
 import { CurrencyProvider } from './CurrencyContext';
-import { SearchStateProvider } from './contexts/SearchStateContext';
 
 import { Wrapper } from "@googlemaps/react-wrapper";
 
@@ -66,8 +65,7 @@ const App = () => {
         <Sonner />
         <CurrencyProvider>
           <BrowserRouter>
-            <SearchStateProvider>
-              <Routes>
+            <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/property/:id" element={<PropertyDetail />} />
                 <Route path="/properties" element={<Properties />} />
@@ -100,7 +98,6 @@ const App = () => {
                 } />
                 <Route path="*" element={<NotFound />} />
               </Routes>
-            </SearchStateProvider>
           </BrowserRouter>
         </CurrencyProvider>
       </TooltipProvider>

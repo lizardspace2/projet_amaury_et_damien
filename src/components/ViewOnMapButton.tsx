@@ -1,6 +1,6 @@
 import { MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 interface ViewOnMapButtonProps {
   onClick?: () => void;
@@ -16,20 +16,16 @@ const ViewOnMapButton = ({
   className = "",
   size = 'md',
   variant = 'outline',
-  children = "Voir sur la carte",
-  listingType
+  children = "Voir sur la carte"
 }: ViewOnMapButtonProps) => {
   const navigate = useNavigate();
-  const location = useLocation();
 
   const handleClick = () => {
     if (onClick) {
       onClick();
     } else {
-      // Construire l'URL avec les paramètres de la page actuelle
-      const searchParams = new URLSearchParams(location.search);
-      const mapUrl = listingType ? `/map?type=${listingType}` : '/map';
-      navigate(mapUrl);
+      // URL simple sans paramètres
+      navigate('/map');
     }
   };
   const sizeClasses = {

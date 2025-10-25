@@ -18,9 +18,7 @@ import { Property, PropertyType, ListingType } from "@/types/property";
 import { supabase } from "@/lib/api/supabaseClient";
 import { getUserProfile } from "@/lib/profiles";
 import { FRENCH_CITIES } from "@/data/FrenchCities";
-import MapModal from "@/components/MapModal";
 import ViewOnMapButton from "@/components/ViewOnMapButton";
-import SimpleMap from "@/components/SimpleMap";
 
 // Properties Component
 const Properties = () => {
@@ -54,10 +52,6 @@ const Properties = () => {
   const [activeTab, setActiveTab] = useState("filters");
   const [selectedCities, setSelectedCities] = useState<string[]>([]);
   const [userLikedProperties, setUserLikedProperties] = useState<string[] | null>(null); // Added state
-  const [isMapModalOpen, setIsMapModalOpen] = useState(false);
-  const [showTestMap, setShowTestMap] = useState(false);
-
-  console.log('Properties - isMapModalOpen:', isMapModalOpen, 'showTestMap:', showTestMap);
 
   // Listing type buttons with translations
   const listingTypeButtons = [
@@ -1638,22 +1632,8 @@ const Properties = () => {
                  'Propriétés'}
               </h1>
               <div className="flex items-center gap-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    console.log('Properties - Clic sur Test Carte, showTestMap actuel:', showTestMap);
-                    setShowTestMap(!showTestMap);
-                  }}
-                  className="flex items-center gap-2"
-                >
-                  Test Carte
-                </Button>
                 <ViewOnMapButton
-                  onClick={() => {
-                    console.log('Properties - Clic sur Voir sur la carte, ouverture du modal');
-                    setIsMapModalOpen(true);
-                  }}
+                  listingType={listingType}
                 />
                 <Button
                   variant="ghost"
@@ -1690,50 +1670,19 @@ const Properties = () => {
                 ))}
               </div>
             ) : (
-              <>
-                {/* Test Map */}
-                {showTestMap && (
-                  <div className="mb-8">
-                    <h3 className="text-lg font-semibold mb-4">Test de la carte</h3>
-                    <SimpleMap 
-                      center={[46.2276, 2.2137]} 
-                      zoom={6} 
-                      className="h-96 w-full rounded-lg border"
-                    />
-                  </div>
-                )}
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {filteredProperties.map(property => (
-                    <PropertyCard
-                      key={property.id}
-                      property={property}
-                    />
-                  ))}
-                </div>
-              </>
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {filteredProperties.map(property => (
+                  <PropertyCard
+                    key={property.id}
+                    property={property}
+                  />
+                ))}
+              </div>
             )}
           </div>
         </div>
       </main>
       {renderMobileFilters()}
-      
-      {/* Modal de la carte */}
-      {console.log('Properties - Rendu du MapModal avec isOpen:', isMapModalOpen, 'properties count:', filteredProperties.length)}
-      <MapModal
-        isOpen={isMapModalOpen}
-        onClose={() => {
-          console.log('Properties - Fermeture du modal');
-          setIsMapModalOpen(false);
-        }}
-        properties={filteredProperties}
-        onPropertyClick={(property) => {
-          console.log('Properties - Clic sur propriété dans la carte:', property.id);
-          // Rediriger vers la page de détail de la propriété
-          navigate(`/property/${property.id}`);
-        }}
-        title="Propriétés sur la carte"
-      />
       
       <Footer />
     </div>

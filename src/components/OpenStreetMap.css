@@ -1,0 +1,44 @@
+/* Styles pour les marqueurs personnalisés */
+.custom-marker {
+  z-index: 1000 !important;
+}
+
+.custom-marker:hover {
+  transform: scale(1.1);
+  transition: transform 0.2s ease;
+}
+
+/* Styles pour les popups personnalisées */
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.leaflet-popup-content {
+  margin: 0;
+  padding: 0;
+}
+
+.custom-popup .leaflet-popup-content-wrapper {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.custom-popup .leaflet-popup-tip {
+  background: white;
+}
+
+/* Améliorer la visibilité des marqueurs */
+.leaflet-marker-icon {
+  z-index: 1000 !important;
+}
+
+/* Styles pour les contrôles de la carte */
+.leaflet-control-zoom {
+  z-index: 1001 !important;
+}
+
+.leaflet-control-attribution {
+  z-index: 1001 !important;
+}

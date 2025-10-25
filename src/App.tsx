@@ -28,6 +28,7 @@ import AuctionDetailPage from "./pages/AuctionDetailPage";
 import AuctionRoomPage from "./pages/auctions/AuctionRoomPage";
 import MovingServicesWrapper from "./pages/MovingServices"; // Import the new component
 import EditProperty from "./pages/EditProperty"; // Import EditProperty
+import MapPage from "./pages/MapPage"; // Import MapPage
 import { supabase } from "@/lib/api/supabaseClient";
 import { useEffect, useState } from "react";
 import { CurrencyProvider } from './CurrencyContext';
@@ -68,6 +69,7 @@ const App = () => {
                 <Route path="/" element={<Index />} />
                 <Route path="/property/:id" element={<PropertyDetail />} />
                 <Route path="/properties" element={<Properties />} />
+                <Route path="/map" element={<MapPage />} />
                 <Route path="/sell" element={<Sell />} />
                 <Route path="/moving-services" element={<MovingServicesWrapper />} /> 
                 <Route path="/borrow" element={<Borrow />} />

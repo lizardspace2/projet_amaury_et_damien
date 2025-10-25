@@ -19,6 +19,8 @@ interface OpenStreetMapProps {
   className?: string;
   properties?: Property[];
   onPropertyClick?: (property: Property) => void;
+  onMapViewChange?: (bounds: { north: number; south: number; east: number; west: number }) => void;
+  onMapRef?: (mapInstance: any) => void;
 }
 
 const OpenStreetMap = ({ 
@@ -26,7 +28,9 @@ const OpenStreetMap = ({
   zoom = 6,
   className = "h-96 w-full rounded-lg",
   properties = [],
-  onPropertyClick
+  onPropertyClick,
+  onMapViewChange,
+  onMapRef
 }: OpenStreetMapProps) => {
   const mapRef = useRef<L.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -190,6 +194,29 @@ const OpenStreetMap = ({
           attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
           maxZoom: 19
         }).addTo(mapRef.current);
+
+        // Ajouter les événements de changement de vue
+        if (onMapViewChange) {
+          const updateBounds = () => {
+            if (mapRef.current) {
+              const bounds = mapRef.current.getBounds();
+              onMapViewChange({
+                north: bounds.getNorth(),
+                south: bounds.getSouth(),
+                east: bounds.getEast(),
+                west: bounds.getWest()
+              });
+            }
+          };
+
+          mapRef.current.on('moveend', updateBounds);
+          mapRef.current.on('zoomend', updateBounds);
+        }
+
+        // Passer la référence de la carte au composant parent
+        if (onMapRef) {
+          onMapRef(mapRef.current);
+        }
 
         // Redimensionner la carte après un délai
         setTimeout(() => {

@@ -1,76 +1,75 @@
-import React, { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Filter, Layers, MapPin } from 'lucide-react';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useQuery } from '@tanstack/react-query';
-import { getProperties } from '@/lib/api/properties';
-import { Property, PropertyType, ListingType } from '@/types/property';
-import OpenStreetMap from '@/components/OpenStreetMap';
+import { useSearchState } from '@/contexts/SearchStateContext';
+import { usePropertiesData } from '@/hooks/usePropertiesData';
+import MapContainer from '@/components/MapContainer';
+import ListView from '@/components/ListView';
+import FilterSortBar from '@/components/FilterSortBar';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
 const MapPage = () => {
-  const location = useLocation();
   const navigate = useNavigate();
-  const [showFilters, setShowFilters] = useState(false);
-  const [selectedType, setSelectedType] = useState<string>('all');
+  const {
+    searchState,
+    updateMapBounds,
+    updateFilters,
+    updatePagination,
+    toggleMapVisibility,
+    toggleListVisibility,
+    resetToDefault
+  } = useSearchState();
 
-  // Récupérer les paramètres de l'URL
-  const searchParams = new URLSearchParams(location.search);
-  const listingType = searchParams.get('type') as ListingType || 'all';
-
-  // Récupérer les propriétés
-  const { data: properties = [], isLoading } = useQuery({
-    queryKey: ['properties', listingType],
-    queryFn: () => getProperties(listingType === 'all' ? undefined : listingType),
+  // Récupérer les données des propriétés
+  const {
+    properties,
+    isLoading,
+    error,
+    totalCount,
+    hasNextPage,
+    hasPreviousPage,
+    refetch
+  } = usePropertiesData({
+    bounds: searchState.mapBounds,
+    filters: searchState.filterState,
+    page: searchState.pagination.page,
+    pageSize: searchState.pagination.pageSize,
+    debounceMs: 500
   });
 
-  // Filtrer les propriétés selon le type sélectionné
-  const filteredProperties = selectedType === 'all' 
-    ? properties 
-    : properties.filter(p => p.listing_type === selectedType);
-
-  const propertyTypes = [
-    { value: 'all', label: 'Toutes les propriétés', count: properties.length },
-    { value: 'sale', label: 'À vendre', count: properties.filter(p => p.listing_type === 'sale').length },
-    { value: 'rent', label: 'À louer', count: properties.filter(p => p.listing_type === 'rent').length },
-    { value: 'auction', label: 'Enchères', count: properties.filter(p => p.listing_type === 'auction').length },
-  ];
-
-  const handlePropertyClick = (property: Property) => {
+  const handlePropertyClick = (property: any) => {
     navigate(`/property/${property.id}`);
   };
 
+  const handleMapViewChange = (bounds: any, zoom: number) => {
+    updateMapBounds(bounds, zoom);
+  };
+
+  const handleFiltersChange = (filters: any) => {
+    updateFilters(filters);
+  };
+
+  const handlePageChange = (page: number) => {
+    updatePagination({ page });
+  };
+
   const getPageTitle = () => {
-    switch (listingType) {
+    switch (searchState.filterState.listingType) {
       case 'sale': return 'Propriétés à vendre sur la carte';
       case 'rent': return 'Propriétés à louer sur la carte';
       case 'auction': return 'Enchères sur la carte';
-      default: return 'Toutes les propriétés sur la carte';
+      default: return 'Propriétés sur la carte';
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-estate-background">
-        <Navbar />
-        <div className="flex items-center justify-center h-96">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-500 mx-auto mb-4"></div>
-            <p className="text-estate-neutral-600">Chargement de la carte...</p>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-estate-background">
+    <div className="flex flex-col min-h-screen bg-gray-50">
       <Navbar />
       
       {/* Header */}
-      <div className="bg-white border-b border-estate-neutral-200">
+      <div className="bg-white border-b border-gray-200">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -85,145 +84,128 @@ const MapPage = () => {
               </Button>
               <div className="flex items-center gap-2">
                 <MapPin className="h-6 w-6 text-teal-600" />
-                <h1 className="text-2xl font-bold text-estate-800">
+                <h1 className="text-2xl font-bold text-gray-800">
                   {getPageTitle()}
-                  <span className="text-sm font-normal text-gray-500 ml-2">
-                    ({filteredProperties.length} propriété{filteredProperties.length !== 1 ? 's' : ''})
-                  </span>
                 </h1>
               </div>
             </div>
             
-            <div className="flex items-center gap-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center gap-2"
-              >
-                <Filter className="h-4 w-4" />
-                Filtres
-              </Button>
-              {filteredProperties.length > 0 && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    // Cette fonction sera implémentée dans OpenStreetMap
-                    (window as any).centerOnMarkers?.();
-                  }}
-                  className="flex items-center gap-2"
-                >
-                  <Layers className="h-4 w-4" />
-                  Centrer sur les propriétés
-                </Button>
-              )}
-              <div className="text-sm text-estate-neutral-600">
-                {filteredProperties.length} propriété{filteredProperties.length > 1 ? 's' : ''}
-              </div>
+            <div className="text-sm text-gray-600">
+              {totalCount} propriété{totalCount !== 1 ? 's' : ''} trouvée{totalCount !== 1 ? 's' : ''}
             </div>
           </div>
         </div>
       </div>
 
-      <div className="flex h-[calc(100vh-80px)]">
-        {/* Filtres latéraux */}
-        {showFilters && (
-          <div className="w-80 bg-white border-r border-estate-neutral-200 p-6 overflow-y-auto">
-            <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
-              <Layers className="h-5 w-5" />
-              Filtrer par type
-            </h3>
-            <div className="space-y-2">
-              {propertyTypes.map((type) => (
-                <button
-                  key={type.value}
-                  onClick={() => setSelectedType(type.value)}
-                  className={`w-full text-left p-3 rounded-lg border transition-colors ${
-                    selectedType === type.value
-                      ? 'bg-teal-50 border-teal-200 text-teal-700'
-                      : 'bg-white border-estate-neutral-200 hover:bg-estate-neutral-50'
-                  }`}
-                >
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium">{type.label}</span>
-                    <span className="text-sm text-estate-neutral-500 bg-estate-neutral-100 px-2 py-1 rounded-full">
-                      {type.count}
-                    </span>
-                  </div>
-                </button>
-              ))}
+      {/* Barre de filtres */}
+      <FilterSortBar
+        filters={searchState.filterState}
+        onFiltersChange={handleFiltersChange}
+        onReset={resetToDefault}
+      />
+
+      {/* Contenu principal */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Liste des propriétés */}
+        {searchState.isListVisible && (
+          <ListView
+            properties={properties}
+            totalCount={totalCount}
+            currentPage={searchState.pagination.page}
+            pageSize={searchState.pagination.pageSize}
+            hasNextPage={hasNextPage}
+            hasPreviousPage={hasPreviousPage}
+            onPageChange={handlePageChange}
+            onPropertyClick={handlePropertyClick}
+            onToggleMapVisibility={toggleMapVisibility}
+            isMapVisible={searchState.isMapVisible}
+            isLoading={isLoading}
+            className="w-96"
+          />
+        )}
+
+        {/* Carte */}
+        {searchState.isMapVisible && (
+          <div className="flex-1 relative">
+            <MapContainer
+              bounds={searchState.mapBounds}
+              zoom={searchState.mapZoom}
+              properties={properties}
+              onBoundsChange={handleMapViewChange}
+              onPropertyClick={handlePropertyClick}
+              isVisible={searchState.isMapVisible}
+              className="h-full w-full"
+            />
+            
+            {/* Légende des marqueurs */}
+            <div className="absolute bottom-4 right-4 bg-white rounded-lg shadow-lg p-4 z-10">
+              <h4 className="font-semibold text-sm mb-2">Légende</h4>
+              <div className="space-y-1 text-xs">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-red-500 border border-white"></div>
+                  <span>Vente</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-blue-500 border border-white"></div>
+                  <span>Location</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-orange-500 border border-white"></div>
+                  <span>Enchères</span>
+                </div>
+              </div>
             </div>
 
-            <div className="mt-6 p-4 bg-estate-neutral-50 rounded-lg">
-              <h4 className="font-medium text-sm text-estate-neutral-700 mb-2">Conseils d'utilisation</h4>
-              <ul className="text-xs text-estate-neutral-600 space-y-1">
-                <li>• Cliquez sur un marqueur pour voir les détails</li>
-                <li>• Utilisez la molette pour zoomer</li>
-                <li>• Glissez pour naviguer sur la carte</li>
-                <li>• Les couleurs indiquent le type de propriété</li>
-              </ul>
+            {/* Indicateur de statut */}
+            <div className="absolute top-4 left-4 bg-white rounded-lg shadow-lg p-3 z-10">
+              <div className="text-sm">
+                {isLoading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                    <span>Chargement...</span>
+                  </div>
+                ) : (
+                  <div className="text-gray-700">
+                    <div className="font-semibold">
+                      {totalCount} propriété{totalCount !== 1 ? 's' : ''} dans cette zone
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {properties.filter(p => p.lat && p.lng).length} avec coordonnées GPS
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
 
-        {/* Carte */}
-        <div className="flex-1 relative">
-          <OpenStreetMap
-            properties={filteredProperties}
-            onPropertyClick={handlePropertyClick}
-            center={[46.2276, 2.2137]}
-            zoom={6}
-            className="h-full w-full"
-          />
-          
-          {/* Légende des marqueurs */}
-          <div className="absolute bottom-4 right-4 bg-white rounded-lg shadow-lg p-4 z-10">
-            <h4 className="font-semibold text-sm mb-2">Légende</h4>
-            <div className="space-y-1 text-xs">
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full bg-red-500 border-2 border-white"></div>
-                <span>Vente</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full bg-blue-500 border-2 border-white"></div>
-                <span>Location</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full bg-orange-500 border-2 border-white"></div>
-                <span>Enchères</span>
-              </div>
-            </div>
+        {/* Bouton pour afficher la liste si masquée */}
+        {!searchState.isListVisible && (
+          <div className="absolute top-4 right-4 z-10">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={toggleListVisibility}
+              className="bg-white shadow-lg"
+            >
+              Afficher la liste
+            </Button>
           </div>
+        )}
 
-          {/* Indicateur de statut */}
-          <div className="absolute top-4 left-4 bg-white rounded-lg shadow-lg p-3 z-10">
-            <div className="text-sm">
-              {isLoading ? (
-                <div className="flex items-center gap-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                  <span>Chargement...</span>
-                </div>
-              ) : (
-                <div className="text-gray-700">
-                  <div className="font-semibold">
-                    {filteredProperties.length} propriété{filteredProperties.length !== 1 ? 's' : ''} affichée{filteredProperties.length !== 1 ? 's' : ''}
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {filteredProperties.filter(p => p.lat && p.lng).length} avec coordonnées GPS
-                  </div>
-                  {filteredProperties.length > 0 && (
-                    <div className="text-xs text-blue-600 mt-1">
-                      {filteredProperties.filter(p => p.lat && p.lng).map(p => 
-                        `${p.title}: ${p.lat?.toFixed(4)}, ${p.lng?.toFixed(4)}`
-                      ).join(' | ')}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+        {/* Bouton pour afficher la carte si masquée */}
+        {!searchState.isMapVisible && (
+          <div className="absolute top-4 right-4 z-10">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={toggleMapVisibility}
+              className="bg-white shadow-lg"
+            >
+              Afficher la carte
+            </Button>
           </div>
-        </div>
+        )}
       </div>
 
       <Footer />

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -16,39 +16,94 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CreatePropertyInput } from '@/lib/api/properties';
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
+import { supabase } from "@/lib/api/supabaseClient";
 
+const MAX_PRICE = 100000000; // 100 millions d'euros
+const MAX_SURFACE = 10000; // 10000 m²
+const MAX_FLOOR_LEVEL = 200; // 200 étages maximum
 
 const formSchema = z.object({
   title: z.string().min(5, "Le titre doit contenir au moins 5 caractères"),
   description: z.string().min(10, "La description doit contenir au moins 10 caractères"),
-  price: z.coerce.number().positive("Le prix doit être un nombre positif"),
+  price: z.coerce.number()
+    .positive("Le prix doit être un nombre positif")
+    .max(MAX_PRICE, `Le prix ne peut pas dépasser ${MAX_PRICE.toLocaleString('fr-FR')} €`),
   beds: z.coerce.number().int().min(0, "Le nombre de lits doit être supérieur ou égal à 0").optional(),
   baths: z.coerce.number().int().min(0, "Le nombre de salles de bain doit être supérieur ou égal à 0").optional(),
-  m2: z.coerce.number().positive("La surface doit être un nombre positif"),
+  m2: z.coerce.number()
+    .positive("La surface doit être un nombre positif")
+    .max(MAX_SURFACE, `La surface ne peut pas dépasser ${MAX_SURFACE} m²`),
   year_built: z.coerce.number().int().min(1800, "L'année doit être 1800 ou ultérieure").max(new Date().getFullYear(), "L'année ne peut pas être dans le futur"),
   cadastral_code: z.string().optional(),
   condition: z.enum(["newly_renovated", "under_renovation", "white_frame", "green_frame", "not_renovated", "black_frame", "old_renovation"]),
   status: z.enum(["available", "pending", "sold", "new_building_under_construction", "old_building"]).default("available"),
   kitchen_type: z.enum(["isolated", "outside", "studio"]).optional(),
   ceiling_height: z.coerce.number().min(2, "La hauteur sous plafond doit être d'au moins 2 mètres").max(7, "La hauteur sous plafond doit être d'au plus 7 mètres").optional(),
-  terrace_area: z.coerce.number().optional(),
-  floor_level: z.coerce.number().optional(),
-  total_floors: z.coerce.number().optional(),
+  terrace_area: z.coerce.number().max(5000, "La surface de terrasse ne peut pas dépasser 5000 m²").optional(),
+  floor_level: z.coerce.number()
+    .int()
+    .min(-2, "Le niveau d'étage doit être d'au moins -2 (2 sous-sols)")
+    .max(MAX_FLOOR_LEVEL, `Le niveau d'étage ne peut pas dépasser ${MAX_FLOOR_LEVEL}`)
+    .optional(),
+  total_floors: z.coerce.number()
+    .int()
+    .positive("Le nombre total d'étages doit être positif")
+    .max(MAX_FLOOR_LEVEL, `Le nombre total d'étages ne peut pas dépasser ${MAX_FLOOR_LEVEL}`)
+    .optional(),
   featured: z.boolean().default(false),
   rooms: z.coerce.number().int().min(0, "Le nombre de pièces doit être supérieur ou égal à 0").optional(),
   // SeLoger fields
-  frais_agence: z.coerce.number().optional(),
-  charges_mensuelles: z.coerce.number().optional(),
-  taxe_fonciere: z.coerce.number().optional(),
+  frais_agence: z.coerce.number().max(MAX_PRICE, "Les frais d'agence ne peuvent pas dépasser 100 millions €").optional(),
+  charges_mensuelles: z.coerce.number().max(100000, "Les charges mensuelles ne peuvent pas dépasser 100 000 €").optional(),
+  taxe_fonciere: z.coerce.number().max(100000, "La taxe foncière ne peut pas dépasser 100 000 €").optional(),
   dpe_classe_energie: z.string().optional(),
-  dpe_consommation: z.coerce.number().optional(),
+  dpe_consommation: z.coerce.number().max(1000, "La consommation énergétique ne peut pas dépasser 1000 kWh/m²/an").optional(),
   ges_classe_gaz: z.string().optional(),
-  ges_emission: z.coerce.number().optional(),
-  surface_balcon_terrasse: z.coerce.number().optional(),
-  parking_box: z.coerce.number().int().optional(),
+  ges_emission: z.coerce.number().max(100, "Les émissions GES ne peuvent pas dépasser 100 kg CO₂/m²/an").optional(),
+  surface_balcon_terrasse: z.coerce.number().max(5000, "La surface balcon/terrasse ne peut pas dépasser 5000 m²").optional(),
+  parking_box: z.coerce.number().int().max(50, "Le nombre de places de parking ne peut pas dépasser 50").optional(),
   cave: z.boolean().default(false),
-  nombre_etages_immeuble: z.coerce.number().int().optional(),
-  annee_construction: z.coerce.number().int().optional(),
+  nombre_etages_immeuble: z.coerce.number()
+    .int()
+    .positive("Le nombre d'étages de l'immeuble doit être positif")
+    .max(MAX_FLOOR_LEVEL, `Le nombre d'étages de l'immeuble ne peut pas dépasser ${MAX_FLOOR_LEVEL}`)
+    .optional(),
+  annee_construction: z.coerce.number().int().min(1800, "L'année doit être 1800 ou ultérieure").max(new Date().getFullYear(), "L'année ne peut pas être dans le futur").optional(),
+}).refine((data) => {
+  // Vérification que le nombre total d'étages >= niveau de l'étage
+  if (data.total_floors !== undefined && data.floor_level !== undefined) {
+    if (data.total_floors < data.floor_level) {
+      return false;
+    }
+  }
+  return true;
+}, {
+  message: "Le nombre total d'étages de l'immeuble doit être supérieur ou égal au niveau de l'étage de l'appartement",
+  path: ["total_floors"]
+}).refine((data) => {
+  // Vérification que le nombre d'étages de l'immeuble >= niveau de l'étage
+  if (data.nombre_etages_immeuble !== undefined && data.floor_level !== undefined) {
+    if (data.nombre_etages_immeuble < data.floor_level) {
+      return false;
+    }
+  }
+  return true;
+}, {
+  message: "Le nombre d'étages de l'immeuble doit être supérieur ou égal au niveau de l'étage de l'appartement",
+  path: ["nombre_etages_immeuble"]
+}).refine((data) => {
+  // Vérification de cohérence année de construction / année built
+  if (data.annee_construction !== undefined && data.year_built !== undefined) {
+    if (data.annee_construction > data.year_built) {
+      return false;
+    }
+  }
+  return true;
+}, {
+  message: "L'année de construction du bâtiment ne peut pas être supérieure à l'année de construction de la propriété",
+  path: ["annee_construction"]
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -60,6 +115,9 @@ interface AddPropertyStep2Props {
 }
 
 const AddPropertyStep2 = ({ onBack, onNext, initialData }: AddPropertyStep2Props) => {
+  const [hasSiret, setHasSiret] = useState(true);
+  const [userProfile, setUserProfile] = useState<any>(null);
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -71,9 +129,9 @@ const AddPropertyStep2 = ({ onBack, onNext, initialData }: AddPropertyStep2Props
       m2: initialData?.m2 || undefined,
       year_built: initialData?.year_built || new Date().getFullYear(),
       cadastral_code: initialData?.cadastral_code || "",
-      condition: initialData?.condition || "newly_renovated",
-      status: initialData?.status || "available",
-      kitchen_type: initialData?.kitchen_type || undefined,
+      condition: (initialData?.condition as any) || "newly_renovated",
+      status: (initialData?.status as any) || "available",
+      kitchen_type: (initialData?.kitchen_type as any) || undefined,
       ceiling_height: initialData?.ceiling_height || undefined,
       terrace_area: initialData?.terrace_area || undefined,
       floor_level: initialData?.floor_level || undefined,
@@ -95,6 +153,28 @@ const AddPropertyStep2 = ({ onBack, onNext, initialData }: AddPropertyStep2Props
     },
   });
 
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('siret')
+            .eq('user_id', user.id)
+            .single();
+          
+          setUserProfile(profile);
+          setHasSiret(!!profile?.siret && profile.siret.length >= 14);
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
+
   const onSubmit = async (data: FormValues) => {
     try {
       onNext({ ...data, currency: "EUR" });
@@ -113,6 +193,16 @@ const AddPropertyStep2 = ({ onBack, onNext, initialData }: AddPropertyStep2Props
               {"Veuillez fournir les détails essentiels de votre propriété."}
             </p>
           </div>
+
+          {!hasSiret && (
+            <Alert className="bg-amber-50 border-amber-200">
+              <AlertTriangle className="h-4 w-4 text-amber-600" />
+              <AlertDescription className="text-amber-800">
+                <strong className="font-semibold">Attention:</strong> Vous n'avez pas renseigné votre numéro SIRET. 
+                Il est fortement recommandé de le fournir car ce site est destiné aux professionnels de l'immobilier.
+              </AlertDescription>
+            </Alert>
+          )}
 
                       <FormField
                         control={form.control}

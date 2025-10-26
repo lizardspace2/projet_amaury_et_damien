@@ -54,8 +54,11 @@ const MapPage = () => {
     });
     markersRef.current = [];
 
+    // Filtrer les propriétés qui ont des coordonnées
+    const propertiesWithCoords = propertiesToAdd.filter(p => p.lat && p.lng);
+
     // Ajouter les nouveaux marqueurs
-    propertiesToAdd.forEach(property => {
+    propertiesWithCoords.forEach(property => {
       const marker = L.marker([property.lat, property.lng]).addTo(mapRef.current!);
       
       const popupContent = `
@@ -121,7 +124,6 @@ const MapPage = () => {
         if (!isMounted) return;
         
         setProperties(withCoords);
-        setLoading(false);
 
         // Attendre un peu que le DOM soit prêt
         setTimeout(() => {
@@ -139,8 +141,11 @@ const MapPage = () => {
           }).addTo(map);
 
           mapRef.current = map;
+          
+          if (isMounted) {
+            setLoading(false);
+          }
 
-          // Ajouter les marqueurs initiaux
           // Les marqueurs seront mis à jour automatiquement par l'effet sur filteredProperties
 
         }, 50);
@@ -177,6 +182,12 @@ const MapPage = () => {
 
   // Appliquer les filtres
   useEffect(() => {
+    if (properties.length === 0) {
+      // Si aucune propriété n'est chargée, garder filteredProperties vide
+      setFilteredProperties([]);
+      return;
+    }
+
     let filtered = [...properties];
 
     // Filtre de recherche
@@ -216,9 +227,9 @@ const MapPage = () => {
 
   // Mettre à jour les marqueurs sur la carte quand les propriétés filtrées changent
   useEffect(() => {
-    if (!loading && mapRef.current) {
-      addMarkersToMap(filteredProperties);
-    }
+    if (loading || !mapRef.current) return;
+    
+    addMarkersToMap(filteredProperties);
   }, [filteredProperties, loading, addMarkersToMap]);
 
   return (

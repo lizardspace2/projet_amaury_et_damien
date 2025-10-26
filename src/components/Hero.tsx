@@ -13,7 +13,7 @@ const Hero = () => {
   const navigate = useNavigate();
 
   const carouselImages = Array.from(
-    { length: 14 },
+    { length: 30 },
     (_, i) => `/photohomepagecaroussel (${i + 1}).jpg`
   );
 

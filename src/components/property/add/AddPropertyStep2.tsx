@@ -110,7 +110,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 interface AddPropertyStep2Props {
   onBack: () => void;
-  onNext: (data: FormValues & { currency: string }) => void;
+  onNext: (data: FormValues & { currency: string; price_per_m2?: number }) => void;
   initialData?: Partial<CreatePropertyInput>;
 }
 
@@ -177,11 +177,24 @@ const AddPropertyStep2 = ({ onBack, onNext, initialData }: AddPropertyStep2Props
 
   const onSubmit = async (data: FormValues) => {
     try {
-      onNext({ ...data, currency: "EUR" });
+      // Calculer automatiquement le prix au mètre carré
+      let price_per_m2: number | undefined = undefined;
+      if (data.price && data.m2 && data.m2 > 0) {
+        price_per_m2 = Number((data.price / data.m2).toFixed(2));
+      }
+
+      onNext({ ...data, currency: "EUR", price_per_m2 });
     } catch (error) {
       console.error('Submission error:', error);
     }
   };
+
+  // Watcher pour afficher le prix/m² calculé en temps réel
+  const priceValue = form.watch("price");
+  const m2Value = form.watch("m2");
+  const calculatedPricePerM2 = priceValue && m2Value && m2Value > 0 
+    ? Number((priceValue / m2Value).toFixed(2)) 
+    : null;
 
   return (
     <Form {...form}>
@@ -264,6 +277,15 @@ const AddPropertyStep2 = ({ onBack, onNext, initialData }: AddPropertyStep2Props
               )}
             />
           </div>
+
+          {/* Affichage du prix/m² calculé */}
+          {calculatedPricePerM2 && (
+            <div className="bg-teal-50 border border-teal-200 rounded-lg p-3 flex items-center gap-2">
+              <span className="text-sm font-medium text-teal-800">
+                Prix au m²: <strong>{calculatedPricePerM2.toLocaleString('fr-FR')} €/m²</strong>
+              </span>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField

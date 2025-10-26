@@ -218,7 +218,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
               {minRooms > 0 ? `${minRooms}+ pièces` : "Nb de pièces"}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-56 z-[10000]" align="start">
+          <PopoverContent className="w-56 z-[1000]" align="start">
             <div className="space-y-1">
               {roomOptions.map((rooms) => (
                 <button

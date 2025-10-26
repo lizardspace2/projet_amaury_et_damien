@@ -130,7 +130,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
               {listingTypeOptions.find(o => o.value === listingType)?.label || "Type d'annonce"}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-64 z-[100]" align="start">
+          <PopoverContent className="w-64 z-[1000]" align="start">
             <div className="space-y-1">
               {listingTypeOptions.map((option) => (
                 <button
@@ -158,7 +158,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
                 : `${propertyTypes.length} types`}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-56 z-[100]" align="start">
+          <PopoverContent className="w-56 z-[1000]" align="start">
             <div className="space-y-1">
               {propertyTypeOptions.map((option) => (
                 <label
@@ -185,7 +185,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
               {minPrice > 0 || maxPrice < 50000000 ? `Budget (${minPrice.toLocaleString()} - ${maxPrice.toLocaleString()} €)` : "Budget"}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-80 z-[100]" align="start">
+          <PopoverContent className="w-80 z-[1000]" align="start">
             <div className="space-y-3">
               <div>
                 <label className="text-xs font-medium text-gray-700">Prix minimum</label>
@@ -218,7 +218,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
               {minRooms > 0 ? `${minRooms}+ pièces` : "Nb de pièces"}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-56 z-[100]" align="start">
+          <PopoverContent className="w-56 z-[10000]" align="start">
             <div className="space-y-1">
               {roomOptions.map((rooms) => (
                 <button
@@ -242,7 +242,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
               Surface {minM2 > 0 || maxM2 < 50000 ? `(${minM2} - ${maxM2} m²)` : ""}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-80 z-[100]" align="start">
+          <PopoverContent className="w-80 z-[1000]" align="start">
             <div className="space-y-3">
               <div>
                 <label className="text-xs font-medium text-gray-700">Surface min (m²)</label>

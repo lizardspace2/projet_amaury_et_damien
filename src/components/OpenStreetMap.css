@@ -51,12 +51,20 @@
   height: 100%;
 }
 
-/* Améliorer la visibilité des marqueurs */
-.leaflet-marker-icon {
+/* Limiter les z-index de Leaflet pour ne pas couvrir les menus */
+.leaflet-container {
+  z-index: 0 !important;
+}
+
+.leaflet-pane {
+  /* Laissez Leaflet gérer les z-index des panes */
+}
+
+.leaflet-top,
+.leaflet-bottom {
   z-index: 1000 !important;
 }
 
-/* Styles pour les contrôles de la carte */
 .leaflet-control-zoom {
   z-index: 1001 !important;
 }

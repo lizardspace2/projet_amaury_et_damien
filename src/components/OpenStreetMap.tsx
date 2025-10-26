@@ -298,12 +298,12 @@ const OpenStreetMap = ({
   }, [properties, onPropertyClick]);
 
   return (
-    <div className="relative w-full h-full">
+    <div className="relative w-full h-full z-0">
       <div 
         ref={mapContainerRef} 
         className={className}
         style={{ 
-          zIndex: 1,
+          zIndex: 0,
           position: 'relative',
           width: '100%',
           height: '100%',

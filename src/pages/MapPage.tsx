@@ -231,7 +231,7 @@ const MapPage = () => {
       {/* Layout 2 colonnes - flex-1 pour prendre tout l'espace disponible */}
       <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
         {/* Colonne gauche - Carte (100% sur mobile, 70% sur desktop) */}
-        <div className="w-full lg:w-[70%] relative h-[60vh] lg:h-full min-h-[500px]">
+        <div className="w-full lg:w-[70%] relative h-[60vh] lg:h-full min-h-[500px] z-0">
           {loading ? (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
@@ -242,7 +242,7 @@ const MapPage = () => {
           ) : (
             <div 
               ref={mapContainerRef}
-              className="h-full w-full"
+              className="h-full w-full relative z-0"
             />
           )}
         </div>

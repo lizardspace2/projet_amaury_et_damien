@@ -83,4 +83,13 @@
   input[type=number] {
     -moz-appearance: textfield;
   }
+
+  /* Assurer que les popovers et dropdowns passent au-dessus de Leaflet */
+  [data-radix-popper-content-wrapper] {
+    z-index: 10000 !important;
+  }
+
+  [data-state="open"] {
+    z-index: 10000 !important;
+  }
 }

@@ -22,8 +22,8 @@ const formSchema = z.object({
   title: z.string().min(5, "Le titre doit contenir au moins 5 caractères"),
   description: z.string().min(10, "La description doit contenir au moins 10 caractères"),
   price: z.coerce.number().positive("Le prix doit être un nombre positif"),
-  beds: z.coerce.number().int().min(0, "Le nombre de lits doit être supérieur ou égal à 0"),
-  baths: z.coerce.number().int().min(0, "Le nombre de salles de bain doit être supérieur ou égal à 0"),
+  beds: z.coerce.number().int().min(0, "Le nombre de lits doit être supérieur ou égal à 0").optional(),
+  baths: z.coerce.number().int().min(0, "Le nombre de salles de bain doit être supérieur ou égal à 0").optional(),
   m2: z.coerce.number().positive("La surface doit être un nombre positif"),
   year_built: z.coerce.number().int().min(1800, "L'année doit être 1800 ou ultérieure").max(new Date().getFullYear(), "L'année ne peut pas être dans le futur"),
   cadastral_code: z.string().optional(),
@@ -35,7 +35,7 @@ const formSchema = z.object({
   floor_level: z.coerce.number().optional(),
   total_floors: z.coerce.number().optional(),
   featured: z.boolean().default(false),
-  rooms: z.coerce.number().int().min(0, "Le nombre de pièces doit être supérieur ou égal à 0"),
+  rooms: z.coerce.number().int().min(0, "Le nombre de pièces doit être supérieur ou égal à 0").optional(),
   // SeLoger fields
   frais_agence: z.coerce.number().optional(),
   charges_mensuelles: z.coerce.number().optional(),
@@ -65,10 +65,10 @@ const AddPropertyStep2 = ({ onBack, onNext, initialData }: AddPropertyStep2Props
     defaultValues: {
       title: initialData?.title || "",
       description: initialData?.description || "",
-      price: initialData?.price || 0,
-      beds: initialData?.beds || 0,
-      baths: initialData?.baths || 0,
-      m2: initialData?.m2 || 0,
+      price: initialData?.price || undefined,
+      beds: initialData?.beds || undefined,
+      baths: initialData?.baths || undefined,
+      m2: initialData?.m2 || undefined,
       year_built: initialData?.year_built || new Date().getFullYear(),
       cadastral_code: initialData?.cadastral_code || "",
       condition: initialData?.condition || "newly_renovated",
@@ -79,7 +79,7 @@ const AddPropertyStep2 = ({ onBack, onNext, initialData }: AddPropertyStep2Props
       floor_level: initialData?.floor_level || undefined,
       total_floors: initialData?.total_floors || undefined,
       featured: initialData?.featured || false,
-      rooms: initialData?.rooms || 0,
+      rooms: initialData?.rooms || undefined,
       frais_agence: initialData?.frais_agence || undefined,
       charges_mensuelles: initialData?.charges_mensuelles || undefined,
       taxe_fonciere: initialData?.taxe_fonciere || undefined,
@@ -158,6 +158,11 @@ const AddPropertyStep2 = ({ onBack, onNext, initialData }: AddPropertyStep2Props
                         type="number"
                         placeholder="Entrez le prix"
                         {...field}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          field.onChange(value === '' ? undefined : value);
+                        }}
+                        value={field.value ?? ''}
                       />
                     </FormControl>
                     <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground">
@@ -178,7 +183,15 @@ const AddPropertyStep2 = ({ onBack, onNext, initialData }: AddPropertyStep2Props
                 <FormItem>
                   <FormLabel>{"Année de construction"}*</FormLabel>
                   <FormControl>
-                    <Input type="number" {...field} />
+                    <Input 
+                      type="number" 
+                      {...field}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value === '' ? undefined : value);
+                      }}
+                      value={field.value ?? ''}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -208,7 +221,15 @@ const AddPropertyStep2 = ({ onBack, onNext, initialData }: AddPropertyStep2Props
                 <FormItem>
                   <FormLabel>{"Chambres"}</FormLabel>
                   <FormControl>
-                    <Input type="number" {...field} />
+                    <Input 
+                      type="number" 
+                      {...field}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value === '' ? undefined : value);
+                      }}
+                      value={field.value ?? ''}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -222,7 +243,15 @@ const AddPropertyStep2 = ({ onBack, onNext, initialData }: AddPropertyStep2Props
                 <FormItem>
                   <FormLabel>{"Salles de bain"}</FormLabel>
                   <FormControl>
-                    <Input type="number" {...field} />
+                    <Input 
+                      type="number" 
+                      {...field}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value === '' ? undefined : value);
+                      }}
+                      value={field.value ?? ''}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -236,7 +265,15 @@ const AddPropertyStep2 = ({ onBack, onNext, initialData }: AddPropertyStep2Props
                 <FormItem>
                   <FormLabel>{"Surface (m²)"}</FormLabel>
                   <FormControl>
-                    <Input type="number" {...field} />
+                    <Input 
+                      type="number" 
+                      {...field}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value === '' ? undefined : value);
+                      }}
+                      value={field.value ?? ''}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -254,6 +291,11 @@ const AddPropertyStep2 = ({ onBack, onNext, initialData }: AddPropertyStep2Props
                       type="number"
                       placeholder="Entrez le nombre de pièces"
                       {...field}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value === '' ? undefined : value);
+                      }}
+                      value={field.value ?? ''}
                     />
                   </FormControl>
                   <FormMessage />
@@ -351,18 +393,24 @@ const AddPropertyStep2 = ({ onBack, onNext, initialData }: AddPropertyStep2Props
                       min="2"
                       max="7"
                       placeholder="e.g. 2.75"
-                      {...field}
+                      value={field.value ?? ''}
                       onChange={(e) => {
-                        const value = parseFloat(e.target.value);
-                        if (value < 2 || value > 7) {
-                          form.setError("ceiling_height", {
-                            type: "manual",
-                            message: "La hauteur sous plafond doit être entre 2 et 7 mètres.",
-                          });
-                        } else {
+                        const value = e.target.value;
+                        if (value === '') {
+                          field.onChange(undefined);
                           form.clearErrors("ceiling_height");
+                        } else {
+                          const numValue = parseFloat(value);
+                          if (numValue < 2 || numValue > 7) {
+                            form.setError("ceiling_height", {
+                              type: "manual",
+                              message: "La hauteur sous plafond doit être entre 2 et 7 mètres.",
+                            });
+                          } else {
+                            form.clearErrors("ceiling_height");
+                          }
+                          field.onChange(numValue);
                         }
-                        field.onChange(e);
                       }}
                     />
                   </FormControl>
@@ -378,7 +426,15 @@ const AddPropertyStep2 = ({ onBack, onNext, initialData }: AddPropertyStep2Props
                 <FormItem>
                   <FormLabel>{"Surface de la terrasse"}</FormLabel>
                   <FormControl>
-                    <Input type="number" {...field} />
+                    <Input 
+                      type="number" 
+                      {...field}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value === '' ? undefined : value);
+                      }}
+                      value={field.value ?? ''}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -392,7 +448,15 @@ const AddPropertyStep2 = ({ onBack, onNext, initialData }: AddPropertyStep2Props
                 <FormItem>
                   <FormLabel>{"Niveau de l'étage"}</FormLabel>
                   <FormControl>
-                    <Input type="number" {...field} />
+                    <Input 
+                      type="number" 
+                      {...field}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value === '' ? undefined : value);
+                      }}
+                      value={field.value ?? ''}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -406,7 +470,15 @@ const AddPropertyStep2 = ({ onBack, onNext, initialData }: AddPropertyStep2Props
                 <FormItem>
                   <FormLabel>{"Nombre total d'étages"}</FormLabel>
                   <FormControl>
-                    <Input type="number" {...field} />
+                    <Input 
+                      type="number" 
+                      {...field}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value === '' ? undefined : value);
+                      }}
+                      value={field.value ?? ''}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -441,7 +513,16 @@ const AddPropertyStep2 = ({ onBack, onNext, initialData }: AddPropertyStep2Props
                 <FormItem>
                   <FormLabel>{"Frais d'agence"}</FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="Frais d'agence en €" {...field} />
+                    <Input 
+                      type="number" 
+                      placeholder="Frais d'agence en €" 
+                      {...field}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value === '' ? undefined : value);
+                      }}
+                      value={field.value ?? ''}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -455,7 +536,16 @@ const AddPropertyStep2 = ({ onBack, onNext, initialData }: AddPropertyStep2Props
                 <FormItem>
                   <FormLabel>{"Charges mensuelles"}</FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="Charges mensuelles en €" {...field} />
+                    <Input 
+                      type="number" 
+                      placeholder="Charges mensuelles en €" 
+                      {...field}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value === '' ? undefined : value);
+                      }}
+                      value={field.value ?? ''}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -469,7 +559,16 @@ const AddPropertyStep2 = ({ onBack, onNext, initialData }: AddPropertyStep2Props
                 <FormItem>
                   <FormLabel>{"Taxe foncière (annuelle)"}</FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="Taxe foncière en €" {...field} />
+                    <Input 
+                      type="number" 
+                      placeholder="Taxe foncière en €" 
+                      {...field}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value === '' ? undefined : value);
+                      }}
+                      value={field.value ?? ''}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -514,7 +613,16 @@ const AddPropertyStep2 = ({ onBack, onNext, initialData }: AddPropertyStep2Props
                 <FormItem>
                   <FormLabel>{"Consommation énergétique (kWh/m²/an)"}</FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="Ex: 120" {...field} />
+                    <Input 
+                      type="number" 
+                      placeholder="Ex: 120" 
+                      {...field}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value === '' ? undefined : value);
+                      }}
+                      value={field.value ?? ''}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -555,7 +663,16 @@ const AddPropertyStep2 = ({ onBack, onNext, initialData }: AddPropertyStep2Props
                 <FormItem>
                   <FormLabel>{"Émissions GES (kg CO₂/m²/an)"}</FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="Ex: 15" {...field} />
+                    <Input 
+                      type="number" 
+                      placeholder="Ex: 15" 
+                      {...field}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value === '' ? undefined : value);
+                      }}
+                      value={field.value ?? ''}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -573,7 +690,16 @@ const AddPropertyStep2 = ({ onBack, onNext, initialData }: AddPropertyStep2Props
                 <FormItem>
                   <FormLabel>{"Surface balcon/terrasse (m²)"}</FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="Surface en m²" {...field} />
+                    <Input 
+                      type="number" 
+                      placeholder="Surface en m²" 
+                      {...field}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value === '' ? undefined : value);
+                      }}
+                      value={field.value ?? ''}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -587,7 +713,16 @@ const AddPropertyStep2 = ({ onBack, onNext, initialData }: AddPropertyStep2Props
                 <FormItem>
                   <FormLabel>{"Nombre de places de parking/box"}</FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="Nombre de places" {...field} />
+                    <Input 
+                      type="number" 
+                      placeholder="Nombre de places" 
+                      {...field}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value === '' ? undefined : value);
+                      }}
+                      value={field.value ?? ''}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -601,7 +736,16 @@ const AddPropertyStep2 = ({ onBack, onNext, initialData }: AddPropertyStep2Props
                 <FormItem>
                   <FormLabel>{"Nombre d'étages de l'immeuble"}</FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="Nombre d'étages" {...field} />
+                    <Input 
+                      type="number" 
+                      placeholder="Nombre d'étages" 
+                      {...field}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value === '' ? undefined : value);
+                      }}
+                      value={field.value ?? ''}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -615,7 +759,16 @@ const AddPropertyStep2 = ({ onBack, onNext, initialData }: AddPropertyStep2Props
                 <FormItem>
                   <FormLabel>{"Année de construction du bâtiment"}</FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="Ex: 1995" {...field} />
+                    <Input 
+                      type="number" 
+                      placeholder="Ex: 1995" 
+                      {...field}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value === '' ? undefined : value);
+                      }}
+                      value={field.value ?? ''}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

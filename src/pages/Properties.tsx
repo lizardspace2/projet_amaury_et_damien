@@ -209,7 +209,14 @@ const Properties = () => {
     queryFn: () => getProperties(listingType === 'all' ? undefined : listingType as any),
   });
 
-
+  // Log when properties are fetched
+  useEffect(() => {
+    console.log('📥 [Properties] Propriétés reçues de l\'API:', {
+      count: properties.length,
+      listingType,
+      properties: properties.map(p => ({ id: p.id, title: p.title, price: p.price, status: p.status, listing_type: p.listing_type }))
+    });
+  }, [properties, listingType]);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -299,8 +306,23 @@ const Properties = () => {
 
   // Apply all filters
   useEffect(() => {
+    console.log('🔍 [Properties] Début du filtrage');
+    console.log('📊 [Properties] Nombre total de propriétés:', properties.length);
+    console.log('📋 [Properties] Listing type:', listingType);
+    
     let filtered = [...properties];
     
+    // Log des propriétés initiales pour debug
+    properties.forEach((prop, idx) => {
+      console.log(`🏠 [Properties] Propriété ${idx}:`, {
+        id: prop.id,
+        title: prop.title,
+        status: prop.status,
+        price: prop.price,
+        listing_type: prop.listing_type,
+        property_type: prop.property_type
+      });
+    });
 
     // Search filter
     if (searchQuery) {
@@ -319,6 +341,7 @@ const Properties = () => {
           description.toLowerCase().includes(query)
         );
       });
+      console.log(`🔎 [Properties] Après recherche: ${beforeSearch} → ${filtered.length}`);
     }
 
     // Property type filter
@@ -327,93 +350,135 @@ const Properties = () => {
       filtered = filtered.filter(property =>
         property.property_type && propertyTypes.includes(property.property_type)
       );
+      console.log(`🏘️ [Properties] Après type de propriété: ${beforeType} → ${filtered.length}`);
     }
 
     // Price filter
+    console.log(`💰 [Properties] Prix min/max: ${minPrice} - ${maxPrice}`);
     const beforePrice = filtered.length;
+    filtered.forEach(property => {
+      console.log(`💰 [Properties] Checking property ${property.id}: price=${property.price}, type=${typeof property.price}, passes=${property.price >= minPrice && property.price <= maxPrice}`);
+    });
     filtered = filtered.filter(property =>
       property.price >= minPrice && property.price <= maxPrice
     );
+    console.log(`💰 [Properties] Après prix: ${beforePrice} → ${filtered.length}`);
 
     // Bedrooms filter
     if (minBeds > 0) {
+      const beforeBeds = filtered.length;
       filtered = filtered.filter(property => (property.beds || 0) >= minBeds);
+      console.log(`🛏️ [Properties] Après chambres: ${beforeBeds} → ${filtered.length}`);
     }
 
     // Bathrooms filter
     if (minBaths > 0) {
+      const beforeBaths = filtered.length;
       filtered = filtered.filter(property => (property.baths || 0) >= minBaths);
+      console.log(`🛁 [Properties] Après salles de bain: ${beforeBaths} → ${filtered.length}`);
     }
 
     const beforeM2 = filtered.length;
     filtered = filtered.filter(property =>
       (property.m2 || 0) >= minM2 && (property.m2 || 0) <= maxM2
     );
+    console.log(`📏 [Properties] Après surface: ${beforeM2} → ${filtered.length}`);
+    
     // Status filter - only "pause" status matters, all other statuses are ignored (they are errors)
-    filtered = filtered.filter(property => property.status !== 'pause');
+    const beforeStatus = filtered.length;
+    filtered = filtered.filter(property => {
+      const passes = property.status !== 'pause';
+      if (!passes) {
+        console.log(`⏸️ [Properties] Propriété ${property.id} exclue: status="${property.status}"`);
+      }
+      return passes;
+    });
+    console.log(`📊 [Properties] Après statut: ${beforeStatus} → ${filtered.length}`);
 
     // City filter
     if (selectedCities.length > 0) {
+      const beforeCities = filtered.length;
       filtered = filtered.filter(property => {
         const fullAddress = `${property.address_street || ''} ${property.address_city || ''} ${property.address_district || ''}`.toLowerCase();
         return selectedCities.some(city => fullAddress.includes(city.toLowerCase()));
       });
+      console.log(`🏙️ [Properties] Après villes: ${beforeCities} → ${filtered.length}`);
     }
 
     // Features filters
     Object.keys(features).forEach(key => {
       if (features[key as keyof typeof features]) {
+        const beforeFeatures = filtered.length;
         filtered = filtered.filter(property => property[key as keyof Property]);
+        console.log(`✨ [Properties] Après feature ${key}: ${beforeFeatures} → ${filtered.length}`);
       }
     });
     
     if (features.has_parking) {
+        const beforeParking = filtered.length;
         filtered = filtered.filter(property => property.parking_type && property.parking_type !== 'none');
+        console.log(`🚗 [Properties] Après parking: ${beforeParking} → ${filtered.length}`);
     }
 
     // Condition filter
     if (condition.length > 0) {
+      const beforeCondition = filtered.length;
       filtered = filtered.filter(property => property.condition && condition.includes(property.condition));
+      console.log(`🔧 [Properties] Après condition: ${beforeCondition} → ${filtered.length}`);
     }
 
     // Furniture type filter
     if (furnitureType.length > 0) {
+      const beforeFurniture = filtered.length;
       filtered = filtered.filter(property =>
         property.furniture_type && furnitureType.includes(property.furniture_type)
       );
+      console.log(`🪑 [Properties] Après mobilier: ${beforeFurniture} → ${filtered.length}`);
     }
 
     // Heating type filter
     if (heatingType.length > 0) {
+      const beforeHeating = filtered.length;
       filtered = filtered.filter(property =>
         property.heating_type && heatingType.includes(property.heating_type)
       );
+      console.log(`🔥 [Properties] Après chauffage: ${beforeHeating} → ${filtered.length}`);
     }
 
     // Parking type filter
     if (parkingType.length > 0) {
+      const beforeParkingType = filtered.length;
       filtered = filtered.filter(property =>
         property.parking_type && parkingType.includes(property.parking_type)
       );
+      console.log(`🅿️ [Properties] Après type de parking: ${beforeParkingType} → ${filtered.length}`);
     }
 
     // Building material filter
     if (buildingMaterial.length > 0) {
+      const beforeMaterial = filtered.length;
       filtered = filtered.filter(property =>
         property.building_material && buildingMaterial.includes(property.building_material)
       );
+      console.log(`🧱 [Properties] Après matériau: ${beforeMaterial} → ${filtered.length}`);
     }
 
     // Kitchen type filter
     if (kitchenType.length > 0) {
+      const beforeKitchen = filtered.length;
       filtered = filtered.filter(property =>
         property.kitchen_type && kitchenType.includes(property.kitchen_type)
       );
+      console.log(`🍳 [Properties] Après cuisine: ${beforeKitchen} → ${filtered.length}`);
     }
 
     // Appliquer le tri final avant de mettre à jour l'état
     const sortedProperties = sortProperties(filtered);
     
+    console.log(`✅ [Properties] Résultat final: ${sortedProperties.length} propriétés affichées`);
+    sortedProperties.forEach((prop, idx) => {
+      console.log(`📌 [Properties] Propriété finale ${idx}: ${prop.title} (ID: ${prop.id})`);
+    });
     
     setFilteredProperties(sortedProperties);
 

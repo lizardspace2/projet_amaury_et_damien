@@ -116,15 +116,20 @@ const PropertyDetail = () => {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-gray-50">
       <Navbar />
       <main className="flex-grow">
-        <PropertyHeader property={property} />
+        <div className="bg-white border-b border-gray-200">
+          <div className="container mx-auto px-4 py-8">
+            <PropertyHeader property={property} />
+          </div>
+        </div>
+        
         <div className="container mx-auto px-4 py-8">
           <PropertyGallery images={property.images} title={property.title} />
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
-            <div className="md:col-span-2 space-y-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+            <div className="lg:col-span-2 space-y-6">
               <PropertySpecs property={property} />
               <PropertyDescription property={property} />
               <DPEEnergyLabels property={property} />
@@ -132,14 +137,18 @@ const PropertyDetail = () => {
               <PropertyFeatures property={property} />
               <PropertyAdditionalFeatures property={property} />
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Localisation</CardTitle>
+              <Card className="overflow-hidden shadow-md border-0">
+                <CardHeader className="bg-gradient-to-r from-teal-50 to-blue-50 border-b">
+                  <CardTitle className="text-xl font-semibold text-gray-900">Localisation</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <p>{property.address_street}, {property.address_district}, {property.address_city}</p>
+                <CardContent className="p-6">
+                  <div className="mb-4">
+                    <p className="text-gray-700 font-medium">
+                      {property.address_street}, {property.address_district}, {property.address_city}
+                    </p>
+                  </div>
                   {property.lat && property.lng && (
-                    <div className="mt-4 h-96 w-full">
+                    <div className="mt-4 h-[450px] w-full rounded-lg overflow-hidden border border-gray-200">
                       <PropertyMap
                         lat={property.lat}
                         lng={property.lng}
@@ -151,8 +160,10 @@ const PropertyDetail = () => {
               </Card>
             </div>
 
-            <div className="md:col-span-1 space-y-8">
-              <AgentContact property={property} />
+            <div className="lg:col-span-1">
+              <div className="sticky top-24 space-y-6">
+                <AgentContact property={property} />
+              </div>
             </div>
           </div>
         </div>

@@ -36,16 +36,16 @@ const PropertyGallery = ({ images, title }: PropertyGalleryProps) => {
 
   return (
     <div className="mb-8">
-      <div className="relative rounded-lg overflow-hidden group">
+      <div className="relative rounded-2xl overflow-hidden group shadow-xl border border-gray-200">
         <img 
           src={images[currentImageIndex]} 
           alt={title}
-          className="w-full h-[500px] object-cover cursor-pointer"
+          className="w-full h-[550px] object-cover cursor-pointer transition-transform group-hover:scale-105"
           onClick={openModal}
         />
         
         {/* Photo counter */}
-        <div className="absolute top-4 right-4 bg-black bg-opacity-60 text-white px-3 py-1 rounded-full text-sm font-medium">
+        <div className="absolute top-4 right-4 bg-black bg-opacity-70 text-white px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-sm">
           {currentImageIndex + 1}/{images.length}
         </div>
         
@@ -74,12 +74,12 @@ const PropertyGallery = ({ images, title }: PropertyGalleryProps) => {
       
       {/* Thumbnail grid */}
       {images.length > 1 && (
-        <div className="grid grid-cols-4 gap-2 mt-2">
+        <div className="grid grid-cols-4 gap-3 mt-4">
           {images.map((img, index) => (
             <div 
               key={index} 
-              className={`rounded-lg overflow-hidden cursor-pointer transition-all ${
-                index === currentImageIndex ? 'ring-2 ring-teal-500' : 'hover:opacity-80'
+              className={`rounded-xl overflow-hidden cursor-pointer transition-all border-2 ${
+                index === currentImageIndex ? 'ring-4 ring-teal-500 ring-offset-2 border-teal-500' : 'border-transparent hover:border-gray-300'
               }`}
               onClick={() => setCurrentImageIndex(index)}
             >

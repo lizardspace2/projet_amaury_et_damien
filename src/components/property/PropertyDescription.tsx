@@ -22,10 +22,13 @@ const PropertyDescription = ({ property }: PropertyDescriptionProps) => {
 
   return (
     <div className="mb-8">
-      <h2 className="text-2xl font-semibold text-estate-800 mb-4">Description</h2>
-      <div className="bg-white rounded-lg p-6 shadow-sm border border-estate-neutral-100">
+      <div className="bg-white rounded-xl p-8 shadow-lg border-0">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+          <span className="w-1 h-8 bg-teal-500 rounded-full"></span>
+          Description
+        </h2>
         <div className="prose prose-gray max-w-none">
-          <p className="text-estate-neutral-700 leading-relaxed whitespace-pre-line">
+          <p className="text-gray-700 leading-relaxed whitespace-pre-line text-lg">
             {displayText}
           </p>
         </div>

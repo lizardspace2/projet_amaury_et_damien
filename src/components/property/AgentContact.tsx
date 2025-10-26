@@ -13,8 +13,9 @@ const AgentContact = ({ property }: AgentContactProps) => {
   return (
     <>
       {(property.nom_agence || property.agent_name || property.phone_number) && (
-        <div className="bg-white rounded-lg p-6 shadow-lg border border-teal-200">
-          <h3 className="text-2xl font-semibold text-estate-800 mb-6">
+        <div className="bg-white rounded-2xl p-8 shadow-xl border border-gray-100">
+          <h3 className="text-2xl font-bold text-gray-900 mb-8 flex items-center gap-2">
+            <span className="w-1 h-8 bg-teal-500 rounded-full"></span>
             Contact
           </h3>
           

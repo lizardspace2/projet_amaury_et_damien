@@ -21,6 +21,9 @@ const propertyStep1Schema = z.object({
   facebook_url: z.string().url("URL invalide").optional().or(z.literal('')),
   twitter_handle: z.string().optional(),
   reference_number: z.string().optional(),
+  nom_agence: z.string().optional(),
+  reference_annonce: z.string().optional(),
+  lien_visite_virtuelle: z.string().url("URL invalide").optional().or(z.literal('')),
 });
 
 interface AddPropertyStep1Props {
@@ -39,6 +42,9 @@ const AddPropertyStep1: React.FC<AddPropertyStep1Props> = ({ onNext, onBack, ini
       facebook_url: initialData?.facebook_url || '',
       twitter_handle: initialData?.twitter_handle || '',
       reference_number: initialData?.cadastral_code || '', // Assuming cadastral_code is used as reference_number
+      nom_agence: initialData?.nom_agence || '',
+      reference_annonce: initialData?.reference_annonce || '',
+      lien_visite_virtuelle: initialData?.lien_visite_virtuelle || '',
     }
   });
 
@@ -158,6 +164,52 @@ const AddPropertyStep1: React.FC<AddPropertyStep1Props> = ({ onNext, onBack, ini
               )}
             />
           </div>
+
+          <h3 className="text-lg font-medium mt-6">Informations agence</h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="nom_agence"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nom de l'agence</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Nom de votre agence immobilière" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="reference_annonce"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Référence annonce</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Ex: ANN-2024-001" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <FormField
+            control={form.control}
+            name="lien_visite_virtuelle"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Lien visite virtuelle</FormLabel>
+                <FormControl>
+                  <Input type="url" placeholder="https://example.com/tour" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
 
         <div className="flex justify-between mt-8">

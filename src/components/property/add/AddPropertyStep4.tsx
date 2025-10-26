@@ -29,6 +29,7 @@ const addressSchema = z.object({
   address: z.string().min(1, "L'adresse est requise"),
   lat: z.number(),
   lng: z.number(),
+  code_postal: z.string().optional(),
 });
 
 type AddressFormValues = z.infer<typeof addressSchema>;
@@ -68,6 +69,7 @@ const AddPropertyStep4 = ({
       address: initialData.address_street ? `${initialData.address_street}, ${initialData.address_district}, ${initialData.address_city}` : "",
       lat: initialData.lat || 45.764043,
       lng: initialData.lng || 4.835659,
+      code_postal: initialData.code_postal || "",
     },
   });
 
@@ -81,6 +83,7 @@ const AddPropertyStep4 = ({
         street: "",
         city: "",
         district: "",
+        postalCode: "",
       };
       place.address_components.forEach((component) => {
         if (component.types.includes("route")) {
@@ -92,12 +95,17 @@ const AddPropertyStep4 = ({
         if (component.types.includes("sublocality_level_1")) {
           address.district = component.long_name;
         }
+        if (component.types.includes("postal_code")) {
+          address.postalCode = component.long_name;
+        }
       });
       form.setValue("address", place.formatted_address || `${address.street}, ${address.district}, ${address.city}`);
+      form.setValue("code_postal", address.postalCode);
       Object.assign(initialData, {
         address_street: address.street,
         address_city: address.city,
         address_district: address.district,
+        code_postal: address.postalCode,
       });
     }
   };
@@ -171,6 +179,7 @@ const AddPropertyStep4 = ({
       address_street: initialData.address_street,
       address_city: initialData.address_city,
       address_district: initialData.address_district,
+      code_postal: data.code_postal,
       images: newImageFiles, // Only new files are passed here
       existingImageUrls: existingImageUrls, // Pass existing URLs to keep
       removedImageUrls: removedImageUrls, // Pass URLs to remove
@@ -209,6 +218,22 @@ const AddPropertyStep4 = ({
               value={form.watch("address")}
               onChange={(value) => form.setValue("address", value)}
             />
+
+            <div className="mt-4">
+              <FormField
+                control={form.control}
+                name="code_postal"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Code postal</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ex: 75001" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <div className="mt-4">
               <Label>{"Notes de localisation"}</Label>

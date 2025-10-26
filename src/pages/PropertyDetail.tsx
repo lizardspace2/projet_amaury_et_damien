@@ -6,8 +6,11 @@ import Footer from "@/components/Footer";
 import PropertyGallery from "@/components/property/PropertyGallery";
 import PropertyHeader from "@/components/property/PropertyHeader";
 import PropertySpecs from "@/components/property/PropertySpecs";
+import PropertyDescription from "@/components/property/PropertyDescription";
 import PropertyFeatures from "@/components/property/PropertyFeatures";
 import PropertyAdditionalFeatures from "@/components/property/PropertyAdditionalFeatures";
+import PropertyFinancialInfo from "@/components/property/PropertyFinancialInfo";
+import DPEEnergyLabels from "@/components/property/DPEEnergyLabels";
 import AgentContact from "@/components/property/AgentContact";
 import PropertyMap from "@/components/PropertyMap";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -122,16 +125,10 @@ const PropertyDetail = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
             <div className="md:col-span-2 space-y-8">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Description</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p>{property.description}</p>
-                </CardContent>
-              </Card>
-
               <PropertySpecs property={property} />
+              <PropertyDescription property={property} />
+              <DPEEnergyLabels property={property} />
+              <PropertyFinancialInfo property={property} />
               <PropertyFeatures property={property} />
               <PropertyAdditionalFeatures property={property} />
 

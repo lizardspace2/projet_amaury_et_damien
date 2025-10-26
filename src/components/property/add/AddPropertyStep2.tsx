@@ -36,6 +36,19 @@ const formSchema = z.object({
   total_floors: z.coerce.number().optional(),
   featured: z.boolean().default(false),
   rooms: z.coerce.number().int().min(0, "Le nombre de pièces doit être supérieur ou égal à 0"),
+  // SeLoger fields
+  frais_agence: z.coerce.number().optional(),
+  charges_mensuelles: z.coerce.number().optional(),
+  taxe_fonciere: z.coerce.number().optional(),
+  dpe_classe_energie: z.string().optional(),
+  dpe_consommation: z.coerce.number().optional(),
+  ges_classe_gaz: z.string().optional(),
+  ges_emission: z.coerce.number().optional(),
+  surface_balcon_terrasse: z.coerce.number().optional(),
+  parking_box: z.coerce.number().int().optional(),
+  cave: z.boolean().default(false),
+  nombre_etages_immeuble: z.coerce.number().int().optional(),
+  annee_construction: z.coerce.number().int().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -67,6 +80,18 @@ const AddPropertyStep2 = ({ onBack, onNext, initialData }: AddPropertyStep2Props
       total_floors: initialData?.total_floors || undefined,
       featured: initialData?.featured || false,
       rooms: initialData?.rooms || 0,
+      frais_agence: initialData?.frais_agence || undefined,
+      charges_mensuelles: initialData?.charges_mensuelles || undefined,
+      taxe_fonciere: initialData?.taxe_fonciere || undefined,
+      dpe_classe_energie: initialData?.dpe_classe_energie || undefined,
+      dpe_consommation: initialData?.dpe_consommation || undefined,
+      ges_classe_gaz: initialData?.ges_classe_gaz || undefined,
+      ges_emission: initialData?.ges_emission || undefined,
+      surface_balcon_terrasse: initialData?.surface_balcon_terrasse || undefined,
+      parking_box: initialData?.parking_box || undefined,
+      cave: initialData?.cave || false,
+      nombre_etages_immeuble: initialData?.nombre_etages_immeuble || undefined,
+      annee_construction: initialData?.annee_construction || undefined,
     },
   });
 
@@ -400,6 +425,215 @@ const AddPropertyStep2 = ({ onBack, onNext, initialData }: AddPropertyStep2Props
                     />
                   </FormControl>
                   <FormLabel>{"Mettre en avant"}</FormLabel>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <h3 className="text-lg font-medium mt-6">Informations financières</h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <FormField
+              control={form.control}
+              name="frais_agence"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{"Frais d'agence"}</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="Frais d'agence en €" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="charges_mensuelles"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{"Charges mensuelles"}</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="Charges mensuelles en €" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="taxe_fonciere"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{"Taxe foncière (annuelle)"}</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="Taxe foncière en €" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <h3 className="text-lg font-medium mt-6">Diagnostic de performance énergétique (DPE)</h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <FormField
+              control={form.control}
+              name="dpe_classe_energie"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{"Classe énergétique DPE"}</FormLabel>
+                  <FormControl>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sélectionner la classe" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="A">A</SelectItem>
+                        <SelectItem value="B">B</SelectItem>
+                        <SelectItem value="C">C</SelectItem>
+                        <SelectItem value="D">D</SelectItem>
+                        <SelectItem value="E">E</SelectItem>
+                        <SelectItem value="F">F</SelectItem>
+                        <SelectItem value="G">G</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="dpe_consommation"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{"Consommation énergétique (kWh/m²/an)"}</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="Ex: 120" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="ges_classe_gaz"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{"Classe émissions GES"}</FormLabel>
+                  <FormControl>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sélectionner la classe" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="A">A</SelectItem>
+                        <SelectItem value="B">B</SelectItem>
+                        <SelectItem value="C">C</SelectItem>
+                        <SelectItem value="D">D</SelectItem>
+                        <SelectItem value="E">E</SelectItem>
+                        <SelectItem value="F">F</SelectItem>
+                        <SelectItem value="G">G</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="ges_emission"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{"Émissions GES (kg CO₂/m²/an)"}</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="Ex: 15" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <h3 className="text-lg font-medium mt-6">Informations supplémentaires</h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <FormField
+              control={form.control}
+              name="surface_balcon_terrasse"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{"Surface balcon/terrasse (m²)"}</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="Surface en m²" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="parking_box"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{"Nombre de places de parking/box"}</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="Nombre de places" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="nombre_etages_immeuble"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{"Nombre d'étages de l'immeuble"}</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="Nombre d'étages" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="annee_construction"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{"Année de construction du bâtiment"}</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="Ex: 1995" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="cave"
+              render={({ field }) => (
+                <FormItem className="flex items-center space-x-2">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormLabel>{"Cave disponible"}</FormLabel>
                   <FormMessage />
                 </FormItem>
               )}

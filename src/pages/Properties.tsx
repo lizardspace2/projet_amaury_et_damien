@@ -9,6 +9,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PropertyCard from "@/components/PropertyCard";
+import FilterBar from "@/components/FilterBar";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useQuery } from "@tanstack/react-query";
@@ -1398,11 +1399,36 @@ const Properties = () => {
   return (
     <div className="flex flex-col min-h-screen bg-estate-background">
       <Navbar />
+      
+      {/* FilterBar en haut */}
+      <FilterBar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        listingType={listingType}
+        onListingTypeChange={setListingType}
+        propertyTypes={propertyTypes}
+        onPropertyTypesChange={setPropertyTypes}
+        minPrice={minPrice}
+        maxPrice={maxPrice}
+        onPriceChange={(min, max) => {
+          setMinPrice(min);
+          setMaxPrice(max);
+        }}
+        minRooms={minBeds}
+        onRoomsChange={setMinBeds}
+        minM2={minM2}
+        maxM2={maxM2}
+        onM2Change={(min, max) => {
+          setMinM2(min);
+          setMaxM2(max);
+        }}
+      />
+      
       <main className="flex-grow container mx-auto px-4 py-8">
         
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Filters Sidebar (Desktop) */}
-          <aside className="hidden lg:block w-full lg:w-1/4 xl:w-1/5 space-y-6">
+          {/* Filters Sidebar (Desktop) - Hidden, using FilterBar instead */}
+          <aside className="hidden w-full lg:w-1/4 xl:w-1/5 space-y-6">
             <div className="bg-white p-6 rounded-lg shadow-sm">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold">{"Filtres"}</h2>

@@ -102,6 +102,26 @@ export interface CreatePropertyInput {
   has_satellite_tv?: boolean;
   has_phone_line?: boolean;
   price_per_m2?: number;
+  // SeLoger fields
+  frais_agence?: number;
+  charges_mensuelles?: number;
+  taxe_fonciere?: number;
+  dpe_classe_energie?: string;
+  dpe_consommation?: number;
+  ges_classe_gaz?: string;
+  ges_emission?: number;
+  nom_agence?: string;
+  reference_annonce?: string;
+  nombre_photos?: number;
+  lien_visite_virtuelle?: string;
+  date_publication?: string;
+  date_mise_a_jour?: string;
+  code_postal?: string;
+  surface_balcon_terrasse?: number;
+  parking_box?: number;
+  cave?: boolean;
+  nombre_etages_immeuble?: number;
+  annee_construction?: number;
 }
 
 const transformProperty = (property: any): Property => {

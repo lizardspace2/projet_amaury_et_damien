@@ -22,7 +22,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Wrapper } from "@googlemaps/react-wrapper";
 import { signInWithEmail, signUpWithEmail } from "@/lib/api/auth";
 
 // Composants pour les étapes d'inscription
@@ -562,13 +561,4 @@ const SellPage = () => {
   );
 };
 
-const Sell = () => {
-    const apiKey = "AIzaSyAjAs9O5AqVbaCZth-QDJm4KJfoq2ZzgUI";
-    return (
-        <Wrapper apiKey={apiKey} libraries={["places"]}>
-            <SellPage />
-        </Wrapper>
-    )
-}
-
-export default Sell;
+export default SellPage;

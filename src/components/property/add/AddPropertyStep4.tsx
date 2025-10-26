@@ -9,7 +9,7 @@ import { Loader2, Images, MapPin } from "lucide-react";
 import { CreatePropertyInput } from "@/lib/api/properties";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import LocationMap from "./LocationMap";
+import LocationMapLeaflet from "./LocationMapLeaflet";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Form,
@@ -19,7 +19,7 @@ import {
   FormControl,
   FormMessage
 } from "@/components/ui/form";
-import Autocomplete from "@/components/Autocomplete";
+import AutocompleteOSM from "@/components/AutocompleteOSM";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -73,7 +73,14 @@ const AddPropertyStep4 = ({
     },
   });
 
-  const handlePlaceSelect = (place: google.maps.places.PlaceResult) => {
+  const handlePlaceSelect = (place: {
+    formatted_address: string;
+    geometry: { location: { lat: () => number; lng: () => number } };
+    address_components?: Array<{
+      types: string[];
+      long_name: string;
+    }>;
+  }) => {
     if (place.geometry && place.geometry.location) {
       form.setValue("lat", place.geometry.location.lat());
       form.setValue("lng", place.geometry.location.lng());
@@ -203,7 +210,7 @@ const AddPropertyStep4 = ({
 
             <div className="mb-6">
               <FormLabel>{"Localisation sur la carte"}</FormLabel>
-              <LocationMap
+              <LocationMapLeaflet
                 initialLat={form.watch("lat")}
                 initialLng={form.watch("lng")}
                 onLocationSelect={handleLocationSelect}
@@ -211,7 +218,7 @@ const AddPropertyStep4 = ({
               />
             </div>
 
-            <Autocomplete
+            <AutocompleteOSM
               label="Adresse"
               placeholder="Entrez l'adresse de la propriété"
               onPlaceChanged={handlePlaceSelect}

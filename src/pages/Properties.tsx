@@ -349,7 +349,7 @@ const Properties = () => {
     filtered = filtered.filter(property =>
       (property.m2 || 0) >= minM2 && (property.m2 || 0) <= maxM2
     );
-    // Status filter - exclude only "pause" status
+    // Status filter - only "pause" status matters, all other statuses are ignored (they are errors)
     filtered = filtered.filter(property => property.status !== 'pause');
 
     // City filter

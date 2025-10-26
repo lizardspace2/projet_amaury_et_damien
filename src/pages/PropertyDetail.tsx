@@ -126,7 +126,7 @@ const PropertyDetail = () => {
         </div>
         
         <div className="container mx-auto px-4 py-8">
-          <PropertyGallery images={property.images} title={property.title} />
+          <PropertyGallery images={property.images} title={property.title} property={property} />
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
             <div className="lg:col-span-2 space-y-6">

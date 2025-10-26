@@ -1,23 +1,34 @@
 
 import MissingImagePlaceholder from '@/components/ui/MissingImagePlaceholder';
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, Video } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Property } from '@/types/property';
 
 interface PropertyGalleryProps {
   images?: string[];
   title?: string;
+  property?: Property;
 }
 
-const PropertyGallery = ({ images, title }: PropertyGalleryProps) => {
+const PropertyGallery = ({ images, title, property }: PropertyGalleryProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   if (!images || images.length === 0) {
     return (
       <div className="mb-8">
-        <div className="rounded-lg overflow-hidden">
+        <div className="rounded-lg overflow-hidden relative">
           <MissingImagePlaceholder className="w-full h-[500px] object-cover" />
+          {property?.lien_visite_virtuelle && (
+            <Button
+              className="absolute top-4 right-4 bg-teal-600 hover:bg-teal-700 text-white"
+              onClick={() => window.open(property.lien_visite_virtuelle, '_blank')}
+            >
+              <Video className="mr-2 h-4 w-4" />
+              Visite virtuelle 360°
+            </Button>
+          )}
         </div>
       </div>
     );
@@ -45,8 +56,22 @@ const PropertyGallery = ({ images, title }: PropertyGalleryProps) => {
         />
         
         {/* Photo counter */}
-        <div className="absolute top-4 right-4 bg-black bg-opacity-70 text-white px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-sm">
-          {currentImageIndex + 1}/{images.length}
+        <div className="absolute top-4 right-4 flex gap-2">
+          <div className="bg-black bg-opacity-70 text-white px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-sm">
+            {currentImageIndex + 1}/{images.length}
+          </div>
+          {property?.lien_visite_virtuelle && (
+            <Button
+              className="bg-teal-600 hover:bg-teal-700 text-white"
+              onClick={(e) => {
+                e.stopPropagation();
+                window.open(property.lien_visite_virtuelle, '_blank');
+              }}
+            >
+              <Video className="mr-2 h-4 w-4" />
+              Visite 360°
+            </Button>
+          )}
         </div>
         
         {/* Navigation arrows */}

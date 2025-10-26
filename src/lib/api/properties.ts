@@ -155,12 +155,21 @@ export const createProperty = async (input: CreatePropertyInput) => {
 
     const { existingImageUrls, removedImageUrls, ...restOfInput } = input;
 
+    // Calculate nombre_photos from the images array
+    const totalImages = [...(input.existingImageUrls || []), ...imageUrls];
+    const nombre_photos = totalImages.length;
+
+    // Set date_publication to current timestamp
+    const date_publication = new Date().toISOString();
+
     const { data: property, error: propertyError } = await supabase
       .from('properties')
       .insert({
         ...restOfInput,
         user_id: user.id,
         images: imageUrls,
+        nombre_photos,
+        date_publication,
       })
       .select()
       .single();
@@ -311,10 +320,20 @@ export const updateProperty = async (propertyId: string, input: Partial<CreatePr
     delete updateData.existingImageUrls;
     delete updateData.removedImageUrls;
 
+    // Calculate nombre_photos from the updated images array
+    const nombre_photos = newImageUrls.length;
+
+    // Set date_mise_a_jour to current timestamp
+    const date_mise_a_jour = new Date().toISOString();
 
     const { error: propertyError } = await supabase
       .from('properties')
-      .update({ ...updateData, images: newImageUrls })
+      .update({ 
+        ...updateData, 
+        images: newImageUrls,
+        nombre_photos,
+        date_mise_a_jour,
+      })
       .eq('id', propertyId)
       .eq('user_id', user.id);
 

@@ -44,7 +44,12 @@ const MapPage = () => {
 
   // Fonction pour ajouter les marqueurs à la carte
   const addMarkersToMap = useCallback((propertiesToAdd: any[]) => {
-    if (!mapRef.current) return;
+    if (!mapRef.current) {
+      console.log('⚠️ [addMarkersToMap] La carte n\'est pas encore initialisée');
+      return;
+    }
+
+    console.log(`📍 [addMarkersToMap] Début - ${propertiesToAdd.length} propriétés à ajouter`);
 
     // Supprimer tous les marqueurs existants
     markersRef.current.forEach(marker => {
@@ -56,6 +61,7 @@ const MapPage = () => {
 
     // Filtrer les propriétés qui ont des coordonnées
     const propertiesWithCoords = propertiesToAdd.filter(p => p.lat && p.lng);
+    console.log(`📍 [addMarkersToMap] ${propertiesWithCoords.length} propriétés avec coordonnées`);
 
     // Ajouter les nouveaux marqueurs
     propertiesWithCoords.forEach(property => {
@@ -109,17 +115,22 @@ const MapPage = () => {
       
       markersRef.current.push(marker);
     });
+    
+    console.log(`✅ [addMarkersToMap] ${markersRef.current.length} marqueurs ajoutés`);
   }, [formatPrice]);
 
-  // Charger les propriétés et initialiser la carte en même temps
+  // Charger les propriétés et initialiser la carte - UNE SEULE FOIS
   useEffect(() => {
     let isMounted = true;
 
     const initMap = async () => {
       try {
+        console.log('🌍 [MapPage] Début du chargement de la carte');
         // Charger les données
         const data = await getProperties('all');
         const withCoords = data.filter(p => p.lat && p.lng);
+        
+        console.log(`🏠 [MapPage] ${withCoords.length} propriétés avec coordonnées chargées`);
         
         if (!isMounted) return;
         
@@ -127,8 +138,12 @@ const MapPage = () => {
 
         // Attendre un peu que le DOM soit prêt
         setTimeout(() => {
-          if (!isMounted || !mapContainerRef.current) return;
+          if (!isMounted || !mapContainerRef.current) {
+            console.log('⚠️ [MapPage] Composant démonté ou conteneur non disponible');
+            return;
+          }
 
+          console.log('🗺️ [MapPage] Création de la carte Leaflet');
           // Créer la carte
           const map = L.map(mapContainerRef.current, {
             center: [45.75805500216428, 4.789653750976552],
@@ -141,17 +156,17 @@ const MapPage = () => {
           }).addTo(map);
 
           mapRef.current = map;
+          console.log('✅ [MapPage] Carte créée avec succès');
           
           if (isMounted) {
             setLoading(false);
+            console.log('✅ [MapPage] Loading mis à false');
           }
-
-          // Les marqueurs seront mis à jour automatiquement par l'effet sur filteredProperties
 
         }, 50);
 
       } catch (error) {
-        console.error('Erreur:', error);
+        console.error('❌ [MapPage] Erreur:', error);
         if (isMounted) {
           setLoading(false);
         }
@@ -161,13 +176,14 @@ const MapPage = () => {
     initMap();
 
     return () => {
+      console.log('🧹 [MapPage] Cleanup du composant');
       isMounted = false;
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
       }
     };
-  }, [formatPrice]);
+  }, []); // Pas de dépendances - on ne veut exécuter qu'une seule fois
 
   // Fonction globale
   useEffect(() => {
@@ -182,9 +198,12 @@ const MapPage = () => {
 
   // Appliquer les filtres
   useEffect(() => {
+    console.log('🔍 [MapPage] Application des filtres, propriétés:', properties.length);
+    
     if (properties.length === 0) {
       // Si aucune propriété n'est chargée, garder filteredProperties vide
       setFilteredProperties([]);
+      console.log('⚠️ [MapPage] Aucune propriété à filtrer');
       return;
     }
 
@@ -198,6 +217,7 @@ const MapPage = () => {
         property.address_city?.toLowerCase().includes(query) ||
         property.address_street?.toLowerCase().includes(query)
       );
+      console.log(`🔎 [MapPage] Après recherche "${searchQuery}": ${filtered.length} résultats`);
     }
 
     // Filtre par type de propriété
@@ -205,30 +225,49 @@ const MapPage = () => {
       filtered = filtered.filter(property =>
         property.property_type && propertyTypes.includes(property.property_type)
       );
+      console.log(`🏘️ [MapPage] Après filtrage par type: ${filtered.length} résultats`);
     }
 
     // Filtre par prix
     filtered = filtered.filter(property =>
       property.price >= minPrice && property.price <= maxPrice
     );
+    console.log(`💰 [MapPage] Après filtrage par prix: ${filtered.length} résultats`);
 
     // Filtre par pièces
     if (minRooms > 0) {
       filtered = filtered.filter(property => (property.rooms || 0) >= minRooms);
+      console.log(`🚪 [MapPage] Après filtrage par pièces: ${filtered.length} résultats`);
     }
 
     // Filtre par surface
     filtered = filtered.filter(property =>
       (property.m2 || 0) >= minM2 && (property.m2 || 0) <= maxM2
     );
+    console.log(`📐 [MapPage] Après filtrage par surface: ${filtered.length} résultats`);
 
+    console.log(`✅ [MapPage] Filtrage terminé: ${filtered.length} propriétés filtrées`);
     setFilteredProperties(filtered);
   }, [properties, searchQuery, propertyTypes, minPrice, maxPrice, minRooms, minM2, maxM2]);
 
   // Mettre à jour les marqueurs sur la carte quand les propriétés filtrées changent
   useEffect(() => {
-    if (loading || !mapRef.current) return;
+    console.log('🔄 [useEffect] Tentative de mise à jour des marqueurs');
+    console.log('   - loading:', loading);
+    console.log('   - mapRef.current:', !!mapRef.current);
+    console.log('   - filteredProperties.length:', filteredProperties.length);
     
+    if (loading) {
+      console.log('⏳ [useEffect] Chargement en cours, on attend...');
+      return;
+    }
+    
+    if (!mapRef.current) {
+      console.log('⚠️ [useEffect] La carte n\'est pas prête');
+      return;
+    }
+    
+    console.log('🎯 [useEffect] Mise à jour des marqueurs avec', filteredProperties.length, 'propriétés');
     addMarkersToMap(filteredProperties);
   }, [filteredProperties, loading, addMarkersToMap]);
 

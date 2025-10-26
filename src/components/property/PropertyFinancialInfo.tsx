@@ -1,5 +1,5 @@
 import { Property } from "@/types/property";
-import { Euro, Droplet, Wind } from "lucide-react";
+import { Euro } from "lucide-react";
 
 interface PropertyFinancialInfoProps {
   property: Property;
@@ -17,16 +17,32 @@ const PropertyFinancialInfo = ({ property }: PropertyFinancialInfoProps) => {
   const getDPEColor = (classe?: string) => {
     if (!classe) return "";
     const colorMap: { [key: string]: string } = {
-      A: "bg-green-500",
-      B: "bg-green-400",
-      C: "bg-yellow-300",
-      D: "bg-yellow-400",
-      E: "bg-orange-400",
-      F: "bg-red-400",
+      A: "bg-green-600",
+      B: "bg-green-500",
+      C: "bg-yellow-400",
+      D: "bg-yellow-500",
+      E: "bg-orange-500",
+      F: "bg-orange-600",
       G: "bg-red-600",
     };
     return colorMap[classe] || "";
   };
+
+  const getGESColor = (classe?: string) => {
+    if (!classe) return "";
+    const colorMap: { [key: string]: string } = {
+      A: "bg-blue-50 border-blue-200",
+      B: "bg-blue-100 border-blue-300",
+      C: "bg-blue-200 border-blue-400",
+      D: "bg-blue-300 border-blue-500",
+      E: "bg-blue-400 border-blue-600",
+      F: "bg-indigo-500 border-indigo-700",
+      G: "bg-indigo-600 border-indigo-800",
+    };
+    return colorMap[classe] || "";
+  };
+
+  const energyClasses = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
 
   return (
     <div className="space-y-6">
@@ -80,55 +96,77 @@ const PropertyFinancialInfo = ({ property }: PropertyFinancialInfoProps) => {
 
       {(hasDPE || hasGES) && (
         <div className="bg-white rounded-xl p-8 shadow-lg border-0">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-            <span className="w-1 h-8 bg-teal-500 rounded-full"></span>
-            Diagnostic de performance énergétique
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {hasDPE && (
-                <div>
-                  <h3 className="font-medium mb-3 flex items-center gap-2">
-                    <Droplet size={18} className="text-teal-500" />
-                    Performance énergétique
-                  </h3>
-                  <div className="flex items-center gap-4">
-                    {property.dpe_classe_energie && (
-                      <div className={`w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-xl ${getDPEColor(property.dpe_classe_energie)}`}>
-                        {property.dpe_classe_energie}
-                      </div>
-                    )}
-                    {property.dpe_consommation && (
-                      <div>
-                        <p className="text-sm text-estate-neutral-500">Consommation énergétique</p>
-                        <p className="text-lg font-semibold">{property.dpe_consommation} kWh/m²/an</p>
-                      </div>
-                    )}
-                  </div>
+          <h2 className="text-3xl font-bold text-gray-900 mb-8">Performance énergétique</h2>
+          
+          <div className="space-y-8">
+            {hasDPE && (
+              <div>
+                <div className="text-sm text-gray-600 mb-4">
+                  Diagnostic de performance énergétique (DPE)
                 </div>
-              )}
+                
+                {/* Barre horizontale DPE */}
+                <div className="flex h-12 rounded-lg overflow-hidden border border-gray-200 shadow-sm">
+                  {energyClasses.map((classe, index) => {
+                    const isActive = property.dpe_classe_energie === classe;
+                    const width = '14.285714%'; // 100/7
+                    return (
+                      <div
+                        key={classe}
+                        style={{ width }}
+                        className={`${getDPEColor(classe)} flex items-center justify-center ${
+                          isActive ? 'ring-2 ring-offset-2 ring-gray-900 font-bold text-lg' : ''
+                        }`}
+                      >
+                        {isActive && <span className="text-white font-extrabold text-xl">{classe}</span>}
+                        {!isActive && <span className="text-transparent">{classe}</span>}
+                      </div>
+                    );
+                  })}
+                </div>
+                
+                {property.dpe_consommation && (
+                  <div className="mt-4 text-sm text-gray-600">
+                    Consommation: <span className="font-semibold text-gray-900">{property.dpe_consommation} kWh/m²/an</span>
+                  </div>
+                )}
+              </div>
+            )}
 
-              {hasGES && (
-                <div>
-                  <h3 className="font-medium mb-3 flex items-center gap-2">
-                    <Wind size={18} className="text-teal-500" />
-                    Émissions de gaz à effet de serre
-                  </h3>
-                  <div className="flex items-center gap-4">
-                    {property.ges_classe_gaz && (
-                      <div className={`w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-xl ${getDPEColor(property.ges_classe_gaz)}`}>
-                        {property.ges_classe_gaz}
-                      </div>
-                    )}
-                    {property.ges_emission && (
-                      <div>
-                        <p className="text-sm text-estate-neutral-500">Émissions GES</p>
-                        <p className="text-lg font-semibold">{property.ges_emission} kg CO₂/m²/an</p>
-                      </div>
-                    )}
-                  </div>
+            {hasGES && (
+              <div>
+                <div className="text-sm text-gray-600 mb-4">
+                  Indice d'émission de gaz à effet de serre (GES)
                 </div>
-              )}
-            </div>
+                
+                {/* Barre horizontale GES */}
+                <div className="flex h-12 rounded-lg overflow-hidden border border-gray-200 shadow-sm">
+                  {energyClasses.map((classe, index) => {
+                    const isActive = property.ges_classe_gaz === classe;
+                    const width = '14.285714%'; // 100/7
+                    return (
+                      <div
+                        key={classe}
+                        style={{ width }}
+                        className={`${getGESColor(classe)} flex items-center justify-center ${
+                          isActive ? 'ring-2 ring-offset-2 ring-gray-900 font-bold text-lg' : ''
+                        }`}
+                      >
+                        {isActive && <span className="font-extrabold text-xl">{classe}</span>}
+                        {!isActive && <span className="text-transparent">{classe}</span>}
+                      </div>
+                    );
+                  })}
+                </div>
+                
+                {property.ges_emission && (
+                  <div className="mt-4 text-sm text-gray-600">
+                    Émissions: <span className="font-semibold text-gray-900">{property.ges_emission} kg CO₂/m²/an</span>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

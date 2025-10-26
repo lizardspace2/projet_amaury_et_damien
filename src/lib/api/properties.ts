@@ -125,8 +125,33 @@ export interface CreatePropertyInput {
 }
 
 const transformProperty = (property: any): Property => {
-  // Basic transformation, as the new schema is flatter
-  return property as Property;
+  // Convert string numeric fields to actual numbers
+  const transformed = { ...property };
+  
+  // Convert price to number
+  if (typeof transformed.price === 'string') {
+    transformed.price = parseFloat(transformed.price) || 0;
+  }
+  
+  // Convert m2 to number
+  if (typeof transformed.m2 === 'string') {
+    transformed.m2 = parseFloat(transformed.m2) || 0;
+  }
+  
+  // Convert other numeric fields
+  ['beds', 'baths', 'rooms', 'terrace_area', 'ceiling_height', 'floor_level', 
+   'total_floors', 'year_built', 'parking_box', 'nombre_etages_immeuble', 
+   'nombre_photos', 'dpe_consommation', 'ges_emission', 'price_per_m2',
+   'frais_agence', 'charges_mensuelles', 'taxe_fonciere', 'surface_balcon_terrasse',
+   'annee_construction'].forEach(field => {
+    if (transformed[field] !== null && transformed[field] !== undefined) {
+      if (typeof transformed[field] === 'string') {
+        transformed[field] = parseFloat(transformed[field]) || 0;
+      }
+    }
+  });
+  
+  return transformed as Property;
 };
 
 export const createProperty = async (input: CreatePropertyInput) => {

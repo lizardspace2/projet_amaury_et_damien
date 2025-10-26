@@ -37,7 +37,7 @@ const Properties = () => {
   const [listingType, setListingType] = useState<ListingType>(initialListingType);
   const [propertyTypes, setPropertyTypes] = useState<PropertyType[]>([]);
   const [minPrice, setMinPrice] = useState(0);
-  const [maxPrice, setMaxPrice] = useState(50000000);
+  const [maxPrice, setMaxPrice] = useState(1000000000);
   const [minBeds, setMinBeds] = useState(0);
   const [minBaths, setMinBaths] = useState(0);
   const [minM2, setMinM2] = useState(0);
@@ -258,7 +258,7 @@ const Properties = () => {
 
   const handlePriceBlur = () => {
     const min = parseInt(minPriceInput) || 0;
-    const max = parseInt(maxPriceInput) || 5000000;
+    const max = parseInt(maxPriceInput) || 1000000000;
     setMinPrice(Math.min(min, max));
     setMaxPrice(Math.max(min, max));
   };
@@ -531,7 +531,7 @@ const Properties = () => {
   const handleClearFilters = () => {
     setPropertyTypes([]);
     setMinPrice(0);
-    setMaxPrice(50000000);
+    setMaxPrice(1000000000);
     setMinBeds(0);
     setMinBaths(0);
     setMinM2(0);
@@ -1224,7 +1224,7 @@ const Properties = () => {
                 <div className="px-2">
                   <Slider
                     value={[minPrice, maxPrice]}
-                    max={50000000}
+                    max={1000000000}
                     step={500000}
                     onValueChange={(values) => {
                       setMinPrice(values[0]);
@@ -1471,7 +1471,7 @@ const Properties = () => {
                       <div className="px-2">
                         <Slider
                           value={[minPrice, maxPrice]}
-                          max={50000000}
+                          max={1000000000}
                           step={500000}
                           onValueChange={(values) => {
                             setMinPrice(values[0]);

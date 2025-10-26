@@ -36,7 +36,7 @@ const MapPage = () => {
   const [listingType, setListingType] = useState<any>("all");
   const [propertyTypes, setPropertyTypes] = useState<any[]>([]);
   const [minPrice, setMinPrice] = useState(0);
-  const [maxPrice, setMaxPrice] = useState(50000000);
+  const [maxPrice, setMaxPrice] = useState(1000000000);
   const [minRooms, setMinRooms] = useState(0);
   const [minM2, setMinM2] = useState(0);
   const [maxM2, setMaxM2] = useState(50000);

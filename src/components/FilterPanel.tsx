@@ -133,7 +133,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="outline" className="h-9 px-4 text-sm">
-              Budget {minPrice > 0 || maxPrice < 50000000 ? `(${minPrice.toLocaleString()} - ${maxPrice.toLocaleString()} €)` : ''}
+              Budget {minPrice > 0 || maxPrice < 1000000000 ? `(${minPrice.toLocaleString()} - ${maxPrice.toLocaleString()} €)` : ''}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-80" align="start">

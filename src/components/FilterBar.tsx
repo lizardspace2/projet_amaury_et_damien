@@ -182,7 +182,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="outline" className="h-9 px-4 text-sm">
-              {minPrice > 0 || maxPrice < 50000000 ? `Budget (${minPrice.toLocaleString()} - ${maxPrice.toLocaleString()} €)` : "Budget"}
+              {minPrice > 0 || maxPrice < 1000000000 ? `Budget (${minPrice.toLocaleString()} - ${maxPrice.toLocaleString()} €)` : "Budget"}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-80 z-[1000]" align="start">

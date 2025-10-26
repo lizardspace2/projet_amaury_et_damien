@@ -309,6 +309,17 @@ const Properties = () => {
     console.log('🔍 [Properties] Début du filtrage');
     console.log('📊 [Properties] Nombre total de propriétés:', properties.length);
     console.log('📋 [Properties] Listing type:', listingType);
+    console.log('⚙️ [Properties] Filtres actifs:', {
+      minPrice,
+      maxPrice,
+      minBeds,
+      minBaths,
+      minM2,
+      maxM2,
+      searchQuery,
+      propertyTypes,
+      selectedCities
+    });
     
     let filtered = [...properties];
     
@@ -320,7 +331,11 @@ const Properties = () => {
         status: prop.status,
         price: prop.price,
         listing_type: prop.listing_type,
-        property_type: prop.property_type
+        property_type: prop.property_type,
+        rooms: prop.rooms,
+        beds: prop.beds,
+        baths: prop.baths,
+        m2: prop.m2
       });
     });
 
@@ -367,6 +382,9 @@ const Properties = () => {
     // Bedrooms filter
     if (minBeds > 0) {
       const beforeBeds = filtered.length;
+      filtered.forEach(property => {
+        console.log(`🛏️ [Properties] Checking beds - ID: ${property.id}, beds: ${property.beds}, minBeds: ${minBeds}, passes: ${(property.beds || 0) >= minBeds}`);
+      });
       filtered = filtered.filter(property => (property.beds || 0) >= minBeds);
       console.log(`🛏️ [Properties] Après chambres: ${beforeBeds} → ${filtered.length}`);
     }

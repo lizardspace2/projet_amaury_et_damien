@@ -217,6 +217,14 @@ const MapPage = () => {
 
     let filtered = [...properties];
 
+    // Filtre par type d'annonce (vente/location)
+    if (listingType && listingType !== 'all') {
+      filtered = filtered.filter(property => 
+        property.listing_type === listingType
+      );
+      console.log(`🏷️ [MapPage] Après filtrage par listing type "${listingType}": ${filtered.length} résultats`);
+    }
+
     // Filtre de recherche
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -256,7 +264,7 @@ const MapPage = () => {
 
     console.log(`✅ [MapPage] Filtrage terminé: ${filtered.length} propriétés filtrées`);
     setFilteredProperties(filtered);
-  }, [properties, searchQuery, propertyTypes, minPrice, maxPrice, minRooms, minM2, maxM2]);
+  }, [properties, listingType, searchQuery, propertyTypes, minPrice, maxPrice, minRooms, minM2, maxM2]);
 
   // Mettre à jour les marqueurs sur la carte quand les propriétés filtrées changent
   useEffect(() => {

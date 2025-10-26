@@ -1,5 +1,5 @@
 -- WARNING: This schema is for context only and is not meant to be run.
--- Table order and constraints may not be valid for execution. essai
+-- Table order and constraints may not be valid for execution.
 
 CREATE TABLE public.profiles (
   user_id uuid NOT NULL,
@@ -12,6 +12,8 @@ CREATE TABLE public.profiles (
   updated_at timestamp with time zone DEFAULT now(),
   email text,
   liked_properties jsonb DEFAULT '[]'::jsonb,
+  profession text,
+  siret text,
   CONSTRAINT profiles_pkey PRIMARY KEY (user_id),
   CONSTRAINT profiles_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
 );
@@ -123,6 +125,25 @@ CREATE TABLE public.properties (
   agent_phone text,
   project_name text,
   price_per_m2 numeric,
+  frais_agence numeric,
+  charges_mensuelles numeric,
+  taxe_fonciere numeric,
+  dpe_classe_energie text,
+  dpe_consommation integer,
+  ges_classe_gaz text,
+  ges_emission integer,
+  nom_agence text,
+  reference_annonce text,
+  nombre_photos integer DEFAULT 0,
+  lien_visite_virtuelle text,
+  date_publication timestamp with time zone,
+  date_mise_a_jour timestamp with time zone,
+  code_postal text,
+  surface_balcon_terrasse numeric,
+  parking_box integer,
+  cave boolean DEFAULT false,
+  nombre_etages_immeuble integer,
+  annee_construction integer,
   CONSTRAINT properties_pkey PRIMARY KEY (id),
   CONSTRAINT properties_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
 );

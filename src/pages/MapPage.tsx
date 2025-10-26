@@ -136,14 +136,20 @@ const MapPage = () => {
         
         setProperties(withCoords);
 
-        // Attendre un peu que le DOM soit prêt
-        setTimeout(() => {
-          if (!isMounted || !mapContainerRef.current) {
-            console.log('⚠️ [MapPage] Composant démonté ou conteneur non disponible');
+        // Attendre que le DOM soit prêt et que le conteneur existe
+        const createMap = () => {
+          if (!isMounted) {
+            console.log('⚠️ [MapPage] Composant démonté');
+            return;
+          }
+          
+          if (!mapContainerRef.current) {
+            console.log('⚠️ [MapPage] Conteneur non disponible, nouvel essai dans 100ms');
+            setTimeout(createMap, 100);
             return;
           }
 
-          console.log('🗺️ [MapPage] Création de la carte Leaflet');
+          console.log('🗺️ [MapPage] Création de la carte Leaflet, conteneur:', mapContainerRef.current);
           // Créer la carte
           const map = L.map(mapContainerRef.current, {
             center: [45.75805500216428, 4.789653750976552],
@@ -162,8 +168,10 @@ const MapPage = () => {
             setLoading(false);
             console.log('✅ [MapPage] Loading mis à false');
           }
+        };
 
-        }, 50);
+        // Démarrer immédiatement
+        createMap();
 
       } catch (error) {
         console.error('❌ [MapPage] Erreur:', error);
@@ -308,18 +316,20 @@ const MapPage = () => {
       <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
         {/* Colonne gauche - Carte (100% sur mobile, 70% sur desktop) */}
         <div className="w-full lg:w-[70%] relative h-[60vh] lg:h-full min-h-[500px] z-0">
-          {loading ? (
-            <div className="flex items-center justify-center h-full">
+          {/* Toujours afficher le conteneur dans le DOM */}
+          <div 
+            ref={mapContainerRef}
+            className="h-full w-full relative z-0"
+          />
+          
+          {/* Afficher le spinner par-dessus si loading */}
+          {loading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-90">
               <div className="text-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600 mx-auto mb-4"></div>
                 <p>Chargement de la carte...</p>
               </div>
             </div>
-          ) : (
-            <div 
-              ref={mapContainerRef}
-              className="h-full w-full relative z-0"
-            />
           )}
         </div>
 

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import NavigationButton from '@/components/ui/navigation-button';
 import { useCurrency } from '@/CurrencyContext';
 import { getProperties } from '@/lib/api/properties';
 import Navbar from '@/components/Navbar';
@@ -147,14 +148,14 @@ const MapPage = () => {
       <div className="bg-white border-b border-gray-200">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
-            <Button
+            <NavigationButton
               variant="ghost"
               size="sm"
               onClick={() => navigate(-1)}
+              icon="back"
             >
-              <ArrowLeft className="h-4 w-4 mr-2" />
               Retour
-            </Button>
+            </NavigationButton>
             <div className="flex items-center gap-2">
               <MapPin className="h-6 w-6 text-teal-600" />
               <h1 className="text-2xl font-bold text-gray-800">

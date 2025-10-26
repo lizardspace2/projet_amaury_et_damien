@@ -57,7 +57,7 @@ const Hero = () => {
             Nous vous aidons à trouver la maison de vos rêves. Parcourez notre catalogue de propriétés et trouvez celle qui vous convient le mieux.
           </p>
 
-          {/* Add Listing Button */}
+          {/* Action Buttons */}
           <div className="max-w-md mx-auto space-y-4">
             <Button
               onClick={() => navigate("/sell")}
@@ -65,6 +65,15 @@ const Hero = () => {
               size="lg"
             >
               Publier une annonce
+            </Button>
+            
+            {/* View Properties Button */}
+            <Button
+              onClick={() => navigate("/properties")}
+              className="bg-white hover:bg-gray-50 text-teal-500 border-2 border-teal-500 px-8 py-6 text-lg md:text-xl rounded-lg font-bold w-full"
+              size="lg"
+            >
+              Voir les annonces
             </Button>
             
             {/* View Map Button */}

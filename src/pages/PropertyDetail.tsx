@@ -12,6 +12,7 @@ import AgentContact from "@/components/property/AgentContact";
 import PropertyMap from "@/components/PropertyMap";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import NavigationButton from "@/components/ui/navigation-button";
 import { toast } from "sonner";
 import { Property } from "@/types/property";
 
@@ -78,7 +79,13 @@ const PropertyDetail = () => {
           <h1 className="text-3xl font-bold text-red-600 mb-4">Erreur</h1>
           <p className="text-lg">{error}</p>
           <p className="text-lg">Cette propriété n'existe pas ou a été supprimée.</p>
-          <a href="/properties" className="text-blue-600 hover:underline mt-4 block">Retour à la liste des propriétés</a>
+          <NavigationButton
+            variant="link"
+            href="/properties"
+            className="text-blue-600 hover:text-teal-600 mt-4"
+          >
+            Retour à la liste des propriétés
+          </NavigationButton>
         </main>
         <Footer />
       </div>
@@ -92,7 +99,13 @@ const PropertyDetail = () => {
         <main className="flex-grow container mx-auto px-4 py-8 text-center">
           <h1 className="text-3xl font-bold text-red-600 mb-4">Propriété non trouvée</h1>
           <p className="text-lg">Cette propriété n'existe pas ou a été supprimée.</p>
-          <a href="/properties" className="text-blue-600 hover:underline mt-4 block">Retour à la liste des propriétés</a>
+          <NavigationButton
+            variant="link"
+            href="/properties"
+            className="text-blue-600 hover:text-teal-600 mt-4"
+          >
+            Retour à la liste des propriétés
+          </NavigationButton>
         </main>
         <Footer />
       </div>

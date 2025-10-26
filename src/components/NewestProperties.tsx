@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Property } from "@/types/property";
 import PropertyCard from "@/components/PropertyCard";
 import { Button } from "@/components/ui/button";
+import NavigationButton from "@/components/ui/navigation-button";
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getNewestProperties } from "@/lib/api/properties";
@@ -39,13 +40,14 @@ const NewestProperties = () => {
           <h2 className="text-2xl md:text-3xl font-bold text-estate-800">
             Les nouveautés
           </h2>
-          <Button
+          <NavigationButton
             variant="link"
-            className="text-estate-800 hover:no-underline p-0"
             onClick={() => navigate("/properties")}
+            icon="right"
+            className="text-estate-800 hover:text-teal-600 font-semibold"
           >
-            Voir tout <ArrowRight className="ml-2" size={18} />
-          </Button>
+            Voir tout
+          </NavigationButton>
         </div>
 
         {isLoading ? (
@@ -79,12 +81,13 @@ const NewestProperties = () => {
             </div>
             {visiblePropertiesCount < properties.length && (
               <div className="mt-8 text-center">
-                <Button
-                  variant="outline"
+                <NavigationButton
+                  variant="secondary"
                   onClick={() => setVisiblePropertiesCount(prevCount => prevCount + 6)}
+                  size="lg"
                 >
                   Voir plus
-                </Button>
+                </NavigationButton>
               </div>
             )}
           </>

@@ -1,6 +1,7 @@
 import { Property } from "@/types/property";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import NavigationButton from "@/components/ui/navigation-button";
 import { ChevronLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useCurrency } from '@/CurrencyContext';
@@ -28,13 +29,14 @@ const PropertyHeader = ({ property }: PropertyHeaderProps) => {
   return (
     <>
       <div className="mb-6">
-        <Link
-          to="/properties"
-          className="flex items-center text-estate-neutral-600 hover:text-estate-800 transition-colors"
+        <NavigationButton
+          variant="link"
+          href="/properties"
+          icon="back"
+          className="text-estate-neutral-600 hover:text-teal-600 font-medium"
         >
-          <ChevronLeft size={20} />
-          <span>Retour aux propriétés</span>
-        </Link>
+          Retour aux propriétés
+        </NavigationButton>
       </div>
 
       <div className="mb-6">

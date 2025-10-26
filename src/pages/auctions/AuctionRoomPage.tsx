@@ -4,6 +4,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import AuctionRoom from '@/components/auction/AuctionRoom';
 import { Button } from '@/components/ui/button';
+import NavigationButton from '@/components/ui/navigation-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Users, Clock, Gavel } from 'lucide-react';
@@ -75,16 +76,14 @@ const AuctionRoomPage = () => {
       <main className="flex-grow container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-6">
-          <Button 
+          <NavigationButton 
             variant="outline" 
-            asChild
+            href="/auctions"
+            icon="back"
             className="mb-4"
           >
-            <Link to="/auctions" className="flex items-center gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Retour aux enchères
-            </Link>
-          </Button>
+            Retour aux enchères
+          </NavigationButton>
           
           <div className="flex items-center justify-between">
             <div>
@@ -119,9 +118,9 @@ const AuctionRoomPage = () => {
             <p className="text-gray-500 mb-6">
               Revenez plus tard pour participer aux prochaines enchères
             </p>
-            <Button asChild>
+            <NavigationButton asChild variant="primary">
               <Link to="/auctions">Voir toutes les enchères</Link>
-            </Button>
+            </NavigationButton>
           </div>
         )}
 
@@ -177,16 +176,17 @@ const AuctionRoomPage = () => {
                         </div>
                       </div>
                       
-                      <Button 
+                      <NavigationButton 
                         className="w-full bg-orange-500 hover:bg-orange-600"
                         onClick={(e) => {
                           e.stopPropagation();
                           setSelectedAuction(auction.id);
                         }}
+                        icon="none"
                       >
                         <Gavel className="h-4 w-4 mr-2" />
                         Rejoindre cette enchère
-                      </Button>
+                      </NavigationButton>
                     </div>
                   </CardContent>
                 </Card>

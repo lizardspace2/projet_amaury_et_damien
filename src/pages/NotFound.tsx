@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import NavigationButton from "@/components/ui/navigation-button";
 
 const NotFound = () => {
   const location = useLocation();
@@ -46,21 +47,22 @@ const NotFound = () => {
         </p>
         
         <div className="flex flex-col sm:flex-row justify-center gap-3">
-          <Button
-            onClick={() => navigate(-1)}
+          <NavigationButton
             variant="outline"
+            onClick={() => navigate(-1)}
+            size="lg"
             className="border-indigo-500 text-indigo-500 hover:bg-indigo-50"
           >
-            <span className="hidden sm:inline">Retour</span>
-            <span className="sm:hidden">Retour</span>
-          </Button>
-          <Button
+            Retour
+          </NavigationButton>
+          <NavigationButton
+            variant="primary"
             onClick={() => navigate("/")}
+            size="lg"
             className="bg-indigo-600 hover:bg-indigo-700"
           >
-            <span className="hidden sm:inline">Retour à l'accueil</span>
-            <span className="sm:hidden">Accueil</span>
-          </Button>
+            Retour à l'accueil
+          </NavigationButton>
         </div>
         
         <div className="mt-8 pt-6 border-t border-gray-200">

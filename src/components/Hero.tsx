@@ -58,13 +58,22 @@ const Hero = () => {
           </p>
 
           {/* Add Listing Button */}
-          <div className="max-w-md mx-auto">
+          <div className="max-w-md mx-auto space-y-4">
             <Button
               onClick={() => navigate("/sell")}
               className="bg-teal-500 hover:bg-teal-600 text-white px-8 py-6 text-lg md:text-xl rounded-lg font-bold w-full"
               size="lg"
             >
               Publier une annonce
+            </Button>
+            
+            {/* View Map Button */}
+            <Button
+              onClick={() => navigate("/map")}
+              className="bg-white hover:bg-gray-50 text-teal-500 border-2 border-teal-500 px-8 py-6 text-lg md:text-xl rounded-lg font-bold w-full"
+              size="lg"
+            >
+              Voir la carte
             </Button>
           </div>
         </div>

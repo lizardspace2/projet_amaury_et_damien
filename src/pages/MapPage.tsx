@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapPin, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -26,6 +26,7 @@ const MapPage = () => {
   const { formatPrice } = useCurrency();
   const mapRef = useRef<L.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
+  const markersRef = useRef<L.Marker[]>([]);
   const [properties, setProperties] = useState<any[]>([]);
   const [filteredProperties, setFilteredProperties] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,6 +41,72 @@ const MapPage = () => {
   const [minM2, setMinM2] = useState(0);
   const [maxM2, setMaxM2] = useState(50000);
   const [viewMode, setViewMode] = useState<'map' | 'gallery' | 'list'>('gallery');
+
+  // Fonction pour ajouter les marqueurs à la carte
+  const addMarkersToMap = useCallback((propertiesToAdd: any[]) => {
+    if (!mapRef.current) return;
+
+    // Supprimer tous les marqueurs existants
+    markersRef.current.forEach(marker => {
+      if (mapRef.current) {
+        mapRef.current.removeLayer(marker);
+      }
+    });
+    markersRef.current = [];
+
+    // Ajouter les nouveaux marqueurs
+    propertiesToAdd.forEach(property => {
+      const marker = L.marker([property.lat, property.lng]).addTo(mapRef.current!);
+      
+      const popupContent = `
+        <div style="width: 250px; padding: 0; margin: 0;">
+          <!-- Photo -->
+          <div style="width: 100%; height: 150px; background-color: #f3f4f6; border-radius: 8px 8px 0 0; overflow: hidden; position: relative;">
+            ${property.images && property.images.length > 0 ? `
+              <img 
+                src="${property.images[0]}" 
+                alt="${property.title}"
+                style="width: 100%; height: 100%; object-fit: cover;"
+              />
+            ` : `
+              <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 24px;">
+                🏠
+              </div>
+            `}
+          </div>
+          
+          <!-- Contenu -->
+          <div style="padding: 12px;">
+            <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1f2937;">${property.title}</h3>
+            <p style="margin: 0 0 6px 0; font-size: 18px; font-weight: bold; color: #e74c3c;">
+              ${formatPrice(property.price)}
+            </p>
+            <p style="margin: 0 0 12px 0; color: #666; font-size: 14px;">
+              📐 ${property.m2} m²
+            </p>
+            <button onclick="window.openProperty('${property.id}')" style="
+              width: 100%; 
+              background: #3498db; 
+              color: white; 
+              border: none; 
+              padding: 8px; 
+              border-radius: 4px; 
+              cursor: pointer;
+              font-size: 14px;
+              font-weight: 500;
+            ">
+              Voir détails
+            </button>
+          </div>
+        </div>
+      `;
+
+      marker.bindPopup(popupContent);
+      marker.on('click', () => marker.openPopup());
+      
+      markersRef.current.push(marker);
+    });
+  }, [formatPrice]);
 
   // Charger les propriétés et initialiser la carte en même temps
   useEffect(() => {
@@ -73,56 +140,8 @@ const MapPage = () => {
 
           mapRef.current = map;
 
-          // Ajouter les marqueurs immédiatement
-          withCoords.forEach(property => {
-            const marker = L.marker([property.lat, property.lng]).addTo(map);
-            
-            const popupContent = `
-              <div style="width: 250px; padding: 0; margin: 0;">
-                <!-- Photo -->
-                <div style="width: 100%; height: 150px; background-color: #f3f4f6; border-radius: 8px 8px 0 0; overflow: hidden; position: relative;">
-                  ${property.images && property.images.length > 0 ? `
-                    <img 
-                      src="${property.images[0]}" 
-                      alt="${property.title}"
-                      style="width: 100%; height: 100%; object-fit: cover;"
-                    />
-                  ` : `
-                    <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #9ca3af; font-size: 24px;">
-                      🏠
-                    </div>
-                  `}
-                </div>
-                
-                <!-- Contenu -->
-                <div style="padding: 12px;">
-                  <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1f2937;">${property.title}</h3>
-                  <p style="margin: 0 0 6px 0; font-size: 18px; font-weight: bold; color: #e74c3c;">
-                    ${formatPrice(property.price)}
-                  </p>
-                  <p style="margin: 0 0 12px 0; color: #666; font-size: 14px;">
-                    📐 ${property.m2} m²
-                  </p>
-                  <button onclick="window.openProperty('${property.id}')" style="
-                    width: 100%; 
-                    background: #3498db; 
-                    color: white; 
-                    border: none; 
-                    padding: 8px; 
-                    border-radius: 4px; 
-                    cursor: pointer;
-                    font-size: 14px;
-                    font-weight: 500;
-                  ">
-                    Voir détails
-                  </button>
-                </div>
-              </div>
-            `;
-
-            marker.bindPopup(popupContent);
-            marker.on('click', () => marker.openPopup());
-          });
+          // Ajouter les marqueurs initiaux
+          // Les marqueurs seront mis à jour automatiquement par l'effet sur filteredProperties
 
         }, 50);
 
@@ -194,6 +213,13 @@ const MapPage = () => {
 
     setFilteredProperties(filtered);
   }, [properties, searchQuery, propertyTypes, minPrice, maxPrice, minRooms, minM2, maxM2]);
+
+  // Mettre à jour les marqueurs sur la carte quand les propriétés filtrées changent
+  useEffect(() => {
+    if (!loading && mapRef.current) {
+      addMarkersToMap(filteredProperties);
+    }
+  }, [filteredProperties, loading, addMarkersToMap]);
 
   return (
     <div className="flex flex-col h-screen bg-white">

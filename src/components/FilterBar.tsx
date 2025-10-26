@@ -239,7 +239,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="outline" className="h-9 px-4 text-sm">
-              Surface {minM2 > 0 || maxM2 < 50000 ? `(${minM2} - ${maxM2} m²)` : ""}
+              Surface {minM2 > 0 || maxM2 < 100000 ? `(${minM2} - ${maxM2} m²)` : ""}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-80 z-[1000]" align="start">

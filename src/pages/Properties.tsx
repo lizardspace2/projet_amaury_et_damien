@@ -41,7 +41,7 @@ const Properties = () => {
   const [minBeds, setMinBeds] = useState(0);
   const [minBaths, setMinBaths] = useState(0);
   const [minM2, setMinM2] = useState(0);
-  const [maxM2, setMaxM2] = useState(50000);
+  const [maxM2, setMaxM2] = useState(100000);
   const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'map' | 'gallery' | 'list'>('gallery');
@@ -618,7 +618,7 @@ const Properties = () => {
     setMinBeds(0);
     setMinBaths(0);
     setMinM2(0);
-    setMaxM2(50000);
+    setMaxM2(100000);
     setFeatures({
         has_elevator: false,
         has_air_conditioning: false,
@@ -1345,7 +1345,7 @@ const Properties = () => {
                 <div className="px-2">
                   <Slider
                     value={[minM2, maxM2]}
-                    max={50000}
+                    max={100000}
                     step={100}
                     onValueChange={(values) => {
                       setMinM2(values[0]);
@@ -1590,7 +1590,7 @@ const Properties = () => {
                       <div className="px-2">
                         <Slider
                           value={[minM2, maxM2]}
-                          max={50000}
+                          max={100000}
                           step={100}
                           onValueChange={(values) => {
                             setMinM2(values[0]);

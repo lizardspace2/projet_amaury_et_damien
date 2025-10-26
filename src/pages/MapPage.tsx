@@ -39,7 +39,7 @@ const MapPage = () => {
   const [maxPrice, setMaxPrice] = useState(1000000000);
   const [minRooms, setMinRooms] = useState(0);
   const [minM2, setMinM2] = useState(0);
-  const [maxM2, setMaxM2] = useState(50000);
+  const [maxM2, setMaxM2] = useState(100000);
   const [viewMode, setViewMode] = useState<'map' | 'gallery' | 'list'>('gallery');
 
   // Fonction pour ajouter les marqueurs à la carte

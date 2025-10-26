@@ -1,10 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPin } from 'lucide-react';
+import { MapPin, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import NavigationButton from '@/components/ui/navigation-button';
 import { useCurrency } from '@/CurrencyContext';
 import { getProperties } from '@/lib/api/properties';
+import PropertyCard from '@/components/PropertyCard';
+import FilterBar from '@/components/FilterBar';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import 'leaflet/dist/leaflet.css';
@@ -24,7 +27,19 @@ const MapPage = () => {
   const mapRef = useRef<L.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [properties, setProperties] = useState<any[]>([]);
+  const [filteredProperties, setFilteredProperties] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Filtres
+  const [searchQuery, setSearchQuery] = useState("");
+  const [listingType, setListingType] = useState<any>("all");
+  const [propertyTypes, setPropertyTypes] = useState<any[]>([]);
+  const [minPrice, setMinPrice] = useState(0);
+  const [maxPrice, setMaxPrice] = useState(50000000);
+  const [minRooms, setMinRooms] = useState(0);
+  const [minM2, setMinM2] = useState(0);
+  const [maxM2, setMaxM2] = useState(50000);
+  const [viewMode, setViewMode] = useState<'map' | 'gallery' | 'list'>('gallery');
 
   // Charger les propriétés et initialiser la carte en même temps
   useEffect(() => {
@@ -141,49 +156,134 @@ const MapPage = () => {
     };
   }, [navigate]);
 
+  // Appliquer les filtres
+  useEffect(() => {
+    let filtered = [...properties];
+
+    // Filtre de recherche
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(property => 
+        property.title?.toLowerCase().includes(query) ||
+        property.address_city?.toLowerCase().includes(query) ||
+        property.address_street?.toLowerCase().includes(query)
+      );
+    }
+
+    // Filtre par type de propriété
+    if (propertyTypes.length > 0) {
+      filtered = filtered.filter(property =>
+        property.property_type && propertyTypes.includes(property.property_type)
+      );
+    }
+
+    // Filtre par prix
+    filtered = filtered.filter(property =>
+      property.price >= minPrice && property.price <= maxPrice
+    );
+
+    // Filtre par pièces
+    if (minRooms > 0) {
+      filtered = filtered.filter(property => (property.rooms || 0) >= minRooms);
+    }
+
+    // Filtre par surface
+    filtered = filtered.filter(property =>
+      (property.m2 || 0) >= minM2 && (property.m2 || 0) <= maxM2
+    );
+
+    setFilteredProperties(filtered);
+  }, [properties, searchQuery, propertyTypes, minPrice, maxPrice, minRooms, minM2, maxM2]);
+
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50">
+    <div className="flex flex-col h-screen bg-white">
       <Navbar />
       
-      <div className="bg-white border-b border-gray-200">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <NavigationButton
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate(-1)}
-              icon="back"
-            >
-              Retour
-            </NavigationButton>
-            <div className="flex items-center gap-2">
-              <MapPin className="h-6 w-6 text-teal-600" />
-              <h1 className="text-2xl font-bold text-gray-800">
-                Propriétés sur la carte
-              </h1>
+      {/* FilterBar */}
+      <div className="flex-shrink-0">
+        <FilterBar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        listingType={listingType}
+        onListingTypeChange={setListingType}
+        propertyTypes={propertyTypes}
+        onPropertyTypesChange={setPropertyTypes}
+        minPrice={minPrice}
+        maxPrice={maxPrice}
+        onPriceChange={(min, max) => {
+          setMinPrice(min);
+          setMaxPrice(max);
+        }}
+        minRooms={minRooms}
+        onRoomsChange={setMinRooms}
+        minM2={minM2}
+        maxM2={maxM2}
+        onM2Change={(min, max) => {
+          setMinM2(min);
+          setMaxM2(max);
+        }}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        currentListingType={listingType}
+      />
+      </div>
+
+      {/* Layout 2 colonnes - flex-1 pour prendre tout l'espace disponible */}
+      <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
+        {/* Colonne gauche - Carte (100% sur mobile, 70% sur desktop) */}
+        <div className="w-full lg:w-[70%] relative h-[60vh] lg:h-full min-h-[500px]">
+          {loading ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600 mx-auto mb-4"></div>
+                <p>Chargement de la carte...</p>
+              </div>
             </div>
+          ) : (
+            <div 
+              ref={mapContainerRef}
+              className="h-full w-full"
+            />
+          )}
+        </div>
+
+        {/* Colonne droite - Panneau latéral (100% sur mobile, 30% sur desktop) */}
+        <div className="w-full lg:w-96 bg-white lg:border-l border-gray-200 overflow-hidden flex flex-col h-[40vh] lg:h-auto">
+          {/* Header du panneau */}
+          <div className="p-4 border-b border-gray-200 bg-white">
+            <h3 className="text-lg font-semibold">
+              {filteredProperties.length} annonce{filteredProperties.length > 1 ? 's' : ''}
+            </h3>
+          </div>
+
+          {/* Liste des résultats */}
+          <div className="flex-1 overflow-y-auto">
+            {filteredProperties.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full p-8 text-center">
+                <Search size={48} className="text-gray-400 mb-4" />
+                <p className="text-gray-600 font-medium">Aucun résultat</p>
+                <p className="text-sm text-gray-400 mt-2">
+                  Essayez de modifier vos critères de recherche
+                </p>
+              </div>
+            ) : viewMode === 'gallery' ? (
+              <div className="grid grid-cols-1 gap-2 p-2">
+                {filteredProperties.map(property => (
+                  <PropertyCard key={property.id} property={property} variant="gallery" />
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-2 p-2">
+                {filteredProperties.map(property => (
+                  <div key={property.id} className="border-b border-gray-100 last:border-0">
+                    <PropertyCard property={property} variant="list" />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
-
-      <div className="flex-1 relative">
-        {loading ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p>Chargement...</p>
-            </div>
-          </div>
-        ) : (
-          <div 
-            ref={mapContainerRef}
-            className="h-full w-full"
-            style={{ minHeight: '500px' }}
-          />
-        )}
-      </div>
-
-      <Footer />
     </div>
   );
 };

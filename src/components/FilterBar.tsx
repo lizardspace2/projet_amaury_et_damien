@@ -1,6 +1,7 @@
 import React, { useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { PropertyType, ListingType } from "@/types/property";
-import { Search, Plus } from "lucide-react";
+import { Search, Plus, Map, LayoutGrid, List } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   Popover,
@@ -38,6 +39,13 @@ interface FilterBarProps {
   
   // Plus de critères
   onShowMoreFilters?: () => void;
+  
+  // Mode d'affichage
+  viewMode?: 'map' | 'gallery' | 'list';
+  onViewModeChange?: (mode: 'map' | 'gallery' | 'list') => void;
+  
+  // Listing type pour la navigation
+  currentListingType?: ListingType;
 }
 
 const FilterBar: React.FC<FilterBarProps> = ({
@@ -56,7 +64,13 @@ const FilterBar: React.FC<FilterBarProps> = ({
   maxM2,
   onM2Change,
   onShowMoreFilters,
+  viewMode,
+  onViewModeChange,
+  currentListingType,
 }) => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const currentPath = window.location.pathname;
   const listingTypeOptions = [
     { value: "all" as ListingType, label: "Toutes les annonces" },
     { value: "sale" as ListingType, label: "À vendre" },
@@ -95,7 +109,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
   };
 
   return (
-    <div className="bg-white border-b border-gray-200 px-4 py-3">
+    <div className="bg-white border-b border-gray-200 px-4 py-3 relative z-50">
       <div className="flex items-center gap-3 flex-wrap">
         {/* Mot-clé - Champ de recherche */}
         <div className="relative">
@@ -116,7 +130,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
               {listingTypeOptions.find(o => o.value === listingType)?.label || "Type d'annonce"}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-64" align="start">
+          <PopoverContent className="w-64 z-[100]" align="start">
             <div className="space-y-1">
               {listingTypeOptions.map((option) => (
                 <button
@@ -144,7 +158,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
                 : `${propertyTypes.length} types`}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-56" align="start">
+          <PopoverContent className="w-56 z-[100]" align="start">
             <div className="space-y-1">
               {propertyTypeOptions.map((option) => (
                 <label
@@ -171,7 +185,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
               {minPrice > 0 || maxPrice < 50000000 ? `Budget (${minPrice.toLocaleString()} - ${maxPrice.toLocaleString()} €)` : "Budget"}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-80" align="start">
+          <PopoverContent className="w-80 z-[100]" align="start">
             <div className="space-y-3">
               <div>
                 <label className="text-xs font-medium text-gray-700">Prix minimum</label>
@@ -204,7 +218,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
               {minRooms > 0 ? `${minRooms}+ pièces` : "Nb de pièces"}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-56" align="start">
+          <PopoverContent className="w-56 z-[100]" align="start">
             <div className="space-y-1">
               {roomOptions.map((rooms) => (
                 <button
@@ -228,7 +242,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
               Surface {minM2 > 0 || maxM2 < 50000 ? `(${minM2} - ${maxM2} m²)` : ""}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-80" align="start">
+          <PopoverContent className="w-80 z-[100]" align="start">
             <div className="space-y-3">
               <div>
                 <label className="text-xs font-medium text-gray-700">Surface min (m²)</label>
@@ -265,6 +279,44 @@ const FilterBar: React.FC<FilterBarProps> = ({
             Plus de critères
           </Button>
         )}
+
+        {/* Boutons de mode d'affichage à droite */}
+        <div className="ml-auto flex items-center gap-2 border border-gray-300 rounded-lg overflow-hidden">
+          <Button
+            variant={currentPath === '/map' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => navigate('/map')}
+            className="rounded-none h-8 px-3"
+            title="Vue Carte"
+          >
+            <Map size={16} />
+          </Button>
+          <Button
+            variant={currentPath === '/properties' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => {
+              const type = currentListingType || listingType || 'all';
+              navigate(`/properties?type=${type}`);
+            }}
+            className="rounded-none h-8 px-3 border-x border-gray-300"
+            title="Vue Galerie/Liste"
+          >
+            <LayoutGrid size={16} />
+          </Button>
+          <Button
+            variant={currentPath === '/properties' && viewMode === 'list' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => {
+              const type = currentListingType || listingType || 'all';
+              navigate(`/properties?type=${type}`);
+              onViewModeChange?.('list');
+            }}
+            className="rounded-none h-8 px-3"
+            title="Vue Liste"
+          >
+            <List size={16} />
+          </Button>
+        </div>
       </div>
     </div>
   );

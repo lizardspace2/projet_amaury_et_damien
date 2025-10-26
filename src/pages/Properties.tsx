@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { Search, Filter, MapPin, SlidersHorizontal, X } from "lucide-react";
+import { Search, Filter, MapPin, SlidersHorizontal, X, LayoutGrid, List, Map } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -19,7 +19,6 @@ import { Property, PropertyType, ListingType } from "@/types/property";
 import { supabase } from "@/lib/api/supabaseClient";
 import { getUserProfile } from "@/lib/profiles";
 import { FRENCH_CITIES } from "@/data/FrenchCities";
-import ViewOnMapButton from "@/components/ViewOnMapButton";
 
 // Properties Component
 const Properties = () => {
@@ -45,6 +44,7 @@ const Properties = () => {
   const [maxM2, setMaxM2] = useState(50000);
   const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'map' | 'gallery' | 'list'>('gallery');
   const [minPriceInput, setMinPriceInput] = useState(minPrice.toString());
   const [maxPriceInput, setMaxPriceInput] = useState(maxPrice.toString());
   const [minM2Input, setMinM2Input] = useState(minM2.toString());
@@ -1422,6 +1422,9 @@ const Properties = () => {
           setMinM2(min);
           setMaxM2(max);
         }}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        currentListingType={listingType}
       />
       
       <main className="flex-grow container mx-auto px-4 py-8">
@@ -1658,9 +1661,6 @@ const Properties = () => {
                  'Propriétés'}
               </h1>
               <div className="flex items-center gap-4">
-                <ViewOnMapButton
-                  listingType={listingType}
-                />
                 <Button
                   variant="ghost"
                   size="icon"
@@ -1696,14 +1696,54 @@ const Properties = () => {
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {filteredProperties.map(property => (
-                  <PropertyCard
-                    key={property.id}
-                    property={property}
-                  />
-                ))}
-              </div>
+              <>
+                {/* Header avec compteur */}
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <span>{filteredProperties.length} annonce{filteredProperties.length > 1 ? 's' : ''}</span>
+                  </div>
+                </div>
+
+                {/* Affichage selon le mode */}
+                {viewMode === 'list' ? (
+                  <div className="space-y-4">
+                    {filteredProperties.map(property => (
+                      <PropertyCard
+                        key={property.id}
+                        property={property}
+                        variant="list"
+                      />
+                    ))}
+                  </div>
+                ) : viewMode === 'map' ? (
+                  <div className="space-y-4">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+                      <Map size={48} className="mx-auto text-blue-500 mb-2" />
+                      <p className="text-blue-800 font-medium">Mode Carte</p>
+                      <p className="text-sm text-blue-600">Carte interactive à venir</p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                      {filteredProperties.map(property => (
+                        <PropertyCard
+                          key={property.id}
+                          property={property}
+                          variant="gallery"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    {filteredProperties.map(property => (
+                      <PropertyCard
+                        key={property.id}
+                        property={property}
+                        variant="gallery"
+                      />
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>

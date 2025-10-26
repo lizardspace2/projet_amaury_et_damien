@@ -31,13 +31,14 @@ interface NominatimResult {
 
 const AutocompleteOSM = ({ onPlaceChanged, value, onChange, placeholder, label }: AutocompleteOSMProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [suggestions, setSuggestions] = useState<NominatimResult[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (inputRef.current && !inputRef.current.contains(event.target as Node)) {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };
@@ -109,7 +110,7 @@ const AutocompleteOSM = ({ onPlaceChanged, value, onChange, placeholder, label }
   };
 
   return (
-    <div className="relative">
+    <div className="relative" ref={containerRef}>
       <label htmlFor={label} className="text-sm font-medium mb-2 block">{label}</label>
       <div className="relative">
         <input
@@ -122,12 +123,19 @@ const AutocompleteOSM = ({ onPlaceChanged, value, onChange, placeholder, label }
         />
         
         {isOpen && suggestions.length > 0 && (
-          <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+          <div className="absolute z-[9999] w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
             {suggestions.map((result, index) => (
               <button
                 key={index}
                 type="button"
-                onClick={() => handleSelectSuggestion(result)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleSelectSuggestion(result);
+                }}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                }}
                 className="w-full text-left px-3 py-2 hover:bg-gray-100 border-b last:border-b-0 focus:outline-none focus:bg-gray-100"
               >
                 <div className="font-medium text-sm">{result.display_name}</div>

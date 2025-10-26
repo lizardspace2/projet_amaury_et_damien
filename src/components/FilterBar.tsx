@@ -290,18 +290,21 @@ const FilterBar: React.FC<FilterBarProps> = ({
             title="Vue Carte"
           >
             <Map size={16} />
+            <span className="hidden lg:inline ml-1.5">Carte</span>
           </Button>
           <Button
-            variant={currentPath === '/properties' ? 'default' : 'ghost'}
+            variant={currentPath === '/properties' && viewMode !== 'list' ? 'default' : 'ghost'}
             size="sm"
             onClick={() => {
               const type = currentListingType || listingType || 'all';
               navigate(`/properties?type=${type}`);
+              onViewModeChange?.('gallery');
             }}
             className="rounded-none h-8 px-3 border-x border-gray-300"
-            title="Vue Galerie/Liste"
+            title="Vue Galerie"
           >
             <LayoutGrid size={16} />
+            <span className="hidden lg:inline ml-1.5">Galerie</span>
           </Button>
           <Button
             variant={currentPath === '/properties' && viewMode === 'list' ? 'default' : 'ghost'}
@@ -315,6 +318,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
             title="Vue Liste"
           >
             <List size={16} />
+            <span className="hidden lg:inline ml-1.5">Liste</span>
           </Button>
         </div>
       </div>

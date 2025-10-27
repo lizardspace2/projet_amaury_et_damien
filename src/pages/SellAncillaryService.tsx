@@ -34,6 +34,7 @@ interface AncillaryServiceInput {
 const SellAncillaryService = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
+  const [userProfile, setUserProfile] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<AncillaryServiceInput>({
     service_type: '',
@@ -56,6 +57,17 @@ const SellAncillaryService = () => {
     const checkAuth = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
+      
+      if (user) {
+        // Fetch user profile to check user_type
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('user_type')
+          .eq('user_id', user.id)
+          .single();
+        
+        setUserProfile(profile);
+      }
     };
 
     checkAuth();
@@ -277,12 +289,65 @@ const SellAncillaryService = () => {
         <section className="py-12 bg-slate-50">
           <div className="container">
             <div className="max-w-3xl mx-auto">
-              <Card className="shadow-md">
-                <CardHeader>
-                  <CardTitle>Informations sur le service</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Check if user is a Particular - only Professionals and Partners can publish */}
+              {userProfile?.user_type === 'Particulier' ? (
+                <Card className="shadow-md">
+                  <CardContent className="pt-6">
+                    <div className="text-center py-8">
+                      <h2 className="text-2xl font-bold text-slate-800 mb-4">
+                        Publication réservée aux professionnels
+                      </h2>
+                      <p className="text-slate-600 mb-6 max-w-lg mx-auto">
+                        La publication de services annexes est réservée aux professionnels et partenaires.
+                        En tant que particulier, vous pouvez consulter et contacter les annonces de services disponibles.
+                      </p>
+                      <div className="space-y-4">
+                        <Button 
+                          onClick={() => navigate('/ancillary-services')}
+                          className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700"
+                        >
+                          Consulter les annonces de services
+                        </Button>
+                        <div>
+                          <Button 
+                            onClick={() => navigate(-1)}
+                            variant="outline"
+                          >
+                            Retour
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : !user ? (
+                <Card className="shadow-md">
+                  <CardContent className="pt-6">
+                    <div className="text-center py-8">
+                      <h2 className="text-2xl font-bold text-slate-800 mb-4">
+                        Connexion requise
+                      </h2>
+                      <p className="text-slate-600 mb-6 max-w-lg mx-auto">
+                        Vous devez être connecté en tant que professionnel ou partenaire pour publier un service annexe.
+                      </p>
+                      <div className="space-y-4">
+                        <Button 
+                          onClick={() => navigate('/ancillary-services')}
+                          className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700"
+                        >
+                          Consulter les annonces
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card className="shadow-md">
+                  <CardHeader>
+                    <CardTitle>Informations sur le service</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Type de service */}
                     <div className="space-y-2">
                       <Label htmlFor="service_type" className="text-sm font-medium">
@@ -473,6 +538,7 @@ const SellAncillaryService = () => {
                   </form>
                 </CardContent>
               </Card>
+              )}
             </div>
           </div>
         </section>

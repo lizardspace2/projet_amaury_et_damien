@@ -234,15 +234,31 @@ const Account = () => {
                 </div>
               ) : (
                 <div className="bg-white rounded-lg p-8 text-center border border-estate-neutral-200">
-                  <p className="text-estate-neutral-600">
-                    Vous n'avez pas encore publié de service annexe.
-                  </p>
-                  <a
-                    href="/sell/ancillary-service"
-                    className="text-amber-500 hover:text-amber-600 font-medium mt-2 inline-block"
-                  >
-                    Publier un service annexe
-                  </a>
+                  {profile?.user_type === 'Particulier' ? (
+                    <>
+                      <p className="text-estate-neutral-600 mb-4">
+                        La publication de services annexes est réservée aux professionnels et partenaires.
+                      </p>
+                      <a
+                        href="/ancillary-services"
+                        className="text-amber-500 hover:text-amber-600 font-medium inline-block"
+                      >
+                        Consulter les annonces de services →
+                      </a>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-estate-neutral-600">
+                        Vous n'avez pas encore publié de service annexe.
+                      </p>
+                      <a
+                        href="/sell/ancillary-service"
+                        className="text-amber-500 hover:text-amber-600 font-medium mt-2 inline-block"
+                      >
+                        Publier un service annexe
+                      </a>
+                    </>
+                  )}
                 </div>
               )}
             </div>

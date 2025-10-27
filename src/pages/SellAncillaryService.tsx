@@ -125,10 +125,28 @@ const SellAncillaryService = () => {
     try {
       setIsSubmitting(true);
 
+      // Check if profile exists, create it if it doesn't
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('user_id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!profile) {
+        // Create profile if it doesn't exist
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert([{ user_id: user.id }]);
+
+        if (profileError) {
+          console.error('Error creating profile:', profileError);
+          throw profileError;
+        }
+      }
+
       const serviceData = {
         service_type: formData.service_type,
         description: formData.description,
-        estimated_cost: formData.estimated_cost ? parseFloat(formData.estimated_cost.toString()) : null,
         provider_name: formData.provider_name,
         provider_contact: formData.provider_contact,
         start_date: startDate ? format(startDate, 'yyyy-MM-dd') : format(new Date(), 'yyyy-MM-dd'),
@@ -160,52 +178,79 @@ const SellAncillaryService = () => {
     switch (formData.service_type) {
       case 'travaux':
         return (
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="surface">Surface (m²)</Label>
-              <Input
-                id="surface"
-                type="number"
-                onChange={(e) => handleMetadataChange('surface_m2', e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="pieces">Nombre de pièces</Label>
-              <Input
-                id="pieces"
-                type="number"
-                onChange={(e) => handleMetadataChange('nombre_pieces', e.target.value)}
-              />
-            </div>
-            <div className="space-y-2 col-span-2">
-              <Label htmlFor="type_travaux">Type de travaux</Label>
-              <Input
-                id="type_travaux"
-                placeholder="Ex: Peinture, Plomberie, Électricité"
-                onChange={(e) => handleMetadataChange('type_travaux', e.target.value)}
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="type_travaux">Type de travaux proposé</Label>
+            <Input
+              id="type_travaux"
+              placeholder="Ex: Peinture, Plomberie, Électricité, Rénovation"
+              onChange={(e) => handleMetadataChange('type_travaux', e.target.value)}
+            />
           </div>
         );
       case 'demenagement':
         return (
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="volume">Volume (m³)</Label>
-              <Input
-                id="volume"
-                type="number"
-                onChange={(e) => handleMetadataChange('volume', e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="distance">Distance (km)</Label>
-              <Input
-                id="distance"
-                type="number"
-                onChange={(e) => handleMetadataChange('distance', e.target.value)}
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="types_demenagement">Types de déménagements proposés</Label>
+            <Input
+              id="types_demenagement"
+              placeholder="Ex: Appartements, Maisons, Locaux commerciaux"
+              onChange={(e) => handleMetadataChange('types_demenagement', e.target.value)}
+            />
+          </div>
+        );
+      case 'diagnostic':
+        return (
+          <div className="space-y-2">
+            <Label htmlFor="types_diagnostics">Types de diagnostics proposés</Label>
+            <Input
+              id="types_diagnostics"
+              placeholder="Ex: DPE, Amiante, Électricité, Gaz"
+              onChange={(e) => handleMetadataChange('types_diagnostics', e.target.value)}
+            />
+          </div>
+        );
+      case 'nettoyage':
+        return (
+          <div className="space-y-2">
+            <Label htmlFor="types_nettoyage">Types de nettoyage proposés</Label>
+            <Input
+              id="types_nettoyage"
+              placeholder="Ex: Nettoyage fin de chantier, Nettoyage régulier"
+              onChange={(e) => handleMetadataChange('types_nettoyage', e.target.value)}
+            />
+          </div>
+        );
+      case 'assurance':
+        return (
+          <div className="space-y-2">
+            <Label htmlFor="types_assurances">Types d'assurances proposées</Label>
+            <Input
+              id="types_assurances"
+              placeholder="Ex: Assurance habitation, PNO, Responsabilité civile"
+              onChange={(e) => handleMetadataChange('types_assurances', e.target.value)}
+            />
+          </div>
+        );
+      case 'amenagement':
+        return (
+          <div className="space-y-2">
+            <Label htmlFor="types_amenagement">Types d'aménagement proposés</Label>
+            <Input
+              id="types_amenagement"
+              placeholder="Ex: Cloisons, Cuisine, Salle de bain"
+              onChange={(e) => handleMetadataChange('types_amenagement', e.target.value)}
+            />
+          </div>
+        );
+      case 'autre':
+        return (
+          <div className="space-y-2">
+            <Label htmlFor="specialisation">Spécialisation</Label>
+            <Input
+              id="specialisation"
+              placeholder="Ex: Décoration, Conseil, Design"
+              onChange={(e) => handleMetadataChange('specialisation', e.target.value)}
+            />
           </div>
         );
       default:
@@ -347,21 +392,6 @@ const SellAncillaryService = () => {
                           />
                         </div>
                       </div>
-                    </div>
-
-                    {/* Coût estimé */}
-                    <div className="space-y-2">
-                      <Label htmlFor="estimated_cost">Coût estimé (€)</Label>
-                      <Input
-                        id="estimated_cost"
-                        name="estimated_cost"
-                        type="number"
-                        step="0.01"
-                        value={formData.estimated_cost || ''}
-                        onChange={handleInputChange}
-                        placeholder="Prix estimé du service"
-                        className="h-11"
-                      />
                     </div>
 
                     {/* Période de validité */}

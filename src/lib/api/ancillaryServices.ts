@@ -12,6 +12,7 @@ export interface AncillaryService {
     website?: string;
   };
   status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+  is_active: boolean;
   start_date: string;
   end_date?: string;
   requested_by: string;

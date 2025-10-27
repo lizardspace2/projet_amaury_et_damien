@@ -474,6 +474,19 @@ const Navbar = () => {
     },
   ];
 
+  const ancillaryServicesLinks = {
+    Types: [
+      { title: "Tous les services annexes", href: "/ancillary-services" },
+      { title: "Déménagement", href: "/ancillary-services?type=demenagement" },
+      { title: "Travaux", href: "/ancillary-services?type=travaux" },
+      { title: "Diagnostic", href: "/ancillary-services?type=diagnostic" },
+      { title: "Nettoyage", href: "/ancillary-services?type=nettoyage" },
+      { title: "Assurance", href: "/ancillary-services?type=assurance" },
+      { title: "Aménagement", href: "/ancillary-services?type=amenagement" },
+      { title: "Autre", href: "/ancillary-services?type=autre" },
+    ]
+  };
+
   const otherLinks = [
     { 
       name: 'Emprunter', 
@@ -482,8 +495,9 @@ const Navbar = () => {
       mobileIcon: <Search size={18} />
     },
     { 
-      name: 'Services de déménagement', 
-      path: '/moving-services',
+      name: 'Services annexes', 
+      path: '/ancillary-services',
+      dropdown: ancillaryServicesLinks,
       mobileIcon: <Truck size={18} />
     },
     { 
@@ -576,7 +590,7 @@ const Navbar = () => {
                         <NavigationMenuTrigger className="group data-[state=open]:bg-teal-50 data-[state=open]:text-teal-700">
                           {link.name}
                         </NavigationMenuTrigger>
-                        <NavigationMenuContent align={link.name === 'Ventes aux enchères' ? 'center' : 'start'}>
+                        <NavigationMenuContent>
                           <div className={`grid gap-6 p-6 ${
                             link.name === 'Ventes aux enchères' ? 'w-[500px] grid-cols-3' : 
                             link.name === 'Louer' ? 'w-[300px] grid-cols-1' : 

@@ -41,7 +41,10 @@ CREATE TABLE IF NOT EXISTS public.ancillary_services (
   -- Tracking utilisateur
   requested_by uuid REFERENCES public.profiles(user_id),
   created_at timestamptz DEFAULT now(),
-  updated_at timestamptz DEFAULT now()
+  updated_at timestamptz DEFAULT now(),
+
+  -- Active status (automatically managed based on dates)
+  is_active boolean DEFAULT true
 );
 
 -- Add indexes for better performance
@@ -49,6 +52,7 @@ CREATE INDEX IF NOT EXISTS idx_ancillary_services_service_type ON public.ancilla
 CREATE INDEX IF NOT EXISTS idx_ancillary_services_status ON public.ancillary_services(status);
 CREATE INDEX IF NOT EXISTS idx_ancillary_services_requested_by ON public.ancillary_services(requested_by);
 CREATE INDEX IF NOT EXISTS idx_ancillary_services_created_at ON public.ancillary_services(created_at);
+CREATE INDEX IF NOT EXISTS idx_ancillary_services_is_active ON public.ancillary_services(is_active);
 
 -- Enable Row Level Security
 ALTER TABLE public.ancillary_services ENABLE ROW LEVEL SECURITY;
@@ -74,4 +78,26 @@ CREATE POLICY "Allow users to update own services" ON public.ancillary_services
 -- Policy: Users can delete their own services
 CREATE POLICY "Allow users to delete own services" ON public.ancillary_services
   FOR DELETE USING (auth.uid() = requested_by);
+
+-- Function to automatically update is_active based on dates
+CREATE OR REPLACE FUNCTION update_ancillary_service_active_status()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- If end_date is not set, service is active if start_date is today or in the past
+  -- If end_date is set, service is active if current date is between start_date and end_date
+  IF NEW.end_date IS NULL THEN
+    NEW.is_active := NEW.start_date <= CURRENT_DATE;
+  ELSE
+    NEW.is_active := NEW.start_date <= CURRENT_DATE AND NEW.end_date >= CURRENT_DATE;
+  END IF;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger to automatically update is_active when inserting or updating
+CREATE TRIGGER trigger_update_ancillary_service_active
+BEFORE INSERT OR UPDATE ON public.ancillary_services
+FOR EACH ROW
+EXECUTE FUNCTION update_ancillary_service_active_status();
 

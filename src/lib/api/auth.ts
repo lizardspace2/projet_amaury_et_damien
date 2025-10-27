@@ -32,8 +32,11 @@ export const signUpWithEmail = async (
   email: string, 
   password: string, 
   profileData?: {
+    user_type?: string;
     phone?: string;
     address?: string;
+    profession?: string;
+    siret?: string;
     instagram?: string;
     twitter?: string;
     facebook?: string;
@@ -61,8 +64,11 @@ export const signUpWithEmail = async (
         .upsert({
           user_id: authData.user.id,
           email: authData.user.email,
+          user_type: profileData?.user_type || null,
           phone: profileData?.phone || null,
           address: profileData?.address || null,
+          profession: profileData?.profession || null,
+          siret: profileData?.siret || null,
           instagram: profileData?.instagram || null,
           twitter: profileData?.twitter || null,
           facebook: profileData?.facebook || null,
@@ -142,8 +148,11 @@ export const getCompleteUserProfile = async () => {
     return {
       ...user,
       profile: {
+        user_type: profile.user_type,
         phone: profile.phone,
         address: profile.address,
+        profession: profile.profession,
+        siret: profile.siret,
         instagram: profile.instagram,
         twitter: profile.twitter,
         facebook: profile.facebook,
@@ -161,8 +170,11 @@ export const getCompleteUserProfile = async () => {
  * Met à jour le profil utilisateur
  */
 export const updateUserProfile = async (profileData: {
+  user_type?: string;
   phone?: string;
   address?: string;
+  profession?: string;
+  siret?: string;
   instagram?: string;
   twitter?: string;
   facebook?: string;

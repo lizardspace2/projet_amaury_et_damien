@@ -37,6 +37,21 @@ const Account = () => {
     }
   });
 
+  const { data: profile } = useQuery({
+    queryKey: ['user-profile'],
+    queryFn: async () => {
+      if (!user) return null;
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user
+  });
+
   const { data: myProperties = [], isLoading: loadingMyProperties } = useQuery({
     queryKey: ['my-properties'],
     queryFn: getMyProperties,
@@ -123,6 +138,11 @@ const Account = () => {
             <p className="text-estate-neutral-600">
               {user?.email}
             </p>
+            {profile?.user_type && (
+              <p className="text-sm text-teal-600 font-medium mt-1">
+                {profile.user_type === 'Particulier' ? '👤 Particulier' : profile.user_type === 'Professionnelle' ? '💼 Professionnelle' : '🤝 Partenaire'}
+              </p>
+            )}
           </div>
         </div>
 

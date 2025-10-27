@@ -1,12 +1,13 @@
 import { supabase } from "./api/supabaseClient";
 
-export const createUserProfile = async (userId: string, email: string) => {
+export const createUserProfile = async (userId: string, email: string, userType?: string) => {
   const { data, error } = await supabase
     .from('profiles')
     .insert([
       { 
         user_id: userId,
         email,
+        user_type: userType || null,
         created_at: new Date().toISOString()
       }
     ]);

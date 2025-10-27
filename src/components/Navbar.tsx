@@ -652,13 +652,13 @@ const Navbar = () => {
                 <PopoverContent className="w-64 p-3" align="end">
                   <div className="flex flex-col gap-1">
                     <Button asChild variant="ghost" className="justify-start h-10 rounded-lg">
-                      <Link to="/account" className="flex items-center gap-3">
+                      <Link to="/account/profile" className="flex items-center gap-3">
                         <User size={18} className="text-slate-600" />
                         <span>Mon profil</span>
                       </Link>
                     </Button>
                     <Button asChild variant="ghost" className="justify-start h-10 rounded-lg">
-                      <Link to="/account" className="flex items-center gap-3">
+                      <Link to="/account/myads" className="flex items-center gap-3">
                         <Home size={18} className="text-slate-600" />
                         <span>Mes annonces</span>
                       </Link>
@@ -840,13 +840,13 @@ const Navbar = () => {
                 </div>
               </div>
               <Button asChild variant="ghost" className="justify-start h-10 rounded-lg text-sm">
-                <Link to="/account" onClick={closeMobileMenu}>
+                <Link to="/account/profile" onClick={closeMobileMenu}>
                   <User size={16} className="mr-2" />
                   Mon profil
                 </Link>
               </Button>
               <Button asChild variant="ghost" className="justify-start h-10 rounded-lg text-sm">
-                <Link to="/account" onClick={closeMobileMenu}>
+                <Link to="/account/myads" onClick={closeMobileMenu}>
                   <Home size={16} className="mr-2" />
                   Mes annonces
                 </Link>

@@ -31,6 +31,8 @@ import EditProperty from "./pages/EditProperty"; // Import EditProperty
 import MapPage from "./pages/MapPage"; // Import MapPage
 import SellAncillaryService from "./pages/SellAncillaryService"; // Import SellAncillaryService
 import AncillaryServices from "./pages/AncillaryServices"; // Import AncillaryServices
+import Profile from "./pages/account/Profile"; // Import Profile
+import MyAds from "./pages/account/MyAds"; // Import MyAds
 import { supabase } from "@/lib/api/supabaseClient";
 import { useEffect, useState } from "react";
 import { CurrencyProvider } from './CurrencyContext';
@@ -90,10 +92,11 @@ const App = () => {
                 <Route path="/auctions/room" element={<AuctionRoomPage />} />
                 <Route path="/account/auctions" element={<MyAuctions />} />
                 <Route path="/auction/:auctionId" element={<AuctionDetailPage />} />
-                <Route
-                  path="/account"
-                  element={<Account />}
-                />
+                <Route path="/account" element={<Account />}>
+                  <Route path="profile" element={<Profile />} />
+                  <Route path="myads" element={<MyAds />} />
+                  <Route index element={<MyAds />} />
+                </Route>
                 <Route path="/verification-error" element={<VerificationError />} />
                 <Route path="/edit-property/:propertyId" element={
                   <Wrapper apiKey={apiKey} libraries={["places"]}>

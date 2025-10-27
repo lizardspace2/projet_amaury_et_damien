@@ -1,0 +1,279 @@
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/lib/api/supabaseClient';
+import { toast } from 'sonner';
+import { Separator } from '@/components/ui/separator';
+
+const Profile: React.FC = () => {
+  const queryClient = useQueryClient();
+  const [formData, setFormData] = useState({
+    phone: '',
+    address: '',
+    email: '',
+    instagram: '',
+    twitter: '',
+    facebook: '',
+    profession: '',
+    siret: '',
+    user_type: '',
+  });
+
+  const { data: user } = useQuery({
+    queryKey: ['user'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      return user;
+    }
+  });
+
+  const { data: profile, isLoading } = useQuery({
+    queryKey: ['user-profile'],
+    queryFn: async () => {
+      if (!user) return null;
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user
+  });
+
+  // Initialize form data when profile loads
+  React.useEffect(() => {
+    if (profile) {
+      setFormData({
+        phone: profile.phone || '',
+        address: profile.address || '',
+        email: profile.email || user?.email || '',
+        instagram: profile.instagram || '',
+        twitter: profile.twitter || '',
+        facebook: profile.facebook || '',
+        profession: profile.profession || '',
+        siret: profile.siret || '',
+        user_type: profile.user_type || '',
+      });
+    }
+  }, [profile, user?.email]);
+
+  const updateProfileMutation = useMutation({
+    mutationFn: async (data: any) => {
+      if (!user) throw new Error('No user');
+      const { error } = await supabase
+        .from('profiles')
+        .update(data)
+        .eq('user_id', user.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success('Profil mis à jour avec succès');
+      queryClient.invalidateQueries({ queryKey: ['user-profile'] });
+    },
+    onError: (error) => {
+      toast.error('Erreur lors de la mise à jour du profil');
+      console.error(error);
+    },
+  });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateProfileMutation.mutate(formData);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="py-4">
+        <div className="flex justify-center py-8">
+          <p>Chargement...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="py-4">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-slate-800 mb-2">
+          Mon profil
+        </h1>
+        <p className="text-slate-600">
+          Gérez vos informations personnelles
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit}>
+        <Card>
+          <CardHeader>
+            <CardTitle>Informations de contact</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input 
+                  id="email" 
+                  name="email"
+                  type="email" 
+                  value={formData.email} 
+                  onChange={handleInputChange}
+                  placeholder="Votre email"
+                  disabled
+                />
+                <p className="text-xs text-slate-500">L'email ne peut pas être modifié ici</p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone">Téléphone</Label>
+                <Input 
+                  id="phone" 
+                  name="phone"
+                  type="tel" 
+                  value={formData.phone} 
+                  onChange={handleInputChange}
+                  placeholder="+33 1 23 45 67 89"
+                />
+              </div>
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="address">Adresse</Label>
+                <Textarea 
+                  id="address" 
+                  name="address"
+                  value={formData.address} 
+                  onChange={handleInputChange}
+                  placeholder="Votre adresse complète"
+                  rows={2}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>Réseaux sociaux</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="instagram">Instagram</Label>
+                <Input 
+                  id="instagram" 
+                  name="instagram"
+                  value={formData.instagram} 
+                  onChange={handleInputChange}
+                  placeholder="@username"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="twitter">Twitter</Label>
+                <Input 
+                  id="twitter" 
+                  name="twitter"
+                  value={formData.twitter} 
+                  onChange={handleInputChange}
+                  placeholder="@username"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="facebook">Facebook</Label>
+                <Input 
+                  id="facebook" 
+                  name="facebook"
+                  value={formData.facebook} 
+                  onChange={handleInputChange}
+                  placeholder="Lien vers votre profil"
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>Informations professionnelles</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="profession">Profession</Label>
+                <Input 
+                  id="profession" 
+                  name="profession"
+                  value={formData.profession} 
+                  onChange={handleInputChange}
+                  placeholder="Votre profession"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="siret">SIRET</Label>
+                <Input 
+                  id="siret" 
+                  name="siret"
+                  value={formData.siret} 
+                  onChange={handleInputChange}
+                  placeholder="14 chiffres"
+                  maxLength={14}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="user_type">Type d'utilisateur</Label>
+                <Input 
+                  id="user_type" 
+                  name="user_type"
+                  value={formData.user_type || ''} 
+                  disabled
+                />
+                <p className="text-xs text-slate-500">Le type d'utilisateur ne peut pas être modifié</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="flex justify-end gap-4 mt-6">
+          <Button 
+            type="button" 
+            variant="outline"
+            onClick={() => {
+              if (profile) {
+                setFormData({
+                  phone: profile.phone || '',
+                  address: profile.address || '',
+                  email: profile.email || user?.email || '',
+                  instagram: profile.instagram || '',
+                  twitter: profile.twitter || '',
+                  facebook: profile.facebook || '',
+                  profession: profile.profession || '',
+                  siret: profile.siret || '',
+                  user_type: profile.user_type || '',
+                });
+              }
+            }}
+          >
+            Annuler
+          </Button>
+          <Button 
+            type="submit" 
+            className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700"
+            disabled={updateProfileMutation.isPending}
+          >
+            {updateProfileMutation.isPending ? 'Enregistrement...' : 'Enregistrer les modifications'}
+          </Button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+export default Profile;
+

@@ -57,6 +57,25 @@ const Hero = () => {
             Nous vous aidons à trouver la maison de vos rêves. Parcourez notre catalogue de propriétés et trouvez celle qui vous convient le mieux.
           </p>
 
+          {/* Category Buttons */}
+          <div className="flex flex-wrap justify-center gap-4 mb-8">
+            <Button
+              className="bg-transparent hover:bg-white/10 text-white border-2 border-white/50 hover:border-white px-6 py-3 text-base md:text-lg rounded-lg font-semibold"
+            >
+              Partenaire
+            </Button>
+            <Button
+              className="bg-transparent hover:bg-white/10 text-white border-2 border-white/50 hover:border-white px-6 py-3 text-base md:text-lg rounded-lg font-semibold"
+            >
+              Professionnelle
+            </Button>
+            <Button
+              className="bg-transparent hover:bg-white/10 text-white border-2 border-white/50 hover:border-white px-6 py-3 text-base md:text-lg rounded-lg font-semibold"
+            >
+              Particulier
+            </Button>
+          </div>
+
           {/* Action Buttons */}
           <div className="max-w-md mx-auto space-y-4">
             <Button

@@ -266,6 +266,7 @@ const Step3 = ({ formData, handleInputChange }: { formData: any; handleInputChan
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
+  const [isPublishDialogOpen, setIsPublishDialogOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   const [signupStep, setSignupStep] = useState(0);
   const [showTypeSelection, setShowTypeSelection] = useState(false);
@@ -677,14 +678,15 @@ const Navbar = () => {
                 </Button>
               </div>
             )}
-            <Button asChild className="bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 shadow-md hover:shadow-lg transition-all px-4">
-              <Link to="/sell" className="flex items-center gap-2 font-semibold">
-                <PlusCircle size={18} />
-                Publier
-                <Badge variant="secondary" className="ml-1 bg-white/20 text-white border-0 text-xs">
-                  Gratuit
-                </Badge>
-              </Link>
+            <Button 
+              onClick={() => setIsPublishDialogOpen(true)}
+              className="bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 shadow-md hover:shadow-lg transition-all px-4 flex items-center gap-2 font-semibold"
+            >
+              <PlusCircle size={18} />
+              Publier
+              <Badge variant="secondary" className="ml-1 bg-white/20 text-white border-0 text-xs">
+                Gratuit
+              </Badge>
             </Button>
           </div>
         </div>
@@ -860,14 +862,18 @@ const Navbar = () => {
             </div>
           )}
           
-          <Button asChild className="bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 h-10 rounded-lg mt-1 font-semibold text-sm">
-            <Link to="/sell" onClick={closeMobileMenu}>
-              <PlusCircle size={16} className="mr-2" />
-              Publier une annonce
-              <Badge variant="secondary" className="ml-2 bg-white/20 text-white border-0 text-xs">
-                Gratuit
-              </Badge>
-            </Link>
+          <Button 
+            onClick={() => {
+              setIsPublishDialogOpen(true);
+              closeMobileMenu();
+            }}
+            className="bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 h-10 rounded-lg mt-1 font-semibold text-sm"
+          >
+            <PlusCircle size={16} className="mr-2" />
+            Publier une annonce
+            <Badge variant="secondary" className="ml-2 bg-white/20 text-white border-0 text-xs">
+              Gratuit
+            </Badge>
           </Button>
         </nav>
       </div>
@@ -989,6 +995,52 @@ const Navbar = () => {
                 </button>
               </p>
             )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Publish Type Selection Dialog */}
+      <Dialog open={isPublishDialogOpen} onOpenChange={setIsPublishDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-center text-slate-800">
+              Publier une annonce
+            </DialogTitle>
+            <DialogDescription className="text-center text-slate-600">
+              Choisissez le type d'annonce que vous souhaitez publier
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3 mt-6">
+            <Button
+              onClick={() => {
+                navigate("/sell");
+                setIsPublishDialogOpen(false);
+              }}
+              variant="outline"
+              className="w-full h-24 flex flex-col items-center justify-center gap-3 hover:bg-teal-50 hover:border-teal-500 border-2"
+            >
+              <Building size={32} className="text-teal-600" />
+              <div className="flex flex-col">
+                <span className="font-semibold text-lg">Annonce immobilière</span>
+                <span className="text-sm text-slate-500">Vente, location, baux commerciaux</span>
+              </div>
+            </Button>
+
+            <Button
+              onClick={() => {
+                navigate("/sell/ancillary-service");
+                setIsPublishDialogOpen(false);
+              }}
+              variant="outline"
+              className="w-full h-24 flex flex-col items-center justify-center gap-3 hover:bg-amber-50 hover:border-amber-500 border-2"
+            >
+              <Truck size={32} className="text-amber-600" />
+              <div className="flex flex-col">
+                <span className="font-semibold text-lg">Services annexes</span>
+                <span className="text-sm text-slate-500">Déménagement, travaux, diagnostics</span>
+              </div>
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

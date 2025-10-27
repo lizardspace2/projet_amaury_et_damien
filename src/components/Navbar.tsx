@@ -138,81 +138,89 @@ const Step1 = ({ formData, handleInputChange }: { formData: any; handleInputChan
   </div>
 );
 
-const Step2 = ({ formData, handleInputChange, setFormData }: { formData: any; handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void; setFormData: React.Dispatch<React.SetStateAction<any>> }) => (
-  <div className="space-y-4">
-    <div className="space-y-2">
-      <Label htmlFor="phone" className="text-sm font-medium">Téléphone</Label>
-      <Input 
-        id="phone" 
-        type="tel" 
-        placeholder="+33 1 23 45 67 89" 
-        value={formData.phone} 
-        onChange={handleInputChange} 
-        className="h-11"
-      />
+const Step2 = ({ formData, handleInputChange, setFormData }: { formData: any; handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void; setFormData: React.Dispatch<React.SetStateAction<any>> }) => {
+  const showProfessionalFields = formData.user_type === 'Professionnelle' || formData.user_type === 'Partenaire';
+  
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="phone" className="text-sm font-medium">Téléphone</Label>
+        <Input 
+          id="phone" 
+          type="tel" 
+          placeholder="+33 1 23 45 67 89" 
+          value={formData.phone} 
+          onChange={handleInputChange} 
+          className="h-11"
+        />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="address" className="text-sm font-medium">Adresse</Label>
+        <Input 
+          id="address" 
+          type="text" 
+          placeholder="Votre adresse complète" 
+          value={formData.address} 
+          onChange={handleInputChange} 
+          className="h-11"
+        />
+      </div>
+      {showProfessionalFields && (
+        <>
+          <div className="space-y-2">
+            <Label htmlFor="profession" className="text-sm font-medium">Profession</Label>
+            <Select value={formData.profession} onValueChange={(value) => setFormData(prev => ({ ...prev, profession: value }))}>
+              <SelectTrigger className="h-11">
+                <SelectValue placeholder="Sélectionnez votre profession" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="regie">Régie</SelectItem>
+                <SelectItem value="service-transaction">Service transaction</SelectItem>
+                <SelectItem value="service-location">Service location</SelectItem>
+                <SelectItem value="agent-immobilier">Agent immobilier</SelectItem>
+                <SelectItem value="mandataires">Mandataires</SelectItem>
+                <SelectItem value="independants-franchises">Indépendants ou franchisés</SelectItem>
+                <SelectItem value="courtier">Courtier</SelectItem>
+                <SelectItem value="notaire">Notaire</SelectItem>
+                <SelectItem value="banque">Banque</SelectItem>
+                <SelectItem value="entreprise-travaux">Entreprise de travaux</SelectItem>
+                <SelectItem value="diagnostiqueur">Diagnostiqueur</SelectItem>
+                <SelectItem value="assureurs">Assureurs</SelectItem>
+                <SelectItem value="demenageurs">Déménageurs</SelectItem>
+                <SelectItem value="artisans">Artisans</SelectItem>
+                <SelectItem value="gestionnaire-patrimoine">Gestionnaire de patrimoine</SelectItem>
+                <SelectItem value="geometre">Géomètre</SelectItem>
+                <SelectItem value="metreur">Métreur</SelectItem>
+                <SelectItem value="architecte">Architecte</SelectItem>
+                <SelectItem value="assistant-maitrise-ouvrage">Assistant maîtrise d'ouvrage</SelectItem>
+                <SelectItem value="promoteur">Promoteur</SelectItem>
+                <SelectItem value="lotisseur">Lotisseur</SelectItem>
+                <SelectItem value="fonciere">Foncière</SelectItem>
+                <SelectItem value="avocat">Avocat</SelectItem>
+                <SelectItem value="expert-comptable">Expert-comptable</SelectItem>
+                <SelectItem value="decorateur">Décorateur</SelectItem>
+                <SelectItem value="autre">Autre</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="siret" className="text-sm font-medium">Numéro SIRET</Label>
+            <Input 
+              id="siret" 
+              type="text" 
+              placeholder="12345678901234" 
+              value={formData.siret} 
+              onChange={handleInputChange} 
+              className="h-11"
+              maxLength={14}
+            />
+            <p className="text-xs text-slate-500">14 chiffres (optionnel)</p>
+          </div>
+        </>
+      )}
     </div>
-    <div className="space-y-2">
-      <Label htmlFor="address" className="text-sm font-medium">Adresse</Label>
-      <Input 
-        id="address" 
-        type="text" 
-        placeholder="Votre adresse complète" 
-        value={formData.address} 
-        onChange={handleInputChange} 
-        className="h-11"
-      />
-    </div>
-    <div className="space-y-2">
-      <Label htmlFor="profession" className="text-sm font-medium">Profession</Label>
-      <Select value={formData.profession} onValueChange={(value) => setFormData(prev => ({ ...prev, profession: value }))}>
-        <SelectTrigger className="h-11">
-          <SelectValue placeholder="Sélectionnez votre profession" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="regie">Régie</SelectItem>
-          <SelectItem value="service-transaction">Service transaction</SelectItem>
-          <SelectItem value="service-location">Service location</SelectItem>
-          <SelectItem value="agent-immobilier">Agent immobilier</SelectItem>
-          <SelectItem value="mandataires">Mandataires</SelectItem>
-          <SelectItem value="independants-franchises">Indépendants ou franchisés</SelectItem>
-          <SelectItem value="courtier">Courtier</SelectItem>
-          <SelectItem value="notaire">Notaire</SelectItem>
-          <SelectItem value="banque">Banque</SelectItem>
-          <SelectItem value="entreprise-travaux">Entreprise de travaux</SelectItem>
-          <SelectItem value="diagnostiqueur">Diagnostiqueur</SelectItem>
-          <SelectItem value="assureurs">Assureurs</SelectItem>
-          <SelectItem value="demenageurs">Déménageurs</SelectItem>
-          <SelectItem value="artisans">Artisans</SelectItem>
-          <SelectItem value="gestionnaire-patrimoine">Gestionnaire de patrimoine</SelectItem>
-          <SelectItem value="geometre">Géomètre</SelectItem>
-          <SelectItem value="metreur">Métreur</SelectItem>
-          <SelectItem value="architecte">Architecte</SelectItem>
-          <SelectItem value="assistant-maitrise-ouvrage">Assistant maîtrise d'ouvrage</SelectItem>
-          <SelectItem value="promoteur">Promoteur</SelectItem>
-          <SelectItem value="lotisseur">Lotisseur</SelectItem>
-          <SelectItem value="fonciere">Foncière</SelectItem>
-          <SelectItem value="avocat">Avocat</SelectItem>
-          <SelectItem value="expert-comptable">Expert-comptable</SelectItem>
-          <SelectItem value="decorateur">Décorateur</SelectItem>
-          <SelectItem value="autre">Autre</SelectItem>
-        </SelectContent>
-      </Select>
-    </div>
-    <div className="space-y-2">
-      <Label htmlFor="siret" className="text-sm font-medium">Numéro SIRET</Label>
-      <Input 
-        id="siret" 
-        type="text" 
-        placeholder="12345678901234" 
-        value={formData.siret} 
-        onChange={handleInputChange} 
-        className="h-11"
-        maxLength={14}
-      />
-      <p className="text-xs text-slate-500">14 chiffres (optionnel)</p>
-    </div>
-  </div>
-);
+  );
+};
 
 const Step3 = ({ formData, handleInputChange }: { formData: any; handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void }) => (
   <div className="space-y-4">
@@ -259,8 +267,10 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
-  const [signupStep, setSignupStep] = useState(1);
+  const [signupStep, setSignupStep] = useState(0);
+  const [showTypeSelection, setShowTypeSelection] = useState(false);
   const [formData, setFormData] = useState({
+    user_type: '',
     email: '',
     password: '',
     phone: '',
@@ -337,6 +347,7 @@ const Navbar = () => {
 
   const resetForm = () => {
     setFormData({ 
+      user_type: '',
       email: '', 
       password: '', 
       phone: '', 
@@ -347,7 +358,14 @@ const Navbar = () => {
       twitter: '', 
       facebook: '' 
     });
-    setSignupStep(1);
+    setSignupStep(0);
+    setShowTypeSelection(false);
+  };
+
+  const handleTypeSelection = (userType: string) => {
+    setFormData(prev => ({ ...prev, user_type: userType }));
+    setShowTypeSelection(true);
+    setSignupStep(0);
   };
 
   const toggleAuthMode = () => {
@@ -881,17 +899,49 @@ const Navbar = () => {
                 Se connecter
               </Button>
             </form>
+          ) : !showTypeSelection ? (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 gap-3">
+                <Button
+                  type="button"
+                  onClick={() => handleTypeSelection('Particulier')}
+                  variant="outline"
+                  className="h-16 flex flex-col items-center justify-center gap-2 hover:bg-teal-50 hover:border-teal-500"
+                >
+                  <span className="text-2xl">👤</span>
+                  <span className="font-semibold">Particulier</span>
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => handleTypeSelection('Professionnelle')}
+                  variant="outline"
+                  className="h-16 flex flex-col items-center justify-center gap-2 hover:bg-teal-50 hover:border-teal-500"
+                >
+                  <span className="text-2xl">💼</span>
+                  <span className="font-semibold">Professionnelle</span>
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => handleTypeSelection('Partenaire')}
+                  variant="outline"
+                  className="h-16 flex flex-col items-center justify-center gap-2 hover:bg-teal-50 hover:border-teal-500"
+                >
+                  <span className="text-2xl">🤝</span>
+                  <span className="font-semibold">Partenaire</span>
+                </Button>
+              </div>
+            </div>
           ) : (
             <div className="space-y-6">
-              <StepIndicator currentStep={signupStep} totalSteps={3} />
+              <StepIndicator currentStep={signupStep + 1} totalSteps={3} />
               
               <form onSubmit={handleEmailSignUp} className="space-y-4">
-                {signupStep === 1 && <Step1 formData={formData} handleInputChange={handleInputChange} />}
-                {signupStep === 2 && <Step2 formData={formData} handleInputChange={handleInputChange} setFormData={setFormData} />}
-                {signupStep === 3 && <Step3 formData={formData} handleInputChange={handleInputChange} />}
+                {signupStep === 0 && <Step1 formData={formData} handleInputChange={handleInputChange} />}
+                {signupStep === 1 && <Step2 formData={formData} handleInputChange={handleInputChange} setFormData={setFormData} />}
+                {signupStep === 2 && <Step3 formData={formData} handleInputChange={handleInputChange} />}
                 
                 <div className="flex justify-between pt-4">
-                  {signupStep > 1 && (
+                  {signupStep > 0 && (
                     <Button 
                       type="button" 
                       variant="outline" 
@@ -902,7 +952,7 @@ const Navbar = () => {
                     </Button>
                   )}
                   
-                  {signupStep < 3 ? (
+                  {signupStep < 2 ? (
                     <Button 
                       type="button" 
                       onClick={nextStep}

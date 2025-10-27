@@ -120,8 +120,8 @@ const MyAds: React.FC = () => {
     <div className="py-4">
       <Tabs defaultValue="properties" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="properties">Propriétés immobilières</TabsTrigger>
-          <TabsTrigger value="services">Services annexes</TabsTrigger>
+          <TabsTrigger value="properties">Mes annonces immobilières</TabsTrigger>
+          <TabsTrigger value="services">Mes annonces de services</TabsTrigger>
         </TabsList>
 
         <TabsContent value="properties">

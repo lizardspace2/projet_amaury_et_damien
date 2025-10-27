@@ -42,25 +42,6 @@ const StepIndicator = ({ currentStep, totalSteps }: { currentStep: number; total
   </div>
 );
 
-const Step0 = ({ formData, setFormData }: { formData: any; setFormData: React.Dispatch<React.SetStateAction<any>> }) => (
-  <div className="space-y-4">
-    <Label htmlFor="user_type" className="text-sm font-medium">Vous êtes un(e)...</Label>
-    <Select 
-      value={formData.user_type} 
-      onValueChange={(value) => setFormData((prev: any) => ({ ...prev, user_type: value }))}
-    >
-      <SelectTrigger className="h-11">
-        <SelectValue placeholder="Sélectionnez votre profil" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="Particulier">Particulier</SelectItem>
-        <SelectItem value="Professionnelle">Professionnelle</SelectItem>
-        <SelectItem value="Partenaire">Partenaire</SelectItem>
-      </SelectContent>
-    </Select>
-  </div>
-);
-
 const Step1 = ({ formData, handleInputChange }: { formData: any; handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void }) => (
   <div className="space-y-4">
     <div className="space-y-2">
@@ -231,6 +212,7 @@ const SellPage = () => {
   const [user, setUser] = useState<any>(null);
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
   const [signupStep, setSignupStep] = useState(0);
+  const [showTypeSelection, setShowTypeSelection] = useState(false);
   const [authFormData, setAuthFormData] = useState({
     user_type: "",
     email: "",
@@ -278,6 +260,13 @@ const SellPage = () => {
       twitter: "", 
       facebook: "" 
     });
+    setSignupStep(0);
+    setShowTypeSelection(false);
+  };
+
+  const handleTypeSelection = (userType: string) => {
+    setAuthFormData(prev => ({ ...prev, user_type: userType }));
+    setShowTypeSelection(true);
     setSignupStep(0);
   };
 
@@ -526,15 +515,54 @@ const SellPage = () => {
                 Se connecter
               </Button>
             </form>
+          ) : !showTypeSelection ? (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 gap-3">
+                <Button
+                  type="button"
+                  onClick={() => handleTypeSelection('Particulier')}
+                  variant="outline"
+                  className="h-16 flex flex-col items-center justify-center gap-2 hover:bg-teal-50 hover:border-teal-500"
+                >
+                  <span className="text-2xl">👤</span>
+                  <span className="font-semibold">Particulier</span>
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => handleTypeSelection('Professionnelle')}
+                  variant="outline"
+                  className="h-16 flex flex-col items-center justify-center gap-2 hover:bg-teal-50 hover:border-teal-500"
+                >
+                  <span className="text-2xl">💼</span>
+                  <span className="font-semibold">Professionnelle</span>
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => handleTypeSelection('Partenaire')}
+                  variant="outline"
+                  className="h-16 flex flex-col items-center justify-center gap-2 hover:bg-teal-50 hover:border-teal-500"
+                >
+                  <span className="text-2xl">🤝</span>
+                  <span className="font-semibold">Partenaire</span>
+                </Button>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={toggleAuthMode}
+                className="w-full h-11 text-slate-600 hover:text-slate-800"
+              >
+                Déjà un compte ? Se connecter
+              </Button>
+            </div>
           ) : (
             <div className="space-y-6">
-              <StepIndicator currentStep={signupStep + 1} totalSteps={4} />
+              <StepIndicator currentStep={signupStep + 1} totalSteps={3} />
               
               <form onSubmit={handleEmailSignUp} className="space-y-4">
-                {signupStep === 0 && <Step0 formData={authFormData} setFormData={setAuthFormData} />}
-                {signupStep === 1 && <Step1 formData={authFormData} handleInputChange={handleAuthInputChange} />}
-                {signupStep === 2 && <Step2 formData={authFormData} handleInputChange={handleAuthInputChange} setFormData={setAuthFormData} />}
-                {signupStep === 3 && <Step3 formData={authFormData} handleInputChange={handleAuthInputChange} />}
+                {signupStep === 0 && <Step1 formData={authFormData} handleInputChange={handleAuthInputChange} />}
+                {signupStep === 1 && <Step2 formData={authFormData} handleInputChange={handleAuthInputChange} setFormData={setAuthFormData} />}
+                {signupStep === 2 && <Step3 formData={authFormData} handleInputChange={handleAuthInputChange} />}
                 
                 <div className="flex justify-between pt-4">
                   {signupStep > 0 && (
@@ -548,12 +576,11 @@ const SellPage = () => {
                     </Button>
                   )}
                   
-                  {signupStep < 3 ? (
+                  {signupStep < 2 ? (
                     <Button 
                       type="button" 
                       onClick={nextStep}
                       className="h-11 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 shadow-md ml-auto"
-                      disabled={signupStep === 0 && !authFormData.user_type}
                     >
                       Suivant
                     </Button>
@@ -569,24 +596,17 @@ const SellPage = () => {
               </form>
             </div>
           )}
-          
-          <div className="text-center text-sm">
-            {authMode === 'login' ? (
+
+          {authMode === 'login' && (
+            <div className="text-center text-sm mt-4">
               <p className="text-slate-600">
                 Pas encore de compte ?{' '}
                 <button type="button" className="font-semibold text-teal-600 hover:text-teal-700 hover:underline" onClick={toggleAuthMode}>
                   S'inscrire
                 </button>
               </p>
-            ) : (
-              <p className="text-slate-600">
-                Déjà un compte ?{' '}
-                <button type="button" className="font-semibold text-teal-600 hover:text-teal-700 hover:underline" onClick={toggleAuthMode}>
-                  Se connecter
-                </button>
-              </p>
-            )}
-          </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

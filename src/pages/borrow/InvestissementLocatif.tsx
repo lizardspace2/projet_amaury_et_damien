@@ -18,6 +18,8 @@ import {
   Mail,
   Phone
 } from 'lucide-react';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -180,9 +182,12 @@ const InvestissementLocatif = () => {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 py-8">
-      <div className="container max-w-7xl">
-        {/* En-tête */}
+    <div>
+      <Navbar />
+      
+      <div className="min-h-screen bg-slate-50 py-8">
+        <div className="container max-w-7xl">
+          {/* En-tête */}
         <div className="text-center mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
             Simulateur d'Investissement Locatif
@@ -670,7 +675,10 @@ const InvestissementLocatif = () => {
             </div>
           </CardContent>
         </Card>
+        </div>
       </div>
+      
+      <Footer />
     </div>
   );
 };

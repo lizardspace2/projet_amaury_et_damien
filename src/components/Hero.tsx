@@ -12,10 +12,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import Autoplay from "embla-carousel-autoplay";
 import { signInWithEmail, signUpWithEmail } from "@/lib/api/auth";
 import { supabase } from "@/lib/api/supabaseClient";
 import { toast } from "sonner";
+import { Building, Truck, PlusCircle } from "lucide-react";
 
 const StepIndicator = ({ currentStep, totalSteps }: { currentStep: number; totalSteps: number }) => (
   <div className="flex items-center justify-center space-x-2 mb-6">
@@ -191,6 +193,7 @@ const Step3 = ({ formData, handleInputChange }: { formData: any; handleInputChan
 const Hero = () => {
   const navigate = useNavigate();
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
+  const [isPublishDialogOpen, setIsPublishDialogOpen] = useState(false);
   const [selectedUserType, setSelectedUserType] = useState<string>('');
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('signup');
   const [signupStep, setSignupStep] = useState(0);
@@ -354,11 +357,15 @@ const Hero = () => {
           {/* Action Buttons */}
           <div className="max-w-md mx-auto space-y-4">
             <Button
-              onClick={() => navigate("/sell")}
-              className="bg-teal-500 hover:bg-teal-600 text-white px-8 py-6 text-lg md:text-xl rounded-lg font-bold w-full"
+              onClick={() => setIsPublishDialogOpen(true)}
+              className="bg-teal-500 hover:bg-teal-600 text-white px-8 py-6 text-lg md:text-xl rounded-lg font-bold w-full flex items-center justify-center gap-2"
               size="lg"
             >
+              <PlusCircle size={24} />
               Publier une annonce
+              <Badge variant="secondary" className="bg-white/20 text-white border-0 text-sm ml-1">
+                Gratuit
+              </Badge>
             </Button>
             
             {/* View Properties Button */}
@@ -497,6 +504,52 @@ const Hero = () => {
               </form>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Publish Type Selection Dialog */}
+      <Dialog open={isPublishDialogOpen} onOpenChange={setIsPublishDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-center text-slate-800">
+              Publier une annonce
+            </DialogTitle>
+            <DialogDescription className="text-center text-slate-600">
+              Choisissez le type d'annonce que vous souhaitez publier
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3 mt-6">
+            <Button
+              onClick={() => {
+                navigate("/sell");
+                setIsPublishDialogOpen(false);
+              }}
+              variant="outline"
+              className="w-full h-24 flex flex-col items-center justify-center gap-3 hover:bg-teal-50 hover:border-teal-500 border-2"
+            >
+              <Building size={32} className="text-teal-600" />
+              <div className="flex flex-col">
+                <span className="font-semibold text-lg">Annonce immobilière</span>
+                <span className="text-sm text-slate-500">Vente, location, baux commerciaux</span>
+              </div>
+            </Button>
+
+            <Button
+              onClick={() => {
+                navigate("/sell/ancillary-service");
+                setIsPublishDialogOpen(false);
+              }}
+              variant="outline"
+              className="w-full h-24 flex flex-col items-center justify-center gap-3 hover:bg-amber-50 hover:border-amber-500 border-2"
+            >
+              <Truck size={32} className="text-amber-600" />
+              <div className="flex flex-col">
+                <span className="font-semibold text-lg">Services annexes</span>
+                <span className="text-sm text-slate-500">Déménagement, travaux, diagnostics</span>
+              </div>
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

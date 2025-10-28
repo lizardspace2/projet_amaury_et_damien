@@ -448,12 +448,30 @@ const Navbar = () => {
         { title: "Simulateur de VEFA", description: "Vente en l'état futur d'achèvement", href: "/resources/simulateur-vefa" },
         { title: "Simulateur de vente à terme", description: "Achat avec paiement différé", href: "/resources/simulateur-vente-terme" },
         { title: "Simulateur de réméré inversé", description: "Vente avec option de rachat inversée", href: "/resources/simulateur-remere-inverse" },
+        { title: "Simulateur de viager", description: "Achat avec rente viagère", href: "/resources/simulateur-viager" },
+        { title: "Simulateur de bail commercial", description: "Reprendre un bail commercial existant", href: "/resources/simulateur-bail" },
+        { title: "Simulateur d'enchères", description: "Acheter aux enchères publiques", href: "/resources/simulateur-encheres" },
+        { title: "Simulateur de biens d'exception", description: "Propriétés de luxe et prestige", href: "/resources/simulateur-biens-exception" },
+        { title: "Simulateur d'indivision", description: "Achat en parts ou nue-propriété", href: "/resources/simulateur-indivision" },
+        { title: "Simulateur de BRS", description: "Bail réel solidaire", href: "/resources/simulateur-brs" },
+        { title: "Simulateur de démembrement", description: "Achat avec démembrement de propriété", href: "/resources/simulateur-demenbrement" },
+        { title: "Simulateur de crédit-vendeur", description: "Achat avec financement par le vendeur", href: "/resources/simulateur-credit-vendeur" },
+        { title: "Simulateur de copropriété", description: "Achat en copropriété ou lot de volume", href: "/resources/simulateur-copropriete" },
     ],
     "Contenu pédagogique": [
         { title: "Guide du réméré", description: "Tout savoir sur le réméré immobilier", href: "/resources/guide-remere" },
         { title: "Guide du VEFA", description: "Comprendre la vente en l'état futur d'achèvement", href: "/resources/guide-vefa" },
         { title: "Guide de la vente à terme", description: "Expliquer la vente à terme", href: "/resources/guide-vente-terme" },
         { title: "Guide du réméré inversé", description: "Comprendre le réméré inversé", href: "/resources/guide-remere-inverse" },
+        { title: "Guide du viager", description: "Tout savoir sur le viager immobilier", href: "/resources/guide-viager" },
+        { title: "Guide du bail commercial", description: "Reprendre un bail commercial", href: "/resources/guide-bail" },
+        { title: "Guide des enchères immobilières", description: "Acheter aux enchères publiques", href: "/resources/guide-encheres" },
+        { title: "Guide des biens d'exception", description: "Investir dans le luxe", href: "/resources/guide-biens-exception" },
+        { title: "Guide de l'indivision", description: "Achat en parts ou nue-propriété", href: "/resources/guide-indivision" },
+        { title: "Guide du BRS", description: "Comprendre le bail réel solidaire", href: "/resources/guide-brs" },
+        { title: "Guide du démembrement", description: "Achat avec démembrement de propriété", href: "/resources/guide-demenbrement" },
+        { title: "Guide du crédit-vendeur", description: "Financement par le vendeur", href: "/resources/guide-credit-vendeur" },
+        { title: "Guide de la copropriété", description: "Achat en copropriété ou lot de volume", href: "/resources/guide-copropriete" },
     ]
   };
 
@@ -615,7 +633,7 @@ const Navbar = () => {
                           <div className={`grid gap-6 p-6 ${
                             link.name === 'Ventes aux enchères' ? 'w-[500px] grid-cols-3' : 
                             link.name === 'Louer' ? 'w-[300px] grid-cols-1' : 
-                            link.name === 'Ressources' ? 'w-[600px] grid-cols-2' :
+                            link.name === 'Ressources' ? 'w-[900px] grid-cols-3' :
                             'w-[600px] grid-cols-3'
                           }`}>
                             {Object.entries(link.dropdown).map(([category, links]) => (

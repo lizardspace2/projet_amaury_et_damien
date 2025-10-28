@@ -43,10 +43,28 @@ import SimulateurRemere from "./pages/resources/SimulateurRemere";
 import SimulateurVEFA from "./pages/resources/SimulateurVEFA";
 import SimulateurVenteTerme from "./pages/resources/SimulateurVenteTerme";
 import SimulateurRemereInverse from "./pages/resources/SimulateurRemereInverse";
+import SimulateurViager from "./pages/resources/SimulateurViager";
+import SimulateurBail from "./pages/resources/SimulateurBail";
+import SimulateurEncheres from "./pages/resources/SimulateurEncheres";
+import SimulateurBiensException from "./pages/resources/SimulateurBiensException";
+import SimulateurIndivision from "./pages/resources/SimulateurIndivision";
+import SimulateurBRS from "./pages/resources/SimulateurBRS";
+import SimulateurDemenbrement from "./pages/resources/SimulateurDemenbrement";
+import SimulateurCreditVendeur from "./pages/resources/SimulateurCreditVendeur";
+import SimulateurCopropriete from "./pages/resources/SimulateurCopropriete";
 import GuideRemere from "./pages/resources/GuideRemere";
 import GuideVEFA from "./pages/resources/GuideVEFA";
 import GuideVenteTerme from "./pages/resources/GuideVenteTerme";
 import GuideRemereInverse from "./pages/resources/GuideRemereInverse";
+import GuideViager from "./pages/resources/GuideViager";
+import GuideBail from "./pages/resources/GuideBail";
+import GuideEncheres from "./pages/resources/GuideEncheres";
+import GuideBiensException from "./pages/resources/GuideBiensException";
+import GuideIndivision from "./pages/resources/GuideIndivision";
+import GuideBRS from "./pages/resources/GuideBRS";
+import GuideDemenbrement from "./pages/resources/GuideDemenbrement";
+import GuideCreditVendeur from "./pages/resources/GuideCreditVendeur";
+import GuideCopropriete from "./pages/resources/GuideCopropriete";
 
 import { Wrapper } from "@googlemaps/react-wrapper";
 
@@ -120,10 +138,28 @@ const App = () => {
                 <Route path="/resources/simulateur-vefa" element={<SimulateurVEFA />} />
                 <Route path="/resources/simulateur-vente-terme" element={<SimulateurVenteTerme />} />
                 <Route path="/resources/simulateur-remere-inverse" element={<SimulateurRemereInverse />} />
+                <Route path="/resources/simulateur-viager" element={<SimulateurViager />} />
+                <Route path="/resources/simulateur-bail" element={<SimulateurBail />} />
+                <Route path="/resources/simulateur-encheres" element={<SimulateurEncheres />} />
+                <Route path="/resources/simulateur-biens-exception" element={<SimulateurBiensException />} />
+                <Route path="/resources/simulateur-indivision" element={<SimulateurIndivision />} />
+                <Route path="/resources/simulateur-brs" element={<SimulateurBRS />} />
+                <Route path="/resources/simulateur-demenbrement" element={<SimulateurDemenbrement />} />
+                <Route path="/resources/simulateur-credit-vendeur" element={<SimulateurCreditVendeur />} />
+                <Route path="/resources/simulateur-copropriete" element={<SimulateurCopropriete />} />
                 <Route path="/resources/guide-remere" element={<GuideRemere />} />
                 <Route path="/resources/guide-vefa" element={<GuideVEFA />} />
                 <Route path="/resources/guide-vente-terme" element={<GuideVenteTerme />} />
                 <Route path="/resources/guide-remere-inverse" element={<GuideRemereInverse />} />
+                <Route path="/resources/guide-viager" element={<GuideViager />} />
+                <Route path="/resources/guide-bail" element={<GuideBail />} />
+                <Route path="/resources/guide-encheres" element={<GuideEncheres />} />
+                <Route path="/resources/guide-biens-exception" element={<GuideBiensException />} />
+                <Route path="/resources/guide-indivision" element={<GuideIndivision />} />
+                <Route path="/resources/guide-brs" element={<GuideBRS />} />
+                <Route path="/resources/guide-demenbrement" element={<GuideDemenbrement />} />
+                <Route path="/resources/guide-credit-vendeur" element={<GuideCreditVendeur />} />
+                <Route path="/resources/guide-copropriete" element={<GuideCopropriete />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
           </BrowserRouter>

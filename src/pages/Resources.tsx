@@ -29,6 +29,60 @@ const Resources = () => {
       href: "/resources/simulateur-remere-inverse",
       icon: <Calculator className="w-8 h-8" />,
     },
+    {
+      title: "Simulateur de viager",
+      description: "Achat avec rente viagère",
+      href: "/resources/simulateur-viager",
+      icon: <Calculator className="w-8 h-8" />,
+    },
+    {
+      title: "Simulateur de bail commercial",
+      description: "Reprendre un bail commercial existant",
+      href: "/resources/simulateur-bail",
+      icon: <Calculator className="w-8 h-8" />,
+    },
+    {
+      title: "Simulateur d'enchères",
+      description: "Acheter aux enchères publiques",
+      href: "/resources/simulateur-encheres",
+      icon: <Calculator className="w-8 h-8" />,
+    },
+    {
+      title: "Simulateur de biens d'exception",
+      description: "Propriétés de luxe et prestige",
+      href: "/resources/simulateur-biens-exception",
+      icon: <Calculator className="w-8 h-8" />,
+    },
+    {
+      title: "Simulateur d'indivision",
+      description: "Achat en parts ou nue-propriété",
+      href: "/resources/simulateur-indivision",
+      icon: <Calculator className="w-8 h-8" />,
+    },
+    {
+      title: "Simulateur de BRS",
+      description: "Bail réel solidaire",
+      href: "/resources/simulateur-brs",
+      icon: <Calculator className="w-8 h-8" />,
+    },
+    {
+      title: "Simulateur de démembrement",
+      description: "Achat avec démembrement de propriété",
+      href: "/resources/simulateur-demenbrement",
+      icon: <Calculator className="w-8 h-8" />,
+    },
+    {
+      title: "Simulateur de crédit-vendeur",
+      description: "Achat avec financement par le vendeur",
+      href: "/resources/simulateur-credit-vendeur",
+      icon: <Calculator className="w-8 h-8" />,
+    },
+    {
+      title: "Simulateur de copropriété",
+      description: "Achat en copropriété ou lot de volume",
+      href: "/resources/simulateur-copropriete",
+      icon: <Calculator className="w-8 h-8" />,
+    },
   ];
 
   const guides = [
@@ -56,6 +110,60 @@ const Resources = () => {
       href: "/resources/guide-remere-inverse",
       icon: <BookOpen className="w-8 h-8" />,
     },
+    {
+      title: "Guide du viager",
+      description: "Tout savoir sur le viager immobilier",
+      href: "/resources/guide-viager",
+      icon: <BookOpen className="w-8 h-8" />,
+    },
+    {
+      title: "Guide du bail commercial",
+      description: "Reprendre un bail commercial",
+      href: "/resources/guide-bail",
+      icon: <BookOpen className="w-8 h-8" />,
+    },
+    {
+      title: "Guide des enchères immobilières",
+      description: "Acheter aux enchères publiques",
+      href: "/resources/guide-encheres",
+      icon: <BookOpen className="w-8 h-8" />,
+    },
+    {
+      title: "Guide des biens d'exception",
+      description: "Investir dans le luxe",
+      href: "/resources/guide-biens-exception",
+      icon: <BookOpen className="w-8 h-8" />,
+    },
+    {
+      title: "Guide de l'indivision",
+      description: "Achat en parts ou nue-propriété",
+      href: "/resources/guide-indivision",
+      icon: <BookOpen className="w-8 h-8" />,
+    },
+    {
+      title: "Guide du BRS",
+      description: "Comprendre le bail réel solidaire",
+      href: "/resources/guide-brs",
+      icon: <BookOpen className="w-8 h-8" />,
+    },
+    {
+      title: "Guide du démembrement",
+      description: "Achat avec démembrement de propriété",
+      href: "/resources/guide-demenbrement",
+      icon: <BookOpen className="w-8 h-8" />,
+    },
+    {
+      title: "Guide du crédit-vendeur",
+      description: "Financement par le vendeur",
+      href: "/resources/guide-credit-vendeur",
+      icon: <BookOpen className="w-8 h-8" />,
+    },
+    {
+      title: "Guide de la copropriété",
+      description: "Achat en copropriété ou lot de volume",
+      href: "/resources/guide-copropriete",
+      icon: <BookOpen className="w-8 h-8" />,
+    },
   ];
 
   return (
@@ -79,7 +187,7 @@ const Resources = () => {
               <Calculator className="w-6 h-6 text-teal-600" />
               Simulateurs
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               { simulators.map((simulator, index) => (
                 <Link
                   key={index}
@@ -114,7 +222,7 @@ const Resources = () => {
               <BookOpen className="w-6 h-6 text-teal-600" />
               Contenu pédagogique
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {guides.map((guide, index) => (
                 <Link
                   key={index}

@@ -37,6 +37,16 @@ import { supabase } from "@/lib/api/supabaseClient";
 import { useEffect, useState } from "react";
 import { CurrencyProvider } from './CurrencyContext';
 
+// Import des pages de ressources
+import SimulateurRemere from "./pages/resources/SimulateurRemere";
+import SimulateurVEFA from "./pages/resources/SimulateurVEFA";
+import SimulateurVenteTerme from "./pages/resources/SimulateurVenteTerme";
+import SimulateurRemereInverse from "./pages/resources/SimulateurRemereInverse";
+import GuideRemere from "./pages/resources/GuideRemere";
+import GuideVEFA from "./pages/resources/GuideVEFA";
+import GuideVenteTerme from "./pages/resources/GuideVenteTerme";
+import GuideRemereInverse from "./pages/resources/GuideRemereInverse";
+
 import { Wrapper } from "@googlemaps/react-wrapper";
 
 const queryClient = new QueryClient();
@@ -103,6 +113,15 @@ const App = () => {
                     <EditProperty />
                   </Wrapper>
                 } />
+                {/* Routes des ressources */}
+                <Route path="/resources/simulateur-remere" element={<SimulateurRemere />} />
+                <Route path="/resources/simulateur-vefa" element={<SimulateurVEFA />} />
+                <Route path="/resources/simulateur-vente-terme" element={<SimulateurVenteTerme />} />
+                <Route path="/resources/simulateur-remere-inverse" element={<SimulateurRemereInverse />} />
+                <Route path="/resources/guide-remere" element={<GuideRemere />} />
+                <Route path="/resources/guide-vefa" element={<GuideVEFA />} />
+                <Route path="/resources/guide-vente-terme" element={<GuideVenteTerme />} />
+                <Route path="/resources/guide-remere-inverse" element={<GuideRemereInverse />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
           </BrowserRouter>

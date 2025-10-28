@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X, User, ChevronDown, Home, Key, Users, CalendarDays, LogIn, LogOut, UserPlus, PlusCircle, Truck, Building, Search, Phone, MapPin } from 'lucide-react';
+import { Menu, X, User, ChevronDown, Home, Key, Users, CalendarDays, LogIn, LogOut, UserPlus, PlusCircle, Truck, Building, Search, Phone, MapPin, BookOpen, Calculator } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
@@ -442,6 +442,21 @@ const Navbar = () => {
     ]
   };
 
+  const resourcesLinks = {
+    Simulateurs: [
+        { title: "Simulateur de réméré", description: "Calculez votre réméré immobilier", href: "/resources/simulateur-remere" },
+        { title: "Simulateur de VEFA", description: "Vente en l'état futur d'achèvement", href: "/resources/simulateur-vefa" },
+        { title: "Simulateur de vente à terme", description: "Achat avec paiement différé", href: "/resources/simulateur-vente-terme" },
+        { title: "Simulateur de réméré inversé", description: "Vente avec option de rachat inversée", href: "/resources/simulateur-remere-inverse" },
+    ],
+    "Contenu pédagogique": [
+        { title: "Guide du réméré", description: "Tout savoir sur le réméré immobilier", href: "/resources/guide-remere" },
+        { title: "Guide du VEFA", description: "Comprendre la vente en l'état futur d'achèvement", href: "/resources/guide-vefa" },
+        { title: "Guide de la vente à terme", description: "Expliquer la vente à terme", href: "/resources/guide-vente-terme" },
+        { title: "Guide du réméré inversé", description: "Comprendre le réméré inversé", href: "/resources/guide-remere-inverse" },
+    ]
+  };
+
   // Fonction pour déterminer l'état actif basée sur le type
   const getActiveState = (linkType: string) => {
     const searchParams = new URLSearchParams(location.search);
@@ -505,6 +520,12 @@ const Navbar = () => {
       path: '/auctions',
       dropdown: auctionLinks,
       mobileIcon: <Users size={18} />
+    },
+    { 
+      name: 'Ressources', 
+      path: '/resources',
+      dropdown: resourcesLinks,
+      mobileIcon: <BookOpen size={18} />
     },
   ];
 
@@ -594,6 +615,7 @@ const Navbar = () => {
                           <div className={`grid gap-6 p-6 ${
                             link.name === 'Ventes aux enchères' ? 'w-[500px] grid-cols-3' : 
                             link.name === 'Louer' ? 'w-[300px] grid-cols-1' : 
+                            link.name === 'Ressources' ? 'w-[600px] grid-cols-2' :
                             'w-[600px] grid-cols-3'
                           }`}>
                             {Object.entries(link.dropdown).map(([category, links]) => (

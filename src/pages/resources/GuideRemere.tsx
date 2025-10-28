@@ -3,12 +3,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { BookOpen, CheckCircle, AlertTriangle, Info, Calculator, Euro, Calendar, Users } from 'lucide-react';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 
 const GuideRemere = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-teal-50 py-8">
-      <div className="container mx-auto px-4">
-        <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-teal-50">
+      <Navbar />
+      <main className="flex-1 py-8">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-3 mb-4">
@@ -326,8 +330,10 @@ const GuideRemere = () => {
               </CardContent>
             </Card>
           </div>
+          </div>
         </div>
-      </div>
+      </main>
+      <Footer />
     </div>
   );
 };

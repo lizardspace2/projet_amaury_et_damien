@@ -763,65 +763,24 @@ const Navbar = () => {
         <nav className="flex flex-col gap-0.5 p-3 max-h-[80vh] overflow-y-auto">
           {/* Liens de type propriété - logique exclusive */}
           {propertyTypeLinks.map(link => (
-            <div key={link.name}>
-              {link.dropdown ? (
-                <div className="space-y-0.5">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-slate-800 px-3 py-2.5 bg-slate-50 rounded-lg">
-                    <span className="text-teal-600">
-                      {link.mobileIcon}
-                    </span>
-                    {link.name}
-                  </div>
-                  <div className="ml-4 space-y-0.5">
-                    {Object.entries(link.dropdown).map(([category, links]) => (
-                      <div key={category} className="space-y-0.5">
-                        <div className="text-xs font-medium text-slate-500 px-2 py-1.5 bg-slate-100 rounded">
-                          {category}
-                        </div>
-                        {links.map((item: any) => (
-                          <button
-                            key={item.title}
-                            onClick={() => {
-                              closeMobileMenu();
-                              navigate(item.href);
-                            }}
-                            className={cn(
-                              "flex flex-col items-start text-sm font-medium transition-all duration-200 px-3 py-2.5 rounded-lg w-full text-left",
-                              getActiveState(item.href.split('type=')[1])
-                                ? "text-teal-700 bg-gradient-to-r from-teal-50 to-emerald-50 border border-teal-200 shadow-sm" 
-                                : "text-slate-600 hover:text-teal-600 hover:bg-slate-50"
-                            )}
-                          >
-                            <span className="font-medium">{item.title}</span>
-                            {item.description && (
-                              <span className="text-xs text-slate-500 mt-0.5">{item.description}</span>
-                            )}
-                          </button>
-                        ))}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <button
-                  onClick={() => handleMobileLinkClick(link)}
-                  className={cn(
-                    "flex items-center gap-2 text-sm font-medium transition-all duration-200 px-3 py-2.5 rounded-lg no-underline w-full text-left",
-                    getActiveState(link.type)
-                      ? "text-teal-700 bg-gradient-to-r from-teal-50 to-emerald-50 border border-teal-200 shadow-sm" 
-                      : "text-slate-600 hover:text-teal-600 hover:bg-slate-50"
-                  )}
-                >
-                  <span className={cn(
-                    "transition-colors",
-                    getActiveState(link.type) ? "text-teal-600" : "text-slate-400 group-hover:text-teal-500"
-                  )}>
-                    {link.mobileIcon}
-                  </span>
-                  {link.name}
-                </button>
+            <button
+              key={link.name}
+              onClick={() => handleMobileLinkClick(link)}
+              className={cn(
+                "flex items-center gap-2 text-sm font-medium transition-all duration-200 px-3 py-2.5 rounded-lg no-underline w-full text-left",
+                getActiveState(link.type)
+                  ? "text-teal-700 bg-gradient-to-r from-teal-50 to-emerald-50 border border-teal-200 shadow-sm" 
+                  : "text-slate-600 hover:text-teal-600 hover:bg-slate-50"
               )}
-            </div>
+            >
+              <span className={cn(
+                "transition-colors",
+                getActiveState(link.type) ? "text-teal-600" : "text-slate-400 group-hover:text-teal-500"
+              )}>
+                {link.mobileIcon}
+              </span>
+              {link.name}
+            </button>
           ))}
           
           {/* Autres liens */}

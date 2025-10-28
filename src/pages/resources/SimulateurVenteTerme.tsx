@@ -5,6 +5,8 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Calculator, Clock, Euro, Calendar, TrendingUp } from 'lucide-react';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 
 const SimulateurVenteTerme = () => {
   const [formData, setFormData] = useState({
@@ -55,9 +57,11 @@ const SimulateurVenteTerme = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-purple-50 py-8">
-      <div className="container mx-auto px-4">
-        <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-purple-50">
+      <Navbar />
+      <main className="flex-1 py-8">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-3 mb-4">
@@ -296,8 +300,10 @@ const SimulateurVenteTerme = () => {
               </Card>
             </div>
           </div>
+          </div>
         </div>
-      </div>
+      </main>
+      <Footer />
     </div>
   );
 };

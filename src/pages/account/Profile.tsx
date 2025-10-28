@@ -8,6 +8,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/api/supabaseClient';
 import { toast } from 'sonner';
 import { Separator } from '@/components/ui/separator';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 
 const Profile: React.FC = () => {
   const queryClient = useQueryClient();
@@ -103,17 +105,20 @@ const Profile: React.FC = () => {
   }
 
   return (
-    <div className="py-4">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-800 mb-2">
-          Mon profil
-        </h1>
-        <p className="text-slate-600">
-          Gérez vos informations personnelles
-        </p>
-      </div>
+    <div className="min-h-screen flex flex-col bg-slate-50">
+      <Navbar />
+      <main className="flex-1 container mx-auto px-4 py-8">
+        <div className="py-4">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-slate-800 mb-2">
+              Mon profil
+            </h1>
+            <p className="text-slate-600">
+              Gérez vos informations personnelles
+            </p>
+          </div>
 
-      <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit}>
         <Card>
           <CardHeader>
             <CardTitle>Informations de contact</CardTitle>
@@ -271,6 +276,9 @@ const Profile: React.FC = () => {
           </Button>
         </div>
       </form>
+        </div>
+      </main>
+      <Footer />
     </div>
   );
 };

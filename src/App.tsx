@@ -33,6 +33,7 @@ import SellAncillaryService from "./pages/SellAncillaryService"; // Import SellA
 import AncillaryServices from "./pages/AncillaryServices"; // Import AncillaryServices
 import Profile from "./pages/account/Profile"; // Import Profile
 import MyAds from "./pages/account/MyAds"; // Import MyAds
+import Resources from "./pages/Resources"; // Import Resources
 import { supabase } from "@/lib/api/supabaseClient";
 import { useEffect, useState } from "react";
 import { CurrencyProvider } from './CurrencyContext';
@@ -114,6 +115,7 @@ const App = () => {
                   </Wrapper>
                 } />
                 {/* Routes des ressources */}
+                <Route path="/resources" element={<Resources />} />
                 <Route path="/resources/simulateur-remere" element={<SimulateurRemere />} />
                 <Route path="/resources/simulateur-vefa" element={<SimulateurVEFA />} />
                 <Route path="/resources/simulateur-vente-terme" element={<SimulateurVenteTerme />} />

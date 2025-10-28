@@ -1,306 +1,373 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { Calculator, Building, Euro, Calendar, TrendingUp } from 'lucide-react';
+import React, { useMemo, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tooltip as ShadTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Info } from "lucide-react";
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar, Area, AreaChart, Legend } from "recharts";
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
+// ==========================
+// Utility helpers
+// ==========================
+const fmtCurrency0 = (n: number) => n.toLocaleString("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+const fmtCurrency2 = (n: number) => n.toLocaleString("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 2 });
+const fmtPct = (n: number) => `${n.toFixed(2)} %`;
+const toNumber = (v: string, fallback = 0) => {
+  const n = Number((v || "").replace(/\s/g, "").replace(",", "."));
+  return isNaN(n) ? fallback : n;
+};
+
+// ==========================
+// Types
+// ==========================
+
+type Milestone = {
+  label: string;
+  month: number; // month from reservation (0-based)
+  cumPct: number; // cumulative % of price paid by this milestone (0..100)
+};
+
+type Inputs = {
+  prixVEFA: number; // TTC
+  apport: number; // cash down payment paid by buyer
+  fraisNotairePctVEFA: number; // reduced fees (VEFA), ~2-3%
+  fraisNotairePctAncien: number; // for comparison, ~7-8%
+  dureeConstructionMois: number; // total duration from réservation to livraison
+  milestones: Milestone[];
+  tauxAnnuel: number; // nominal annual rate (excluding insurance)
+  tauxAssuranceAnnuel: number; // borrower insurance annual rate (on outstanding capital)
+  dureeCreditAnnees: number; // amortization length starting at delivery
+};
+
+// Default milestone schedule (indicative only)
+const defaultMilestones = (totalMonths: number): Milestone[] => [
+  { label: "Réservation", month: 0, cumPct: 5 },
+  { label: "Acte notarié", month: Math.max(1, Math.round(totalMonths * 0.1)), cumPct: 25 },
+  { label: "Fondations", month: Math.round(totalMonths * 0.3), cumPct: 35 },
+  { label: "Hors d'eau", month: Math.round(totalMonths * 0.6), cumPct: 70 },
+  { label: "Achèvement", month: Math.round(totalMonths * 0.9), cumPct: 95 },
+  { label: "Livraison", month: totalMonths, cumPct: 100 },
+];
+
+// ==========================
+// Core finance math
+// ==========================
+function annuityPayment(principal: number, annualRate: number, years: number) {
+  const r = annualRate / 12;
+  const n = Math.max(1, Math.round(years * 12));
+  if (r <= 0) return principal / n;
+  return (principal * r) / (1 - Math.pow(1 + r, -n));
+}
+
+function buildDrawdowns(inputs: Inputs) {
+  // Normalize milestones by cumulative % and month
+  const ordered = [...inputs.milestones].sort((a, b) => a.month - b.month);
+  // Ensure cumulative is non-decreasing and last = 100
+  const sanitized: Milestone[] = ordered.map((m, i) => ({
+    label: m.label,
+    month: Math.max(0, Math.min(inputs.dureeConstructionMois, m.month)),
+    cumPct: i === ordered.length - 1 ? 100 : Math.max(0, Math.min(100, m.cumPct)),
+  }));
+  // Remove duplicates by month keeping max cumPct
+  const map = new Map<number, Milestone>();
+  for (const m of sanitized) {
+    const prev = map.get(m.month);
+    if (!prev || m.cumPct > prev.cumPct) map.set(m.month, m);
+  }
+  const uniq = Array.from(map.values()).sort((a, b) => a.month - b.month);
+  return uniq;
+}
+
 const SimulateurVEFA = () => {
-  const [formData, setFormData] = useState({
-    prixVEFA: '',
-    prixFinal: '',
-    dureeConstruction: '',
-    tauxInteret: '',
-    apport: '',
-    fraisNotaire: '',
-    fraisDossier: ''
+  const [inputs, setInputs] = useState<Inputs>({
+    prixVEFA: 320_000,
+    apport: 20_000,
+    fraisNotairePctVEFA: 2.5,
+    fraisNotairePctAncien: 7.5,
+    dureeConstructionMois: 20,
+    milestones: defaultMilestones(20),
+    tauxAnnuel: 3.2,
+    tauxAssuranceAnnuel: 0.3,
+    dureeCreditAnnees: 25,
   });
 
-  const [resultats, setResultats] = useState(null);
+  // Derived values
+  const fraisNotaireVEFA = useMemo(() => (inputs.prixVEFA * inputs.fraisNotairePctVEFA) / 100, [inputs.prixVEFA, inputs.fraisNotairePctVEFA]);
+  const fraisNotaireAncien = useMemo(() => (inputs.prixVEFA * inputs.fraisNotairePctAncien) / 100, [inputs.prixVEFA, inputs.fraisNotairePctAncien]);
+  const economieFraisNotaire = useMemo(() => Math.max(0, fraisNotaireAncien - fraisNotaireVEFA), [fraisNotaireAncien, fraisNotaireVEFA]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+  const coutTotalProjet = useMemo(() => inputs.prixVEFA + fraisNotaireVEFA, [inputs.prixVEFA, fraisNotaireVEFA]);
+  const besoinFinancement = useMemo(() => Math.max(0, coutTotalProjet - inputs.apport), [coutTotalProjet, inputs.apport]);
+
+  // Drawdowns by milestone (loan funds + buyer cash used at reservation if needed)
+  const milestones = useMemo(() => buildDrawdowns(inputs), [inputs]);
+
+  // Build monthly schedule: outstanding increases at milestone months by draw amount (= delta cumPct * prixVEFA)
+  const schedule = useMemo(() => {
+    const months = inputs.dureeConstructionMois;
+    const rNom = inputs.tauxAnnuel / 100 / 12;
+    const rAss = inputs.tauxAssuranceAnnuel / 100 / 12;
+
+    let outstanding = 0; // loan drawn
+    const principalTarget = besoinFinancement; // we assume all costs financed except apport paid up-front progressively
+
+    const msByMonth = new Map<number, number>(); // cumulative %
+    milestones.forEach(m => msByMonth.set(m.month, m.cumPct));
+
+    const rows: { month: number; draw: number; outstanding: number; interest: number; insurance: number; intercalary: number }[] = [];
+
+    let lastCum = 0;
+    for (let m = 0; m <= months; m++) {
+      const cum = msByMonth.has(m) ? (msByMonth.get(m) as number) : lastCum;
+      const deltaPct = Math.max(0, cum - lastCum);
+      const neededForPrice = (deltaPct / 100) * inputs.prixVEFA;
+
+      // part financed by loan: proportion vs. total project
+      const financedShare = principalTarget / coutTotalProjet; // ratio financed by loan
+      const draw = neededForPrice * financedShare; // ignoring fees timing (simplification)
+
+      outstanding += draw;
+
+      const interest = outstanding * rNom; // monthly interest only
+      const insurance = outstanding * rAss; // monthly insurance
+      const intercalary = interest + insurance;
+
+      rows.push({ month: m, draw, outstanding, interest, insurance, intercalary });
+      lastCum = cum;
+    }
+
+    // Monthly payment after delivery
+    const mensualite = annuityPayment(principalTarget, (inputs.tauxAnnuel + inputs.tauxAssuranceAnnuel) / 100, inputs.dureeCreditAnnees);
+
+    const totalIntercalary = rows.slice(0, rows.length - 1).reduce((s, r) => s + r.intercalary, 0);
+
+    return { rows, mensualite, totalIntercalary, principalTarget };
+  }, [inputs, milestones, besoinFinancement, coutTotalProjet]);
+
+  const graphDraws = useMemo(() => schedule.rows.map(r => ({ mois: r.month, tirage: Math.round(r.draw), encours: Math.round(r.outstanding) })), [schedule]);
+  const graphInterests = useMemo(() => schedule.rows.map(r => ({ mois: r.month, interets: r.interest + r.insurance })), [schedule]);
+
+  const coutIntercalaires = useMemo(() => schedule.totalIntercalary, [schedule]);
+  const mensualite = useMemo(() => schedule.mensualite, [schedule]);
+
+  // ==========================
+  // UI helpers
+  // ==========================
+  const updateMilestone = (idx: number, field: keyof Milestone, value: number | string) => {
+    const next = inputs.milestones.map((m, i) => (i === idx ? { ...m, [field]: typeof value === "string" ? toNumber(value, (m as any)[field]) : value } : m));
+    setInputs({ ...inputs, milestones: next });
   };
 
-  const calculerVEFA = () => {
-    const prixVEFA = parseFloat(formData.prixVEFA) || 0;
-    const prixFinal = parseFloat(formData.prixFinal) || 0;
-    const dureeConstruction = parseInt(formData.dureeConstruction) || 0;
-    const tauxInteret = parseFloat(formData.tauxInteret) || 0;
-    const apport = parseFloat(formData.apport) || 0;
-    const fraisNotaire = parseFloat(formData.fraisNotaire) || 0;
-    const fraisDossier = parseFloat(formData.fraisDossier) || 0;
+  const resetMilestones = () => setInputs({ ...inputs, milestones: defaultMilestones(inputs.dureeConstructionMois) });
 
-    if (prixVEFA && prixFinal && dureeConstruction && tauxInteret && apport) {
-      const montantEmprunte = prixFinal - apport;
-      const tauxMensuel = tauxInteret / 100 / 12;
-      const mensualite = (montantEmprunte * tauxMensuel * Math.pow(1 + tauxMensuel, dureeConstruction)) / 
-                        (Math.pow(1 + tauxMensuel, dureeConstruction) - 1);
-      const coutTotal = (mensualite * dureeConstruction) + fraisNotaire + fraisDossier;
-      const coutCredit = coutTotal - montantEmprunte;
-      const economieVEFA = prixFinal - prixVEFA;
-
-      setResultats({
-        montantEmprunte,
-        mensualite,
-        coutTotal,
-        coutCredit,
-        economieVEFA,
-        fraisNotaire,
-        fraisDossier
-      });
-    }
+  const applyPreset = (label: "Classique" | "Rapide" | "Longue") => {
+    const d = label === "Rapide" ? 14 : label === "Longue" ? 28 : 20;
+    setInputs(prev => ({ ...prev, dureeConstructionMois: d, milestones: defaultMilestones(d) }));
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-blue-50">
       <Navbar />
       <main className="flex-1 py-8">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <div className="p-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl">
-                <Calculator className="h-8 w-8 text-white" />
-              </div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-700 bg-clip-text text-transparent">
-                Simulateur de VEFA
-              </h1>
+        <div className="w-full mx-auto max-w-7xl p-4 md:p-8 space-y-6">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <h1 className="text-2xl md:text-3xl font-semibold">Simulateur VEFA</h1>
+            <div className="flex gap-2">
+              <Button variant="secondary" onClick={() => applyPreset("Rapide")} className="rounded-2xl">Livraison rapide</Button>
+              <Button variant="secondary" onClick={() => applyPreset("Classique")} className="rounded-2xl">Calendrier classique</Button>
+              <Button variant="secondary" onClick={() => applyPreset("Longue")} className="rounded-2xl">Construction longue</Button>
             </div>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              Calculez votre projet VEFA (Vente en l'État Futur d'Achèvement) et découvrez les avantages
-            </p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-8">
-            {/* Formulaire */}
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Building className="h-5 w-5 text-blue-600" />
-                  Paramètres du VEFA
-                </CardTitle>
-                <CardDescription>
-                  Renseignez les informations de votre projet
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="prixVEFA">Prix VEFA (€)</Label>
-                    <Input
-                      id="prixVEFA"
-                      name="prixVEFA"
-                      type="number"
-                      placeholder="250000"
-                      value={formData.prixVEFA}
-                      onChange={handleInputChange}
-                      className="h-11"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="prixFinal">Prix final du bien (€)</Label>
-                    <Input
-                      id="prixFinal"
-                      name="prixFinal"
-                      type="number"
-                      placeholder="300000"
-                      value={formData.prixFinal}
-                      onChange={handleInputChange}
-                      className="h-11"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="dureeConstruction">Durée de construction (mois)</Label>
-                    <Input
-                      id="dureeConstruction"
-                      name="dureeConstruction"
-                      type="number"
-                      placeholder="18"
-                      value={formData.dureeConstruction}
-                      onChange={handleInputChange}
-                      className="h-11"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="tauxInteret">Taux d'intérêt annuel (%)</Label>
-                    <Input
-                      id="tauxInteret"
-                      name="tauxInteret"
-                      type="number"
-                      step="0.01"
-                      placeholder="3.5"
-                      value={formData.tauxInteret}
-                      onChange={handleInputChange}
-                      className="h-11"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="apport">Apport personnel (€)</Label>
-                    <Input
-                      id="apport"
-                      name="apport"
-                      type="number"
-                      placeholder="50000"
-                      value={formData.apport}
-                      onChange={handleInputChange}
-                      className="h-11"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="fraisNotaire">Frais de notaire (€)</Label>
-                    <Input
-                      id="fraisNotaire"
-                      name="fraisNotaire"
-                      type="number"
-                      placeholder="3000"
-                      value={formData.fraisNotaire}
-                      onChange={handleInputChange}
-                      className="h-11"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="fraisDossier">Frais de dossier (€)</Label>
-                    <Input
-                      id="fraisDossier"
-                      name="fraisDossier"
-                      type="number"
-                      placeholder="800"
-                      value={formData.fraisDossier}
-                      onChange={handleInputChange}
-                      className="h-11"
-                    />
+          <Card className="rounded-2xl shadow-sm">
+            <CardHeader>
+              <CardTitle>Paramètres du projet</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-2">
+                  <Label>Prix VEFA TTC (€)</Label>
+                  <Input inputMode="numeric" value={inputs.prixVEFA}
+                         onChange={(e) => setInputs({ ...inputs, prixVEFA: toNumber(e.target.value, inputs.prixVEFA) })}/>
+                </div>
+                <div className="space-y-2">
+                  <Label>Apport personnel (€)</Label>
+                  <Input inputMode="numeric" value={inputs.apport}
+                         onChange={(e) => setInputs({ ...inputs, apport: Math.max(0, toNumber(e.target.value, inputs.apport)) })}/>
+                </div>
+                <div className="space-y-2">
+                  <Label>Durée de construction (mois)</Label>
+                  <div className="flex items-center gap-3">
+                    <Input inputMode="numeric" value={inputs.dureeConstructionMois}
+                           onChange={(e) => setInputs({ ...inputs, dureeConstructionMois: Math.max(6, Math.min(48, toNumber(e.target.value, inputs.dureeConstructionMois))) })}/>
+                    <Slider value={[inputs.dureeConstructionMois]} min={6} max={48} step={1}
+                            onValueChange={([v]) => setInputs({ ...inputs, dureeConstructionMois: v })}
+                            className="w-40"/>
                   </div>
                 </div>
+              </div>
 
-                <Button 
-                  onClick={calculerVEFA}
-                  className="w-full h-12 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-lg font-semibold"
-                >
-                  <Calculator className="h-5 w-5 mr-2" />
-                  Calculer mon VEFA
-                </Button>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-2">
+                  <Label>Frais de notaire VEFA (%)</Label>
+                  <Input inputMode="numeric" value={inputs.fraisNotairePctVEFA}
+                         onChange={(e) => setInputs({ ...inputs, fraisNotairePctVEFA: Math.max(0, toNumber(e.target.value, inputs.fraisNotairePctVEFA)) })}/>
+                </div>
+                <div className="space-y-2">
+                  <Label>Frais de notaire dans l'ancien (%)</Label>
+                  <Input inputMode="numeric" value={inputs.fraisNotairePctAncien}
+                         onChange={(e) => setInputs({ ...inputs, fraisNotairePctAncien: Math.max(0, toNumber(e.target.value, inputs.fraisNotairePctAncien)) })}/>
+                </div>
+                <div className="space-y-2">
+                  <Label>Économie estimée</Label>
+                  <div className="p-2 border rounded-lg text-right font-medium">{fmtCurrency0(economieFraisNotaire)}</div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-2">
+                  <Label>Taux nominal annuel (%)</Label>
+                  <Input inputMode="numeric" value={inputs.tauxAnnuel}
+                         onChange={(e) => setInputs({ ...inputs, tauxAnnuel: Math.max(0, toNumber(e.target.value, inputs.tauxAnnuel)) })}/>
+                </div>
+                <div className="space-y-2">
+                  <Label>Assurance emprunteur (%/an)</Label>
+                  <Input inputMode="numeric" value={inputs.tauxAssuranceAnnuel}
+                         onChange={(e) => setInputs({ ...inputs, tauxAssuranceAnnuel: Math.max(0, toNumber(e.target.value, inputs.tauxAssuranceAnnuel)) })}/>
+                </div>
+                <div className="space-y-2">
+                  <Label>Durée du crédit (années)</Label>
+                  <Input inputMode="numeric" value={inputs.dureeCreditAnnees}
+                         onChange={(e) => setInputs({ ...inputs, dureeCreditAnnees: Math.max(5, Math.min(30, toNumber(e.target.value, inputs.dureeCreditAnnees))) })}/>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label>Calendrier des appels de fonds (cumul %)</Label>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Button variant="outline" onClick={resetMilestones} className="rounded-2xl">Réinitialiser</Button>
+                    <TooltipProvider>
+                      <ShadTooltip>
+                        <TooltipTrigger asChild>
+                          <Info className="w-4 h-4" />
+                        </TooltipTrigger>
+                        <TooltipContent>Barème indicatif. Adaptez selon votre contrat.</TooltipContent>
+                      </ShadTooltip>
+                    </TooltipProvider>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-6 gap-3">
+                  {inputs.milestones.map((m, i) => (
+                    <div key={i} className="border rounded-xl p-3 space-y-2">
+                      <div className="font-medium text-sm">{m.label}</div>
+                      <div className="flex items-center gap-2">
+                        <Label className="text-xs text-muted-foreground">Mois</Label>
+                        <Input value={m.month} inputMode="numeric" onChange={(e) => updateMilestone(i, "month", e.target.value)} />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Label className="text-xs text-muted-foreground">Cumul %</Label>
+                        <Input value={m.cumPct} inputMode="numeric" onChange={(e) => updateMilestone(i, "cumPct", e.target.value)} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <Card className="rounded-2xl">
+              <CardHeader>
+                <CardTitle>Résumé financier</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm">
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="text-muted-foreground">Prix VEFA</div>
+                  <div className="text-right font-medium">{fmtCurrency0(inputs.prixVEFA)}</div>
+
+                  <div className="text-muted-foreground">Frais de notaire (VEFA)</div>
+                  <div className="text-right">{fmtCurrency0(fraisNotaireVEFA)} ({fmtPct(inputs.fraisNotairePctVEFA)})</div>
+
+                  <div className="text-muted-foreground">Coût total projet</div>
+                  <div className="text-right font-medium">{fmtCurrency0(coutTotalProjet)}</div>
+
+                  <div className="text-muted-foreground">Apport</div>
+                  <div className="text-right">{fmtCurrency0(inputs.apport)}</div>
+
+                  <div className="text-muted-foreground">Besoin de financement</div>
+                  <div className="text-right font-semibold">{fmtCurrency0(besoinFinancement)}</div>
+
+                  <div className="text-muted-foreground">Intérêts/assurance avant livraison</div>
+                  <div className="text-right">{fmtCurrency0(coutIntercalaires)}</div>
+
+                  <div className="text-muted-foreground">Mensualité après livraison (est.)</div>
+                  <div className="text-right font-semibold">{fmtCurrency2(mensualite)}</div>
+
+                  <div className="text-muted-foreground">Économie vs ancien (frais notaire)</div>
+                  <div className="text-right text-emerald-700 font-semibold">{fmtCurrency0(economieFraisNotaire)}</div>
+                </div>
               </CardContent>
             </Card>
 
-            {/* Résultats */}
-            <div className="space-y-6">
-              {resultats ? (
-                <Card className="shadow-lg">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <TrendingUp className="h-5 w-5 text-indigo-600" />
-                      Résultats du calcul
-                    </CardTitle>
-                    <CardDescription>
-                      Détail de votre projet VEFA
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 gap-4">
-                      <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-                        <span className="font-medium">Montant emprunté</span>
-                        <span className="font-bold text-lg text-blue-600">
-                          {resultats.montantEmprunte.toLocaleString('fr-FR')} €
-                        </span>
-                      </div>
-
-                      <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-                        <span className="font-medium">Mensualité</span>
-                        <span className="font-bold text-lg text-indigo-600">
-                          {resultats.mensualite.toLocaleString('fr-FR', { maximumFractionDigits: 2 })} €
-                        </span>
-                      </div>
-
-                      <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg border border-green-200">
-                        <span className="font-medium">Économie VEFA</span>
-                        <span className="font-bold text-lg text-green-600">
-                          {resultats.economieVEFA.toLocaleString('fr-FR')} €
-                        </span>
-                      </div>
-
-                      <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-                        <span className="font-medium">Coût total du crédit</span>
-                        <span className="font-bold text-lg text-red-600">
-                          {resultats.coutCredit.toLocaleString('fr-FR', { maximumFractionDigits: 2 })} €
-                        </span>
-                      </div>
-
-                      <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-                        <span className="font-medium">Coût total de l'opération</span>
-                        <span className="font-bold text-lg text-slate-700">
-                          {resultats.coutTotal.toLocaleString('fr-FR', { maximumFractionDigits: 2 })} €
-                        </span>
-                      </div>
-                    </div>
-
-                    <Separator />
-
-                    <div className="space-y-2">
-                      <h4 className="font-semibold text-slate-700">Détail des frais</h4>
-                      <div className="text-sm text-slate-600 space-y-1">
-                        <div className="flex justify-between">
-                          <span>Frais de notaire</span>
-                          <span>{resultats.fraisNotaire.toLocaleString('fr-FR')} €</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Frais de dossier</span>
-                          <span>{resultats.fraisDossier.toLocaleString('fr-FR')} €</span>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ) : (
-                <Card className="shadow-lg">
-                  <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-                    <Euro className="h-16 w-16 text-slate-300 mb-4" />
-                    <h3 className="text-lg font-semibold text-slate-600 mb-2">
-                      Résultats du calcul
-                    </h3>
-                    <p className="text-slate-500">
-                      Renseignez les informations ci-contre pour voir les résultats de votre VEFA
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Informations sur le VEFA */}
-              <Card className="shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5 text-blue-600" />
-                    Qu'est-ce que le VEFA ?
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3 text-sm text-slate-600">
-                  <p>
-                    Le VEFA (Vente en l'État Futur d'Achèvement) permet d'acheter un bien immobilier 
-                    avant sa construction complète, souvent à un prix avantageux.
-                  </p>
-                  <p>
-                    Cette formule présente plusieurs avantages : prix préférentiel, TVA réduite, 
-                    et possibilité de personnaliser certains éléments.
-                  </p>
-                  <p className="font-medium text-slate-700">
-                    ⚠️ Cette simulation est indicative et ne remplace pas l'avis d'un professionnel.
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
+            <Card className="rounded-2xl lg:col-span-2">
+              <CardHeader>
+                <CardTitle>Tirages et encours pendant la construction</CardTitle>
+              </CardHeader>
+              <CardContent className="h-72">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={graphDraws} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="mois" tickFormatter={(v) => `${v}m`} />
+                    <YAxis tickFormatter={(v) => v.toLocaleString("fr-FR")} />
+                    <Tooltip formatter={(value: any) => fmtCurrency0(Number(value))} labelFormatter={(l) => `Mois ${l}`} />
+                    <Legend />
+                    <Area type="monotone" dataKey="tirage" name="Tirage mensuel" dot={false} />
+                    <Area type="monotone" dataKey="encours" name="Encours cumulé" dot={false} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
           </div>
-          </div>
+
+          <Card className="rounded-2xl">
+            <CardHeader>
+              <CardTitle>Coût des intérêts intercalaires</CardTitle>
+            </CardHeader>
+            <CardContent className="h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={graphInterests} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="mois" />
+                  <YAxis tickFormatter={(v) => v.toLocaleString("fr-FR")} />
+                  <Tooltip formatter={(value: any) => fmtCurrency2(Number(value))} labelFormatter={(l) => `Mois ${l}`} />
+                  <Bar dataKey="interets" name="Intérêts + assurance" />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-2xl">
+            <CardHeader>
+              <CardTitle>Avantages de la VEFA</CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm text-muted-foreground space-y-2">
+              <ul className="list-disc pl-6 space-y-1">
+                <li><span className="font-medium">Frais de notaire réduits</span> (souvent 2–3% vs 7–8% dans l'ancien) : {fmtCurrency0(economieFraisNotaire)} d'économie estimée ici.</li>
+                <li>Logement neuf aux <span className="font-medium">normes énergétiques</span> récentes (moins de travaux, charges optimisées).</li>
+                <li><span className="font-medium">Paiement échelonné</span> au rythme du chantier, limitant l'encours moyen avant livraison.</li>
+                <li>Possibilité d'<span className="font-medium">options et personnalisations</span> (dans la limite du contrat).</li>
+                <li>Garantie d'achèvement, décennale, parfait achèvement (selon réglementation en vigueur).</li>
+              </ul>
+              <p className="text-xs">Ce simulateur est pédagogique : adaptez les pourcentages d'appels de fonds et vérifiez votre contrat/banque pour les modalités précises.</p>
+            </CardContent>
+          </Card>
         </div>
       </main>
       <Footer />

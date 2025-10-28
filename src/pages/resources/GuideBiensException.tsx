@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, AlertTriangle, Info, Calculator } from 'lucide-react';
+import { CheckCircle, AlertTriangle, Info, Calculator, Users } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
@@ -36,13 +36,20 @@ const GuideBiensException = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-slate-600 leading-relaxed">
-                    Les biens d'exception sont des propriétés luxueuses, prestigieuses et rares. 
-                    Ils se distinguent par leur localisation, leur architecture, leurs équipements haut de gamme.
+                    Les biens d'exception sont des propriétés immobilières haut de gamme, caractérisées par leur prestige, 
+                    leur rareté et leur valeur marchande élevée. Ils se distinguent par une localisation privilégiée, 
+                    une architecture remarquable, des équipements haut de gamme et une finition exceptionnelle.
+                  </p>
+                  <p className="text-slate-600 leading-relaxed">
+                    Ces biens peuvent être des manoirs, châteaux, villas de prestige, penthouses en bord de mer, 
+                    ou appartements dans des immeubles historiques. L'investissement dans ce type de bien nécessite 
+                    un budget important et une vision patrimoniale à long terme.
                   </p>
                   <div className="bg-teal-50 p-4 rounded-lg border border-teal-200">
-                    <h4 className="font-semibold text-teal-800 mb-2">Caractéristiques</h4>
+                    <h4 className="font-semibold text-teal-800 mb-2">Caractéristiques clés</h4>
                     <p className="text-teal-700 text-sm">
-                      Prestige, rareté, localisation exceptionnelle, équipements de luxe.
+                      Prestige, rareté, localisation exceptionnelle, équipements de luxe, qualité de construction 
+                      supérieure. Ces biens sont des placements patrimoniaux à forte valeur ajoutée.
                     </p>
                   </div>
                 </CardContent>
@@ -60,22 +67,36 @@ const GuideBiensException = () => {
                     <div className="flex items-start gap-3">
                       <CheckCircle className="h-4 w-4 text-green-500 mt-1 flex-shrink-0" />
                       <div>
-                        <p className="font-medium text-slate-700">Plus-value</p>
-                        <p className="text-sm text-slate-600">Bon potentiel de revente</p>
+                        <p className="font-medium text-slate-700">Plus-value importante</p>
+                        <p className="text-sm text-slate-600">Bon potentiel de revente à terme</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
                       <CheckCircle className="h-4 w-4 text-green-500 mt-1 flex-shrink-0" />
                       <div>
-                        <p className="font-medium text-slate-700">Prestige</p>
-                        <p className="text-sm text-slate-600">Statut social</p>
+                        <p className="font-medium text-slate-700">Prestige et image</p>
+                        <p className="text-sm text-slate-600">Statut social et reconnaissance</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
                       <CheckCircle className="h-4 w-4 text-green-500 mt-1 flex-shrink-0" />
                       <div>
                         <p className="font-medium text-slate-700">Rareté</p>
-                        <p className="text-sm text-slate-600">Place limitée sur le marché</p>
+                        <p className="text-sm text-slate-600">Place limitée sur le marché, faible concurrence</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <CheckCircle className="h-4 w-4 text-green-500 mt-1 flex-shrink-0" />
+                      <div>
+                        <p className="font-medium text-slate-700">Conservation de valeur</p>
+                        <p className="text-sm text-slate-600">Plus résistants aux crises économiques</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <CheckCircle className="h-4 w-4 text-green-500 mt-1 flex-shrink-0" />
+                      <div>
+                        <p className="font-medium text-slate-700">Location haut de gamme</p>
+                        <p className="text-sm text-slate-600">Potentiel locatif important</p>
                       </div>
                     </div>
                   </CardContent>
@@ -92,27 +113,101 @@ const GuideBiensException = () => {
                     <div className="flex items-start gap-3">
                       <AlertTriangle className="h-4 w-4 text-red-500 mt-1 flex-shrink-0" />
                       <div>
-                        <p className="font-medium text-slate-700">Coût élevé</p>
-                        <p className="text-sm text-slate-600">Investissement important</p>
+                        <p className="font-medium text-slate-700">Investissement élevé</p>
+                        <p className="text-sm text-slate-600">Budget initial très important (1M€+)</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
                       <AlertTriangle className="h-4 w-4 text-red-500 mt-1 flex-shrink-0" />
                       <div>
-                        <p className="font-medium text-slate-700">Entretien</p>
-                        <p className="text-sm text-slate-600">Coûts d'entretien importants</p>
+                        <p className="font-medium text-slate-700">Entretien coûteux</p>
+                        <p className="text-sm text-slate-600">Coûts d'entretien et de rénovation importants annuellement</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
                       <AlertTriangle className="h-4 w-4 text-red-500 mt-1 flex-shrink-0" />
                       <div>
-                        <p className="font-medium text-slate-700">Liquidité</p>
-                        <p className="text-sm text-slate-600">Revente parfois difficile</p>
+                        <p className="font-medium text-slate-700">Liquidité réduite</p>
+                        <p className="text-sm text-slate-600">Revente plus longue et complexe</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <AlertTriangle className="h-4 w-4 text-red-500 mt-1 flex-shrink-0" />
+                      <div>
+                        <p className="font-medium text-slate-700">Charges élevées</p>
+                        <p className="text-sm text-slate-600">Taxes foncières, assurance, piscine, jardin...</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <AlertTriangle className="h-4 w-4 text-red-500 mt-1 flex-shrink-0" />
+                      <div>
+                        <p className="font-medium text-slate-700">Marché étroit</p>
+                        <p className="text-sm text-slate-600">Peu d'acheteurs solvables pour ce type de bien</p>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
               </div>
+
+              <Card className="shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5 text-teal-600" />
+                    Conseils pratiques
+                  </CardTitle>
+                  <CardDescription>Points importants pour investir dans un bien d'exception</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <h4 className="font-semibold text-slate-700">Avant l'achat</h4>
+                      <ul className="space-y-2 text-sm text-slate-600">
+                        <li className="flex items-start gap-2">
+                          <span className="text-teal-500 mt-1">•</span>
+                          <span>Évaluer votre budget global (achat + travaux + entretien)</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-teal-500 mt-1">•</span>
+                          <span>Choisir une localisation privilégiée et stable</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-teal-500 mt-1">•</span>
+                          <span>Expertiser le bien avec un expert immobilier</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-teal-500 mt-1">•</span>
+                          <span>Évaluer les charges annuelles d'entretien</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-teal-500 mt-1">•</span>
+                          <span>Vérifier la fiscalité (ISF, taxes foncières)</span>
+                        </li>
+                      </ul>
+                    </div>
+                    <div className="space-y-4">
+                      <h4 className="font-semibold text-slate-700">Après l'achat</h4>
+                      <ul className="space-y-2 text-sm text-slate-600">
+                        <li className="flex items-start gap-2">
+                          <span className="text-emerald-500 mt-1">•</span>
+                          <span>Maintenir le bien en excellent état</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-emerald-500 mt-1">•</span>
+                          <span>Anticiper les travaux de rénovation</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-emerald-500 mt-1">•</span>
+                          <span>Surveiller l'évolution du marché</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-emerald-500 mt-1">•</span>
+                          <span>Envisager une location haut de gamme</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
               <Card className="shadow-lg bg-gradient-to-r from-teal-50 to-emerald-50 border-teal-200">
                 <CardHeader>

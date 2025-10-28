@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, AlertTriangle, Info, Calculator } from 'lucide-react';
+import { CheckCircle, AlertTriangle, Info, Calculator, Users } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
@@ -36,13 +36,21 @@ const GuideEncheres = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-slate-600 leading-relaxed">
-                    Les enchères immobilières sont des ventes publiques de biens immobiliers. 
-                    Elles permettent d'acheter des biens souvent en dessous du marché.
+                    Les enchères immobilières sont des ventes publiques organisées par un commissaire-priseur ou 
+                    un notaire. Elles concernent principalement des biens immobiliers saisis par décision de justice, 
+                    mis en vente volontairement par leur propriétaire, ou provenant de successions.
+                  </p>
+                  <p className="text-slate-600 leading-relaxed">
+                    Les biens mis aux enchères sont généralement vendus à un prix inférieur au marché, offrant une 
+                    opportunité d'achat intéressante pour les investisseurs. Cependant, l'acheteur doit être disponible 
+                    rapidement et disposer de fonds conséquents pour la signature de l'acte.
                   </p>
                   <div className="bg-teal-50 p-4 rounded-lg border border-teal-200">
-                    <h4 className="font-semibold text-teal-800 mb-2">Avantage principal</h4>
+                    <h4 className="font-semibold text-teal-800 mb-2">Principe clé</h4>
                     <p className="text-teal-700 text-sm">
-                      Opportunité d'acquérir un bien immobilier à prix réduit.
+                      Les enchères permettent d'acquérir un bien immobilier à prix réduit lors d'une vente publique. 
+                      La concurrence peut faire monter les prix, mais offre aussi des opportunités de bonne affaire 
+                      pour les acheteurs bien préparés.
                     </p>
                   </div>
                 </CardContent>
@@ -60,22 +68,36 @@ const GuideEncheres = () => {
                     <div className="flex items-start gap-3">
                       <CheckCircle className="h-4 w-4 text-green-500 mt-1 flex-shrink-0" />
                       <div>
-                        <p className="font-medium text-slate-700">Prix avantageux</p>
-                        <p className="text-sm text-slate-600">En dessous du marché</p>
+                        <p className="font-medium text-slate-700">Prix souvent avantageux</p>
+                        <p className="text-sm text-slate-600">Acquisition souvent 20-30% en dessous du marché</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
                       <CheckCircle className="h-4 w-4 text-green-500 mt-1 flex-shrink-0" />
                       <div>
-                        <p className="font-medium text-slate-700">Transparence</p>
-                        <p className="text-sm text-slate-600">Vente publique</p>
+                        <p className="font-medium text-slate-700">Transparence totale</p>
+                        <p className="text-sm text-slate-600">Vente publique avec adjudication transparente</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
                       <CheckCircle className="h-4 w-4 text-green-500 mt-1 flex-shrink-0" />
                       <div>
                         <p className="font-medium text-slate-700">Rapidité</p>
-                        <p className="text-sm text-slate-600">Vente rapide</p>
+                        <p className="text-sm text-slate-600">Vente rapide et efficace</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <CheckCircle className="h-4 w-4 text-green-500 mt-1 flex-shrink-0" />
+                      <div>
+                        <p className="font-medium text-slate-700">Pas d'intermédiaire</p>
+                        <p className="text-sm text-slate-600">Pas de commission d'agence à payer</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <CheckCircle className="h-4 w-4 text-green-500 mt-1 flex-shrink-0" />
+                      <div>
+                        <p className="font-medium text-slate-700">Opportunités intéressantes</p>
+                        <p className="text-sm text-slate-600">Accès à des biens uniques et rares</p>
                       </div>
                     </div>
                   </CardContent>
@@ -92,27 +114,105 @@ const GuideEncheres = () => {
                     <div className="flex items-start gap-3">
                       <AlertTriangle className="h-4 w-4 text-red-500 mt-1 flex-shrink-0" />
                       <div>
-                        <p className="font-medium text-slate-700">Frais élevés</p>
-                        <p className="text-sm text-slate-600">Frais de notaire importants</p>
+                        <p className="font-medium text-slate-700">Frais de notaire élevés</p>
+                        <p className="text-sm text-slate-600">7-8% au lieu de 2-3% en vente classique</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
                       <AlertTriangle className="h-4 w-4 text-red-500 mt-1 flex-shrink-0" />
                       <div>
-                        <p className="font-medium text-slate-700">Travaux</p>
-                        <p className="text-sm text-slate-600">Souvent nécessaire</p>
+                        <p className="font-medium text-slate-700">Travaux souvent nécessaires</p>
+                        <p className="text-sm text-slate-600">Biens souvent dans un état moyen à dégradé</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
                       <AlertTriangle className="h-4 w-4 text-red-500 mt-1 flex-shrink-0" />
                       <div>
-                        <p className="font-medium text-slate-700">Visite limitée</p>
-                        <p className="text-sm text-slate-600">Peu de visites possibles</p>
+                        <p className="font-medium text-slate-700">Visite limitée du bien</p>
+                        <p className="text-sm text-slate-600">Risque de mauvaise surprise à la livraison</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <AlertTriangle className="h-4 w-4 text-red-500 mt-1 flex-shrink-0" />
+                      <div>
+                        <p className="font-medium text-slate-700">Caution requise</p>
+                        <p className="text-sm text-slate-600">Deposit important à déposer avant la vente</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <AlertTriangle className="h-4 w-4 text-red-500 mt-1 flex-shrink-0" />
+                      <div>
+                        <p className="font-medium text-slate-700">Concurrence</p>
+                        <p className="text-sm text-slate-600">Risque de surenchère au moment de l'adjudication</p>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
               </div>
+
+              <Card className="shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5 text-teal-600" />
+                    Conseils pratiques
+                  </CardTitle>
+                  <CardDescription>Points importants pour réussir aux enchères</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <h4 className="font-semibold text-slate-700">Avant la vente</h4>
+                      <ul className="space-y-2 text-sm text-slate-600">
+                        <li className="flex items-start gap-2">
+                          <span className="text-teal-500 mt-1">•</span>
+                          <span>Visiter le bien si possible (visites organisées)</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-teal-500 mt-1">•</span>
+                          <span>Estimer le budget travaux</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-teal-500 mt-1">•</span>
+                          <span>Préparer le financement (caution + prix)</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-teal-500 mt-1">•</span>
+                          <span>Assister à d'autres enchères pour observer</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-teal-500 mt-1">•</span>
+                          <span>Fixer votre prix maximum avant la vente</span>
+                        </li>
+                      </ul>
+                    </div>
+                    <div className="space-y-4">
+                      <h4 className="font-semibold text-slate-700">Le jour de la vente</h4>
+                      <ul className="space-y-2 text-sm text-slate-600">
+                        <li className="flex items-start gap-2">
+                          <span className="text-emerald-500 mt-1">•</span>
+                          <span>Arriver en avance pour s'installer</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-emerald-500 mt-1">•</span>
+                          <span>Ne pas dépasser votre budget maximum</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-emerald-500 mt-1">•</span>
+                          <span>Observer la concurrence</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-emerald-500 mt-1">•</span>
+                          <span>Signer l'acte d'adjudication si adjugé</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-emerald-500 mt-1">•</span>
+                          <span>Payer la caution et les frais rapidement</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
               <Card className="shadow-lg bg-gradient-to-r from-teal-50 to-emerald-50 border-teal-200">
                 <CardHeader>

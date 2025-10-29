@@ -23,6 +23,16 @@ const serviceTypeLabels: Record<string, string> = {
   nettoyage: "Nettoyage",
   assurance: "Assurance",
   amenagement: "Aménagement",
+  courtier: "Courtier",
+  notaire: "Notaire",
+  banque: "Banque",
+  artisan: "Artisan",
+  gestionnaire_patrimoine: "Gestionnaire de patrimoine",
+  geometre: "Géomètre",
+  maitre_oeuvre: "Maître d’œuvre",
+  architecte: "Architecte",
+  amo: "Assistant maîtrise d’ouvrage",
+  promoteur_lotisseur: "Promoteur / lotisseur",
   autre: "Autre"
 };
 
@@ -90,15 +100,31 @@ const AncillaryServices = () => {
         </div>
 
         <Tabs value={selectedType} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="grid w-full grid-cols-8 mb-6">
+          <TabsList className="flex w-full flex-wrap gap-2 mb-6">
             <TabsTrigger value="all">Toutes</TabsTrigger>
-            <TabsTrigger value="demenagement">Déménagement</TabsTrigger>
-            <TabsTrigger value="travaux">Travaux</TabsTrigger>
-            <TabsTrigger value="diagnostic">Diagnostic</TabsTrigger>
-            <TabsTrigger value="nettoyage">Nettoyage</TabsTrigger>
-            <TabsTrigger value="assurance">Assurance</TabsTrigger>
-            <TabsTrigger value="amenagement">Aménagement</TabsTrigger>
-            <TabsTrigger value="autre">Autre</TabsTrigger>
+            {[
+              'demenagement',
+              'travaux',
+              'diagnostic',
+              'nettoyage',
+              'assurance',
+              'amenagement',
+              'courtier',
+              'notaire',
+              'banque',
+              'artisan',
+              'gestionnaire_patrimoine',
+              'geometre',
+              'maitre_oeuvre',
+              'architecte',
+              'amo',
+              'promoteur_lotisseur',
+              'autre',
+            ].map((type) => (
+              <TabsTrigger key={type} value={type}>
+                {serviceTypeLabels[type] || type}
+              </TabsTrigger>
+            ))}
           </TabsList>
 
           {/* TabsContent for "all" - shows all services without specific content */}
@@ -124,7 +150,25 @@ const AncillaryServices = () => {
             </div>
           </TabsContent>
 
-          {['demenagement', 'travaux', 'diagnostic', 'nettoyage', 'assurance', 'amenagement', 'autre'].map((type) => (
+          {[
+            'demenagement',
+            'travaux',
+            'diagnostic',
+            'nettoyage',
+            'assurance',
+            'amenagement',
+            'courtier',
+            'notaire',
+            'banque',
+            'artisan',
+            'gestionnaire_patrimoine',
+            'geometre',
+            'maitre_oeuvre',
+            'architecte',
+            'amo',
+            'promoteur_lotisseur',
+            'autre',
+          ].map((type) => (
             <TabsContent key={type} value={type}>
               <div className="py-4">
                 {isLoading ? (

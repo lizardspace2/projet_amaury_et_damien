@@ -367,6 +367,16 @@ const SellAncillaryService = () => {
                           <SelectItem value="nettoyage">Nettoyage</SelectItem>
                           <SelectItem value="assurance">Assurance</SelectItem>
                           <SelectItem value="amenagement">Aménagement</SelectItem>
+                          <SelectItem value="courtier">Courtier</SelectItem>
+                          <SelectItem value="notaire">Notaire</SelectItem>
+                          <SelectItem value="banque">Banque</SelectItem>
+                          <SelectItem value="artisan">Artisan</SelectItem>
+                          <SelectItem value="gestionnaire_patrimoine">Gestionnaire de patrimoine</SelectItem>
+                          <SelectItem value="geometre">Géomètre</SelectItem>
+                          <SelectItem value="maitre_oeuvre">Maître d’œuvre</SelectItem>
+                          <SelectItem value="architecte">Architecte</SelectItem>
+                          <SelectItem value="amo">Assistant maîtrise d’ouvrage</SelectItem>
+                          <SelectItem value="promoteur_lotisseur">Promoteur / lotisseur</SelectItem>
                           <SelectItem value="autre">Autre</SelectItem>
                         </SelectContent>
                       </Select>

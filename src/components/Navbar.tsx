@@ -508,16 +508,30 @@ const Navbar = () => {
   ];
 
   const ancillaryServicesLinks = {
-    Types: [
+    "Vie pratique": [
       { title: "Tous les services annexes", href: "/ancillary-services" },
       { title: "Déménagement", href: "/ancillary-services?type=demenagement" },
-      { title: "Travaux", href: "/ancillary-services?type=travaux" },
-      { title: "Diagnostic", href: "/ancillary-services?type=diagnostic" },
-      { title: "Nettoyage", href: "/ancillary-services?type=nettoyage" },
-      { title: "Assurance", href: "/ancillary-services?type=assurance" },
       { title: "Aménagement", href: "/ancillary-services?type=amenagement" },
+      { title: "Nettoyage", href: "/ancillary-services?type=nettoyage" },
+      { title: "Diagnostic", href: "/ancillary-services?type=diagnostic" },
       { title: "Autre", href: "/ancillary-services?type=autre" },
-    ]
+    ],
+    "Bâtiment et maîtrise d’œuvre": [
+      { title: "Travaux", href: "/ancillary-services?type=travaux" },
+      { title: "Artisan", href: "/ancillary-services?type=artisan" },
+      { title: "Maître d’œuvre", href: "/ancillary-services?type=maitre_oeuvre" },
+      { title: "Architecte", href: "/ancillary-services?type=architecte" },
+      { title: "Assistant maîtrise d’ouvrage", href: "/ancillary-services?type=amo" },
+      { title: "Géomètre", href: "/ancillary-services?type=geometre" },
+    ],
+    "Finance et juridique": [
+      { title: "Courtier", href: "/ancillary-services?type=courtier" },
+      { title: "Banque", href: "/ancillary-services?type=banque" },
+      { title: "Assurance", href: "/ancillary-services?type=assurance" },
+      { title: "Notaire", href: "/ancillary-services?type=notaire" },
+      { title: "Gestionnaire de patrimoine", href: "/ancillary-services?type=gestionnaire_patrimoine" },
+      { title: "Promoteur / lotisseur", href: "/ancillary-services?type=promoteur_lotisseur" },
+    ],
   };
 
   const otherLinks = [

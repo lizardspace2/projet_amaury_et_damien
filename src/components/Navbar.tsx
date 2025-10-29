@@ -458,7 +458,7 @@ const Navbar = () => {
         { title: "Simulateur de crédit-vendeur", description: "Achat avec financement par le vendeur", href: "/resources/simulateur-credit-vendeur" },
         { title: "Simulateur de copropriété", description: "Achat en copropriété ou lot de volume", href: "/resources/simulateur-copropriete" },
     ],
-    "Contenu pédagogique": [
+    "Guides - opérations": [
         { title: "Guide du réméré", description: "Tout savoir sur le réméré immobilier", href: "/resources/guide-remere" },
         { title: "Guide du VEFA", description: "Comprendre la vente en l'état futur d'achèvement", href: "/resources/guide-vefa" },
         { title: "Guide de la vente à terme", description: "Expliquer la vente à terme", href: "/resources/guide-vente-terme" },
@@ -467,6 +467,8 @@ const Navbar = () => {
         { title: "Guide du bail commercial", description: "Reprendre un bail commercial", href: "/resources/guide-bail" },
         { title: "Guide des enchères immobilières", description: "Acheter aux enchères publiques", href: "/resources/guide-encheres" },
         { title: "Guide des biens d'exception", description: "Investir dans le luxe", href: "/resources/guide-biens-exception" },
+    ],
+    "Guides - copropriété & financement": [
         { title: "Guide de l'indivision", description: "Achat en parts ou nue-propriété", href: "/resources/guide-indivision" },
         { title: "Guide du BRS", description: "Comprendre le bail réel solidaire", href: "/resources/guide-brs" },
         { title: "Guide du démembrement", description: "Achat avec démembrement de propriété", href: "/resources/guide-demenbrement" },

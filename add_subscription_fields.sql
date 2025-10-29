@@ -14,3 +14,4 @@ CREATE INDEX IF NOT EXISTS idx_profiles_max_listings ON public.profiles(max_list
 CREATE INDEX IF NOT EXISTS idx_profiles_stripe_customer_id ON public.profiles(stripe_customer_id);
 
 
+

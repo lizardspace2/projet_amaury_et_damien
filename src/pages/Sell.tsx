@@ -11,6 +11,7 @@ import { CreatePropertyInput, createProperty } from "@/lib/api/properties";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { supabase } from "@/lib/api/supabaseClient";
+import { startProUpgradeCheckout } from "@/lib/billing";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -23,6 +24,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { signInWithEmail, signUpWithEmail } from "@/lib/api/auth";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 
 // Composants pour les étapes d'inscription
 const StepIndicator = ({ currentStep, totalSteps }: { currentStep: number; totalSteps: number }) => (
@@ -213,6 +216,7 @@ const SellPage = () => {
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
   const [signupStep, setSignupStep] = useState(0);
   const [showTypeSelection, setShowTypeSelection] = useState(false);
+  const [userProfile, setUserProfile] = useState<{ user_type?: string; max_listings?: number } | null>(null);
   const [authFormData, setAuthFormData] = useState({
     user_type: "",
     email: "",
@@ -226,6 +230,10 @@ const SellPage = () => {
     facebook: ""
   });
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const [currentMaxListings, setCurrentMaxListings] = useState<number | null>(null);
+  const [monthlyCount, setMonthlyCount] = useState<number>(0);
+  
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -241,6 +249,46 @@ const SellPage = () => {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Load profile for logged-in users to know type and current quota
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (!user) {
+        setUserProfile(null);
+        return;
+      }
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('user_type, max_listings')
+        .eq('user_id', user.id)
+        .single();
+      if (!error) setUserProfile(data);
+    };
+    loadProfile();
+  }, [user]);
+
+  // Load count of properties created this month for the user
+  useEffect(() => {
+    const loadMonthlyCount = async () => {
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      if (!currentUser) {
+        setMonthlyCount(0);
+        return;
+      }
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const { count, error } = await supabase
+        .from('properties')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', currentUser.id)
+        .gte('created_at', startOfMonth.toISOString())
+        .lte('created_at', now.toISOString());
+      if (!error) setMonthlyCount(count || 0);
+    };
+    loadMonthlyCount();
+  }, [user]);
+
+  
 
   const handleAuthInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -305,7 +353,9 @@ const SellPage = () => {
       if (user) {
         await supabase
           .from('profiles')
-          .update({
+          .upsert({
+            user_id: user.id,
+            email: user.email,
             user_type: authFormData.user_type,
             phone: authFormData.phone,
             address: authFormData.address,
@@ -315,13 +365,12 @@ const SellPage = () => {
             twitter: authFormData.twitter,
             facebook: authFormData.facebook,
             updated_at: new Date().toISOString()
-          })
-          .eq('user_id', user.id);
+          });
       }
 
       setIsAuthDialogOpen(false);
       resetAuthForm();
-      toast.success("Inscription réussie");
+      toast.success("Compte créé ! Consultez votre boîte mail pour finaliser votre inscription.");
     }
   };
 
@@ -337,9 +386,14 @@ const SellPage = () => {
       setFormData({});
       setStep(1);
       toast.success("Annonce publiée avec succès");
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting form:', error);
-      toast.error("Erreur lors de la publication de l'annonce");
+      if (error?.code === 'LISTING_LIMIT_REACHED') {
+        setCurrentMaxListings(typeof error.maxListings === 'number' ? error.maxListings : null);
+        setShowUpgradeDialog(true);
+      } else {
+        toast.error("Erreur lors de la publication de l'annonce");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -357,6 +411,30 @@ const SellPage = () => {
       {user ? (
         <div className="space-y-4">
           <p className="text-center">{"Bienvenue"} : {user.email || "User"}!</p>
+          {userProfile?.user_type === 'Professionnelle' && (
+            <div className="rounded-md border border-amber-200 p-4 bg-amber-50">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="font-medium text-amber-900">Quota d'annonces mensuel</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Badge variant="secondary">{monthlyCount}/{userProfile?.max_listings ?? 10}</Badge>
+                    <span className="text-sm text-amber-700">{Math.max(0, (userProfile?.max_listings ?? 10) - monthlyCount)} restantes</span>
+                  </div>
+                  <div className="mt-2">
+                    <Progress value={Math.min(100, Math.round((monthlyCount / (userProfile?.max_listings ?? 10)) * 100))} />
+                  </div>
+                  {(userProfile?.max_listings ?? 10) < 100 && (
+                    <p className="text-sm text-amber-700 mt-1">Passez à Pro+ pour publier jusqu'à 100 annonces (29,99 € / mois).</p>
+                  )}
+                </div>
+                {(userProfile?.max_listings ?? 10) < 100 && (
+                  <Button onClick={async () => {
+                    try { await startProUpgradeCheckout(); } catch (e: any) { toast.error(e?.message || 'Impossible de démarrer le paiement'); }
+                  }} className="bg-amber-600 hover:bg-amber-700">Passer à Pro+ (29,99 € / mois)</Button>
+                )}
+              </div>
+            </div>
+          )}
           <Button
             className="w-full bg-teal-500 hover:bg-teal-600"
             onClick={() => setStep(2)}
@@ -436,7 +514,7 @@ const SellPage = () => {
                       onBack={user ? () => setStep(1) : undefined}
                       onNext={(data) => {
                         console.log('PropertyTypeStep data:', data);
-                        setFormData({ ...formData, ...data });
+                        setFormData(prev => ({ ...prev, ...(data as unknown as Partial<CreatePropertyInput>) }));
                         setStep(3);
                       }}
                     />
@@ -447,7 +525,7 @@ const SellPage = () => {
                       onBack={() => setStep(2)}
                       onNext={(data) => {
                         console.log('AddPropertyStep1 data:', data);
-                        setFormData({ ...formData, ...data });
+                        setFormData(prev => ({ ...prev, ...(data as unknown as Partial<CreatePropertyInput>) }));
                         setStep(4);
                       }}
                     />
@@ -458,7 +536,7 @@ const SellPage = () => {
                       onBack={() => setStep(3)}
                       onNext={(data) => {
                         console.log('AddPropertyStep2 data:', data);
-                        setFormData({ ...formData, ...data });
+                        setFormData(prev => ({ ...prev, ...(data as unknown as Partial<CreatePropertyInput>) }));
                         setStep(5);
                       }}
                     />
@@ -469,7 +547,7 @@ const SellPage = () => {
                       onBack={() => setStep(4)}
                       onNext={(data) => {
                         console.log('AddPropertyStep3 data:', data);
-                        setFormData({ ...formData, ...data });
+                        setFormData(prev => ({ ...prev, ...(data as unknown as Partial<CreatePropertyInput>) }));
                         setStep(6);
                       }}
                     />
@@ -481,6 +559,11 @@ const SellPage = () => {
                       initialData={formData}
                       isSubmitting={isSubmitting}
                       onNext={handleFinalSubmit}
+                      maxListings={userProfile?.user_type === 'Professionnelle' ? (userProfile?.max_listings ?? 10) : undefined}
+                      monthlyCount={userProfile?.user_type === 'Professionnelle' ? monthlyCount : undefined}
+                      onUpgrade={async () => {
+                        try { await startProUpgradeCheckout(); } catch (e: any) { toast.error(e?.message || 'Impossible de démarrer le paiement'); }
+                      }}
                     />
                   )}
                 </CardContent>
@@ -607,6 +690,28 @@ const SellPage = () => {
               </p>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Upgrade Dialog for professionals hitting the limit */}
+      <Dialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Augmentez votre limite d'annonces</DialogTitle>
+            <DialogDescription>
+              {currentMaxListings ? `Votre quota de ${currentMaxListings} annonces est atteint.` : "Votre quota d'annonces est atteint."} Passez à l'offre Pro+ pour publier jusqu'à 100 annonces pour 29,99 € / mois.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setShowUpgradeDialog(false)}>Plus tard</Button>
+            <Button className="bg-amber-600 hover:bg-amber-700" onClick={async () => {
+              try {
+                await startProUpgradeCheckout();
+              } catch (e: any) {
+                toast.error(e?.message || 'Impossible de démarrer le paiement');
+              }
+            }}>Passer à Pro+</Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

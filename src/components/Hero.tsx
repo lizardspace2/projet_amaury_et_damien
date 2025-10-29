@@ -279,7 +279,7 @@ const Hero = () => {
     if (success) {
       setIsAuthDialogOpen(false);
       resetForm();
-      toast.success('Compte créé avec succès !');
+      toast.success('Compte créé ! Consultez votre boîte mail pour finaliser votre inscription.');
     }
   };
 

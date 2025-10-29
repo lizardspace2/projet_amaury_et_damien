@@ -11,6 +11,10 @@ import { AncillaryService } from "@/lib/api/ancillaryServices";
 import { supabase } from "@/lib/api/supabaseClient";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { startProUpgradeCheckout } from "@/lib/billing";
 
 const MyAds: React.FC = () => {
   const navigate = useNavigate();
@@ -25,11 +29,29 @@ const MyAds: React.FC = () => {
       if (!user) return null;
       const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select('*, max_listings')
         .eq('user_id', user.id)
         .single();
       if (error) throw error;
       return data;
+    }
+  });
+
+  const { data: monthlyCount } = useQuery({
+    queryKey: ['my-properties-monthly-count'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return 0;
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const { count, error } = await supabase
+        .from('properties')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .gte('created_at', startOfMonth.toISOString())
+        .lte('created_at', now.toISOString());
+      if (error) return 0;
+      return count || 0;
     }
   });
 
@@ -118,6 +140,29 @@ const MyAds: React.FC = () => {
 
   return (
     <div className="py-4">
+      {profile?.user_type === 'Professionnelle' && (
+        <div className="mb-6 rounded-md border border-amber-200 p-4 bg-amber-50">
+          <div className="flex items-center justify-between gap-3">
+            <div className="w-full">
+              <p className="font-semibold text-amber-900">Quota d'annonces mensuel</p>
+              <div className="flex items-center gap-2 mt-1">
+                <Badge variant="secondary">{monthlyCount ?? 0}/{profile?.max_listings ?? 10}</Badge>
+                <span className="text-sm text-amber-700">
+                  {Math.max(0, (profile?.max_listings ?? 10) - (monthlyCount ?? 0))} restantes
+                </span>
+              </div>
+              <div className="mt-2 max-w-sm">
+                <Progress value={Math.min(100, Math.round(((monthlyCount ?? 0) / (profile?.max_listings ?? 10)) * 100))} />
+              </div>
+            </div>
+            {(profile?.max_listings ?? 10) < 100 && (
+              <Button onClick={async () => {
+                try { await startProUpgradeCheckout(); } catch (e: any) { toast.error(e?.message || 'Impossible de démarrer le paiement'); }
+              }} className="bg-amber-600 hover:bg-amber-700 whitespace-nowrap">Passer à Pro+ (29,99 € / mois)</Button>
+            )}
+          </div>
+        </div>
+      )}
       <Tabs defaultValue="properties" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="properties">Mes annonces immobilières</TabsTrigger>

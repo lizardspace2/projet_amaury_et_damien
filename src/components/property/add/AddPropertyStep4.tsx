@@ -20,6 +20,8 @@ import {
   FormMessage
 } from "@/components/ui/form";
 import AutocompleteOSM from "@/components/AutocompleteOSM";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -39,13 +41,19 @@ interface AddPropertyStep4Props {
   initialData: Partial<CreatePropertyInput>;
   isSubmitting: boolean;
   onNext: (data: Partial<CreatePropertyInput> & { existingImageUrls?: string[], removedImageUrls?: string[] }) => void;
+  maxListings?: number;
+  monthlyCount?: number;
+  onUpgrade?: () => void;
 }
 
 const AddPropertyStep4 = ({
   onBack,
   initialData,
   isSubmitting,
-  onNext
+  onNext,
+  maxListings,
+  monthlyCount,
+  onUpgrade,
 }: AddPropertyStep4Props) => {
   const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
   const [existingImageUrls, setExistingImageUrls] = useState<string[]>([]);
@@ -55,6 +63,8 @@ const AddPropertyStep4 = ({
   const [previewImage, setPreviewImage] = useState("");
 
   const totalImages = existingImageUrls.length + newImageFiles.length;
+  const quotaDefined = typeof maxListings === 'number' && typeof monthlyCount === 'number';
+  const remaining = quotaDefined ? Math.max(0, (maxListings as number) - (monthlyCount as number)) : undefined;
 
   useEffect(() => {
     if (initialData?.images && initialData.images.length > 0) {
@@ -312,18 +322,40 @@ const AddPropertyStep4 = ({
           </div>
         </div>
 
+        {quotaDefined && (
+          <div className="mb-4 rounded-md border border-amber-200 p-4 bg-amber-50">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="font-medium text-amber-900">Quota d'annonces mensuel</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <Badge variant="secondary">{(monthlyCount as number)}/{maxListings}</Badge>
+                  <span className="text-sm text-amber-700">{remaining} restantes</span>
+                </div>
+                <div className="mt-2">
+                  <Progress value={Math.min(100, Math.round(((monthlyCount as number) / (maxListings as number)) * 100))} />
+                </div>
+              </div>
+              {(maxListings as number) < 100 && (
+                <Button type="button" variant="outline" className="border-amber-600 text-amber-700 hover:bg-amber-50" onClick={onUpgrade}>Passer à Pro+ (29,99 € / mois)</Button>
+              )}
+            </div>
+          </div>
+        )}
+
         <div className="flex justify-between">
           <Button type="button" variant="outline" onClick={onBack}>
             {"Retour"}
           </Button>
           <Button
             type="submit"
-            disabled={isSubmitting || totalImages === 0}
+            disabled={isSubmitting || totalImages === 0 || (quotaDefined && (remaining as number) <= 0)}
           >
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {"Publication..."}
               </>
+            ) : (quotaDefined && (remaining as number) <= 0) ? (
+              "Quota atteint - Passer à Pro+"
             ) : (
               "Publier l'annonce"
             )}

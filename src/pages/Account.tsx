@@ -6,6 +6,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Outlet } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/api/supabaseClient";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 
 const Account = () => {
   const location = useLocation();
@@ -37,6 +39,24 @@ const Account = () => {
         .single();
       if (error) throw error;
       return data;
+    },
+    enabled: !!user
+  });
+
+  const { data: monthlyCount = 0 } = useQuery({
+    queryKey: ['my-properties-monthly-count'],
+    queryFn: async () => {
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      if (!currentUser) return 0;
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const { count } = await supabase
+        .from('properties')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', currentUser.id)
+        .gte('created_at', startOfMonth.toISOString())
+        .lte('created_at', now.toISOString());
+      return count || 0;
     },
     enabled: !!user
   });
@@ -76,6 +96,18 @@ const Account = () => {
               <p className="text-sm text-teal-600 font-medium mt-1">
                 {profile.user_type === 'Particulier' ? '👤 Particulier' : profile.user_type === 'Professionnelle' ? '💼 Professionnelle' : '🤝 Partenaire'}
               </p>
+            )}
+            {profile?.user_type === 'Professionnelle' && (
+              <div className="mt-2">
+                <p className="text-sm text-amber-900">Quota d'annonces mensuel</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <Badge variant="secondary">{monthlyCount}/{profile?.max_listings ?? 10}</Badge>
+                  <a href="/account/subscription" className="text-sm text-amber-700 hover:underline">Gérer l'abonnement</a>
+                </div>
+                <div className="mt-2 max-w-xs">
+                  <Progress value={Math.min(100, Math.round((monthlyCount / (profile?.max_listings ?? 10)) * 100))} />
+                </div>
+              </div>
             )}
           </div>
         </div>

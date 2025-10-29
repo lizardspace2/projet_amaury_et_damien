@@ -159,6 +159,29 @@ export const createProperty = async (input: CreatePropertyInput) => {
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) throw new Error("User not authenticated");
 
+    // Enforce publishing cap for professional accounts (max 10 listings)
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('user_type, max_listings')
+      .eq('user_id', user.id)
+      .single();
+
+    if (!profileError && profile?.user_type === 'Professionnelle') {
+      const maxListings = typeof (profile as any).max_listings === 'number' ? (profile as any).max_listings : 10;
+      const { count, error: countError } = await supabase
+        .from('properties')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+
+      if (!countError && typeof count === 'number' && count >= maxListings) {
+        toast.error(`Limite atteinte: votre quota de ${maxListings} annonces est utilisé. Passez à l'offre Pro+ pour publier jusqu'à 100 annonces.`);
+        const errorWithCode: any = new Error('Professional listing limit reached');
+        errorWithCode.code = 'LISTING_LIMIT_REACHED';
+        errorWithCode.maxListings = maxListings;
+        throw errorWithCode;
+      }
+    }
+
     let imageUrls: string[] = [];
     if (input.images?.length) {
       const uploadPromises = input.images.map(async (file) => {

@@ -33,6 +33,7 @@ import SellAncillaryService from "./pages/SellAncillaryService"; // Import SellA
 import AncillaryServices from "./pages/AncillaryServices"; // Import AncillaryServices
 import Profile from "./pages/account/Profile"; // Import Profile
 import MyAds from "./pages/account/MyAds"; // Import MyAds
+import Subscription from "./pages/account/Subscription";
 import Resources from "./pages/Resources"; // Import Resources
 import { supabase } from "@/lib/api/supabaseClient";
 import { useEffect, useState } from "react";
@@ -124,6 +125,7 @@ const App = () => {
                 <Route path="/account" element={<Account />}>
                   <Route path="profile" element={<Profile />} />
                   <Route path="myads" element={<MyAds />} />
+                  <Route path="subscription" element={<Subscription />} />
                   <Route index element={<MyAds />} />
                 </Route>
                 <Route path="/verification-error" element={<VerificationError />} />

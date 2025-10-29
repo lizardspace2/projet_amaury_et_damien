@@ -57,36 +57,30 @@ export const signUpWithEmail = async (
 
     if (authError) throw authError;
 
-    // Étape 2: Création ou mise à jour du profil utilisateur
-    if (authData.user) {
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .upsert({
-          user_id: authData.user.id,
-          email: authData.user.email,
-          user_type: profileData?.user_type || null,
-          phone: profileData?.phone || null,
-          address: profileData?.address || null,
-          profession: profileData?.profession || null,
-          siret: profileData?.siret || null,
-          instagram: profileData?.instagram || null,
-          twitter: profileData?.twitter || null,
-          facebook: profileData?.facebook || null,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        });
+    // Le profil sera créé côté base via un trigger sur auth.users.
+    // On n'insère plus côté client pour éviter les erreurs de contrainte FK liées aux délais de propagation.
 
-      if (profileError) throw profileError;
-    }
-
-    toast.success("Inscription réussie ! Vérifiez votre email pour confirmer votre compte.");
+    toast.success("Compte créé ! Consultez votre boîte mail pour finaliser votre inscription.");
     return true;
   } catch (error) {
     console.error("Error signing up:", error);
     
     let errorMessage = "Échec de l'inscription";
-    if (error instanceof Error) {
-      errorMessage += ` : ${error.message}`;
+    const message = (error as any)?.message || (error instanceof Error ? error.message : "");
+    const status = (error as any)?.status;
+    const code = (error as any)?.code;
+
+    const lowerMsg = typeof message === 'string' ? message.toLowerCase() : '';
+    const isAlreadyRegistered =
+      lowerMsg.includes('already registered') ||
+      lowerMsg.includes('user already exists') ||
+      code === 'user_already_exists' ||
+      status === 400; // supabase often returns 400 with "User already registered"
+
+    if (isAlreadyRegistered) {
+      errorMessage = "Un compte existe déjà avec cet email. Connectez-vous ou réinitialisez votre mot de passe.";
+    } else if (message) {
+      errorMessage += ` : ${message}`;
     }
     
     toast.error(errorMessage);

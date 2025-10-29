@@ -15,6 +15,7 @@ import { supabase } from '@/lib/api/supabaseClient';
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuContent, NavigationMenuLink } from '@/components/ui/navigation-menu';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { startProUpgradeCheckout } from '@/lib/billing';
 
 const Logo = () => (
   <Link to="/" className="flex items-center gap-3 text-xl font-bold text-slate-900 no-underline group">
@@ -285,21 +286,77 @@ const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userEmail, setUserEmail] = useState('');
   const [scrolled, setScrolled] = useState(false);
+  const [profileMaxListings, setProfileMaxListings] = useState<number | null>(null);
+  const [userType, setUserType] = useState<string | null>(null);
+  const [monthlyCount, setMonthlyCount] = useState<number>(0);
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
+    console.log('[Navbar] useEffect mount: initializing auth/profile checks');
     const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setIsLoggedIn(!!user);
-      setUserEmail(user?.email || '');
+      try {
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) {
+          console.error('[Navbar] getSession error', sessionError);
+        }
+        const sessionUser = sessionData?.session?.user || null;
+        console.log('[Navbar] checkAuth.session ->', sessionUser?.id, sessionUser?.email);
+
+        const { data: { user } } = await supabase.auth.getUser();
+        console.log('[Navbar] checkAuth.start getUser ->', user?.id, user?.email);
+        const effectiveUser = user || sessionUser;
+        setIsLoggedIn(!!effectiveUser);
+        setUserEmail(effectiveUser?.email || '');
+
+        if (effectiveUser) {
+          try {
+            const { data: profile, error: profileError } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('user_id', effectiveUser.id)
+              .single();
+            if (profileError) {
+              console.error('[Navbar] profiles fetch error', profileError);
+            }
+            console.log('[Navbar] checkAuth.profile ->', profile);
+            setProfileMaxListings((profile as any)?.max_listings ?? 10);
+            setUserType((profile as any)?.user_type ?? null);
+
+            const now = new Date();
+            const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+            const { count, error: countError } = await supabase
+              .from('properties')
+              .select('id', { count: 'exact', head: true })
+              .eq('user_id', effectiveUser.id)
+              .gte('created_at', startOfMonth.toISOString())
+              .lte('created_at', now.toISOString());
+            if (countError) {
+              console.error('[Navbar] properties count error', countError);
+            }
+            console.log('[Navbar] checkAuth.monthlyCount ->', count);
+            setMonthlyCount(count || 0);
+            console.log('[Navbar] checkAuth.end');
+          } catch (innerErr) {
+            console.error('[Navbar] fetch profile/count failed', innerErr);
+          }
+        } else {
+          setProfileMaxListings(null);
+          setUserType(null);
+          setMonthlyCount(0);
+        }
+      } catch (err) {
+        console.error('[Navbar] getUser failed', err);
+      }
     };
 
     checkAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('[Navbar] onAuthStateChange', event, session?.user?.id);
       setIsLoggedIn(!!session?.user);
       setUserEmail(session?.user?.email || '');
+      await checkAuth();
     });
 
     const handleScroll = () => {
@@ -312,6 +369,11 @@ const Navbar = () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
+
+  useEffect(() => {
+    const remaining = Math.max(0, (profileMaxListings ?? 10) - (monthlyCount ?? 0));
+    console.log('[Navbar] state', `isLoggedIn=${isLoggedIn}`, `email=${userEmail}`, `userType=${userType}`, `max=${profileMaxListings}`, `count=${monthlyCount}`, `remaining=${remaining}`);
+  }, [isLoggedIn, userEmail, userType, profileMaxListings, monthlyCount]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -335,7 +397,7 @@ const Navbar = () => {
     if (success) {
       setIsAuthDialogOpen(false);
       resetForm();
-      toast.success('Compte créé avec succès !');
+      toast.success('Compte créé ! Consultez votre boîte mail pour finaliser votre inscription.');
     }
   };
 
@@ -707,6 +769,23 @@ const Navbar = () => {
                 </PopoverTrigger>
                 <PopoverContent className="w-64 p-3" align="end">
                   <div className="flex flex-col gap-1">
+                    {(() => { const show = userType === 'Professionnelle'; console.log('[Navbar] render.desktop.accountPopover showQuota=', show, 'userType=', userType); return show; })() && (
+                      <div className="p-2 rounded-md bg-amber-50 border border-amber-200 mb-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-amber-900">Restant ce mois</span>
+                          <Badge variant="secondary">{Math.max(0, (profileMaxListings ?? 10) - (monthlyCount ?? 0))}/{profileMaxListings ?? 10}</Badge>
+                        </div>
+                        {(profileMaxListings ?? 10) < 100 && (
+                          <Button
+                            onClick={async () => { try { await startProUpgradeCheckout(); } catch (e: any) { toast.error(e?.message || 'Paiement indisponible'); } }}
+                            size="sm"
+                            className="w-full mt-2 h-8 bg-amber-600 hover:bg-amber-700"
+                          >
+                            Passer à Pro+
+                          </Button>
+                        )}
+                      </div>
+                    )}
                     <Button asChild variant="ghost" className="justify-start h-10 rounded-lg">
                       <Link to="/account/profile" className="flex items-center gap-3">
                         <User size={18} className="text-slate-600" />
@@ -757,6 +836,11 @@ const Navbar = () => {
               <Badge variant="secondary" className="ml-1 bg-white/20 text-white border-0 text-xs">
                 Gratuit
               </Badge>
+              {(() => { const show = isLoggedIn && userType === 'Professionnelle'; console.log('[Navbar] render.desktop.publishBadge show=', show, 'userType=', userType); return show; })() && (
+                <Badge variant="outline" className="ml-2 bg-white/90 text-slate-800 border-slate-300 text-xs">
+                  {Math.max(0, (profileMaxListings ?? 10) - (monthlyCount ?? 0))}/{profileMaxListings ?? 10}
+                </Badge>
+              )}
             </Button>
           </div>
         </div>
@@ -854,6 +938,23 @@ const Navbar = () => {
                   <p className="text-xs text-slate-500 truncate">{userEmail}</p>
                 </div>
               </div>
+              {(() => { const show = userType === 'Professionnelle'; console.log('[Navbar] render.mobile.accountCard showQuota=', show, 'userType=', userType); return show; })() && (
+                <div className="p-2 rounded-md bg-amber-50 border border-amber-200">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-amber-900">Restant ce mois</span>
+                    <Badge variant="secondary" className="text-xs">{Math.max(0, (profileMaxListings ?? 10) - (monthlyCount ?? 0))}/{profileMaxListings ?? 10}</Badge>
+                  </div>
+                  {(profileMaxListings ?? 10) < 100 && (
+                    <Button
+                      onClick={async () => { try { await startProUpgradeCheckout(); closeMobileMenu(); } catch (e: any) { toast.error(e?.message || 'Paiement indisponible'); } }}
+                      size="sm"
+                      className="w-full mt-2 h-8 bg-amber-600 hover:bg-amber-700"
+                    >
+                      Passer à Pro+
+                    </Button>
+                  )}
+                </div>
+              )}
               <Button asChild variant="ghost" className="justify-start h-10 rounded-lg text-sm">
                 <Link to="/account/profile" onClick={closeMobileMenu}>
                   <User size={16} className="mr-2" />

@@ -7,6 +7,20 @@ import { toast } from 'sonner';
 import { getApiBase } from '@/lib/utils';
 
 const SubscriptionPage: React.FC = () => {
+  React.useEffect(() => {
+    const onError = (event: ErrorEvent) => {
+      console.error('[subscription] window.onerror', event?.message, event?.error);
+    };
+    const onUnhandled = (event: PromiseRejectionEvent) => {
+      console.error('[subscription] window.onunhandledrejection', event?.reason);
+    };
+    window.addEventListener('error', onError);
+    window.addEventListener('unhandledrejection', onUnhandled as any);
+    return () => {
+      window.removeEventListener('error', onError);
+      window.removeEventListener('unhandledrejection', onUnhandled as any);
+    };
+  }, []);
   const { data: user } = useQuery({
     queryKey: ['user'],
     queryFn: async () => {
@@ -50,18 +64,23 @@ const SubscriptionPage: React.FC = () => {
 
   const openPortal = async () => {
     try {
+      toast.info('Ouverture du portail client…');
       const { data: { user: currentUser } } = await supabase.auth.getUser();
       if (!currentUser) throw new Error('Non authentifié');
       console.log('[subscription] openPortal: user', { id: currentUser.id, email: currentUser.email });
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
       const resp = await fetch(`${getApiBase()}/api/stripe/create-portal-session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: currentUser.id }),
+        signal: controller.signal,
       });
+      clearTimeout(timeout);
       console.log('[subscription] portal-session status', resp.status);
       const portalJson = await resp.json().catch(() => ({} as any));
       console.log('[subscription] portal-session payload', portalJson);
-      if (!resp.ok) throw new Error(portalJson?.error || 'Impossible d’ouvrir le portail client');
+      if (!resp.ok) throw new Error(portalJson?.error || `Impossible d’ouvrir le portail client (status ${resp.status})`);
       const { url } = portalJson as { url?: string };
       window.location.href = url;
     } catch (e: any) {
@@ -80,6 +99,7 @@ const SubscriptionPage: React.FC = () => {
         return;
       }
       setIsStarting(true);
+      toast.info('Préparation du paiement…');
       // Try to use the user we already loaded from React Query, fallback to Supabase call with timeout
       let currentUser = user as any;
       if (!currentUser) {
@@ -101,15 +121,19 @@ const SubscriptionPage: React.FC = () => {
       console.log('[subscription] startUpgrade: user', { id: currentUser.id, email: currentUser.email });
       const apiBase = getApiBase();
       console.log('[subscription] apiBase', apiBase);
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 20000);
       const r = await fetch(`${apiBase}/api/stripe/create-checkout-session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: currentUser.id, userEmail: currentUser.email }),
+        signal: controller.signal,
       });
+      clearTimeout(timeout);
       console.log('[subscription] checkout-session status', r.status);
       const json = await r.json().catch(() => ({} as any));
       console.log('[subscription] checkout-session payload', json);
-      if (!r.ok) throw new Error(json?.error || 'Impossible de démarrer le paiement');
+      if (!r.ok) throw new Error(json?.error || `Impossible de démarrer le paiement (status ${r.status})`);
       const { url } = json as { url?: string };
       console.log('[subscription] redirecting to', url);
       window.location.href = url;

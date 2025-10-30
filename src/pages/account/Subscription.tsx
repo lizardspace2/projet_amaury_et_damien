@@ -52,16 +52,21 @@ const SubscriptionPage: React.FC = () => {
     try {
       const { data: { user: currentUser } } = await supabase.auth.getUser();
       if (!currentUser) throw new Error('Non authentifié');
+      console.log('[subscription] openPortal: user', { id: currentUser.id, email: currentUser.email });
       const resp = await fetch(`${getApiBase()}/api/stripe/create-portal-session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: currentUser.id }),
       });
-      if (!resp.ok) throw new Error('Impossible d’ouvrir le portail client');
-      const { url } = await resp.json();
+      console.log('[subscription] portal-session status', resp.status);
+      const portalJson = await resp.json().catch(() => ({} as any));
+      console.log('[subscription] portal-session payload', portalJson);
+      if (!resp.ok) throw new Error(portalJson?.error || 'Impossible d’ouvrir le portail client');
+      const { url } = portalJson as { url?: string };
       window.location.href = url;
     } catch (e: any) {
       toast.error(e?.message || 'Erreur');
+      console.error('[subscription] openPortal error', e);
     }
   };
 
@@ -70,17 +75,21 @@ const SubscriptionPage: React.FC = () => {
       // Ensure we have a fresh authenticated user before calling the API
       const { data: { user: currentUser } } = await supabase.auth.getUser();
       if (!currentUser) throw new Error('Non authentifié');
-
+      console.log('[subscription] startUpgrade: user', { id: currentUser.id, email: currentUser.email });
       const r = await fetch(`${getApiBase()}/api/stripe/create-checkout-session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: currentUser.id, userEmail: currentUser.email }),
       });
-      if (!r.ok) throw new Error('Impossible de démarrer le paiement');
-      const { url } = await r.json();
+      console.log('[subscription] checkout-session status', r.status);
+      const json = await r.json().catch(() => ({} as any));
+      console.log('[subscription] checkout-session payload', json);
+      if (!r.ok) throw new Error(json?.error || 'Impossible de démarrer le paiement');
+      const { url } = json as { url?: string };
       window.location.href = url;
     } catch (e: any) {
       toast.error(e?.message || 'Erreur');
+      console.error('[subscription] startUpgrade error', e);
     }
   };
 

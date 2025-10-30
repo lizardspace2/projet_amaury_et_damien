@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { getApiBase } from '@/lib/utils';
+import { startProUpgradeCheckout } from '@/lib/billing';
 
 const SubscriptionPage: React.FC = () => {
   React.useEffect(() => {
@@ -100,48 +101,23 @@ const SubscriptionPage: React.FC = () => {
       }
       setIsStarting(true);
       toast.info('Préparation du paiement…');
-      // Try to use the user we already loaded from React Query, fallback to Supabase call with timeout
+
+      // Ensure user is authenticated (no artificial timeout)
       let currentUser = user as any;
       if (!currentUser) {
-        console.log('[subscription] no cached user, calling supabase.auth.getUser() with timeout');
-        const getUserWithTimeout = <T,>(p: Promise<T>, ms: number) => Promise.race([
-          p,
-          new Promise<T>((_, reject) => setTimeout(() => reject(new Error('getUser timeout')), ms))
-        ]);
-        try {
-          const res: any = await getUserWithTimeout(supabase.auth.getUser(), 5000);
-          console.log('[subscription] getUser raw response', res);
-          currentUser = res?.data?.user || null;
-        } catch (err) {
-          console.error('[subscription] getUser error/timeout', err);
-        }
+        const { data: { user: fetched } } = await supabase.auth.getUser();
+        currentUser = fetched;
       }
-      console.log('[subscription] after getUser', { hasUser: !!currentUser });
-      if (!currentUser) throw new Error('Non authentifié');
-      console.log('[subscription] startUpgrade: user', { id: currentUser.id, email: currentUser.email });
-      const apiBase = getApiBase();
-      console.log('[subscription] apiBase', apiBase);
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 20000);
-      const r = await fetch(`${apiBase}/api/stripe/create-checkout-session`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: currentUser.id, userEmail: currentUser.email }),
-        signal: controller.signal,
-      });
-      clearTimeout(timeout);
-      console.log('[subscription] checkout-session status', r.status);
-      const json = await r.json().catch(() => ({} as any));
-      console.log('[subscription] checkout-session payload', json);
-      if (!r.ok) throw new Error(json?.error || `Impossible de démarrer le paiement (status ${r.status})`);
-      const { url } = json as { url?: string };
-      console.log('[subscription] redirecting to', url);
-      window.location.href = url;
+      if (!currentUser) {
+        throw new Error('Veuillez vous connecter pour continuer');
+      }
+
+      // Delegate to shared billing helper for consistency
+      await startProUpgradeCheckout();
     } catch (e: any) {
       toast.error(e?.message || 'Erreur');
       console.error('[subscription] startUpgrade error', e);
-    }
-    finally {
+    } finally {
       setIsStarting(false);
     }
   };

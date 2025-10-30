@@ -2,7 +2,7 @@
 -- Date: 2025-10-29
 
 ALTER TABLE public.profiles
-ADD COLUMN IF NOT EXISTS max_listings integer DEFAULT 10;
+ADD COLUMN IF NOT EXISTS max_listings integer DEFAULT 50;
 
 ALTER TABLE public.profiles
 ADD COLUMN IF NOT EXISTS stripe_customer_id text;

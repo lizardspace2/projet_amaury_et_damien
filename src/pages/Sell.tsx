@@ -417,17 +417,17 @@ const SellPage = () => {
                 <div>
                   <p className="font-medium text-amber-900">Quota d'annonces mensuel</p>
                   <div className="flex items-center gap-2 mt-1">
-                    <Badge variant="secondary">{monthlyCount}/{userProfile?.max_listings ?? 10}</Badge>
-                    <span className="text-sm text-amber-700">{Math.max(0, (userProfile?.max_listings ?? 10) - monthlyCount)} restantes</span>
+                    <Badge variant="secondary">{monthlyCount}/{userProfile?.max_listings ?? 50}</Badge>
+                    <span className="text-sm text-amber-700">{Math.max(0, (userProfile?.max_listings ?? 50) - monthlyCount)} restantes</span>
                   </div>
                   <div className="mt-2">
-                    <Progress value={Math.min(100, Math.round((monthlyCount / (userProfile?.max_listings ?? 10)) * 100))} />
+                    <Progress value={Math.min(100, Math.round((monthlyCount / (userProfile?.max_listings ?? 50)) * 100))} />
                   </div>
-                  {(userProfile?.max_listings ?? 10) < 100 && (
-                    <p className="text-sm text-amber-700 mt-1">Passez à Pro+ pour publier jusqu'à 100 annonces (29,99 € / mois).</p>
+                  {(userProfile?.max_listings ?? 50) < 500 && (
+                    <p className="text-sm text-amber-700 mt-1">Passez à Pro+ pour publier jusqu'à 500 annonces (29,99 € / mois).</p>
                   )}
                 </div>
-                {(userProfile?.max_listings ?? 10) < 100 && (
+                {(userProfile?.max_listings ?? 50) < 500 && (
                   <Button onClick={async () => {
                     try { await startProUpgradeCheckout(); } catch (e: any) { toast.error(e?.message || 'Impossible de démarrer le paiement'); }
                   }} className="bg-amber-600 hover:bg-amber-700">Passer à Pro+ (29,99 € / mois)</Button>
@@ -559,7 +559,7 @@ const SellPage = () => {
                       initialData={formData}
                       isSubmitting={isSubmitting}
                       onNext={handleFinalSubmit}
-                      maxListings={userProfile?.user_type === 'Professionnelle' ? (userProfile?.max_listings ?? 10) : undefined}
+                      maxListings={userProfile?.user_type === 'Professionnelle' ? (userProfile?.max_listings ?? 50) : undefined}
                       monthlyCount={userProfile?.user_type === 'Professionnelle' ? monthlyCount : undefined}
                       onUpgrade={async () => {
                         try { await startProUpgradeCheckout(); } catch (e: any) { toast.error(e?.message || 'Impossible de démarrer le paiement'); }
@@ -699,7 +699,7 @@ const SellPage = () => {
           <DialogHeader>
             <DialogTitle>Augmentez votre limite d'annonces</DialogTitle>
             <DialogDescription>
-              {currentMaxListings ? `Votre quota de ${currentMaxListings} annonces est atteint.` : "Votre quota d'annonces est atteint."} Passez à l'offre Pro+ pour publier jusqu'à 100 annonces pour 29,99 € / mois.
+              {currentMaxListings ? `Votre quota de ${currentMaxListings} annonces est atteint.` : "Votre quota d'annonces est atteint."} Passez à l'offre Pro+ pour publier jusqu'à 500 annonces pour 29,99 € / mois.
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end gap-2">

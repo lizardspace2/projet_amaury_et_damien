@@ -93,17 +93,60 @@ export const signUpWithEmail = async (
  */
 export const signOut = async () => {
   try {
-    const { error } = await supabase.auth.signOut();
-    
-    if (error) {
-      toast.error("Échec de la déconnexion : " + error.message);
-      return false;
+    console.log('[Auth] signOut: start');
+    // 1) Manual token cleanup first to ensure UI reflects logout immediately
+    try {
+      console.log('[Auth] signOut: manual token cleanup start');
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (!key) continue;
+        if (key.startsWith('sb-') && key.endsWith('-auth-token')) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(k => {
+        console.log('[Auth] signOut: removing localStorage key ->', k);
+        localStorage.removeItem(k);
+      });
+      console.log('[Auth] signOut: manual token cleanup done');
+    } catch (e) {
+      console.error('[Auth] signOut: manual token cleanup failed (non-blocking)', e);
     }
-    
+
+    // 2) Attempt global sign-out but race with a timeout to avoid hanging
+    const globalSignOut = (async () => {
+      try {
+        console.log('[Auth] signOut: calling global supabase.auth.signOut()');
+        const { error } = await supabase.auth.signOut();
+        console.log('[Auth] signOut: global signOut completed, error =', error);
+        if (error) return { ok: false, error } as const;
+        return { ok: true } as const;
+      } catch (e) {
+        console.error('[Auth] signOut: exception during global signOut', e);
+        return { ok: false, error: e } as const;
+      }
+    })();
+
+    const timeout = new Promise<{ ok: false; error: Error }>(resolve => {
+      const id = setTimeout(() => {
+        clearTimeout(id);
+        console.warn('[Auth] signOut: global signOut timed out');
+        resolve({ ok: false, error: new Error('timeout') });
+      }, 4000);
+    });
+
+    const result = await Promise.race([globalSignOut, timeout]);
+
+    if (!result.ok) {
+      console.warn('[Auth] signOut: proceeding after timeout/error to keep UI consistent');
+    }
+
     toast.success("Déconnexion réussie");
+    console.log('[Auth] signOut: finishing -> returning true');
     return true;
   } catch (error) {
-    console.error("Error signing out:", error);
+    console.error('[Auth] signOut: exception thrown', error);
     return false;
   }
 };

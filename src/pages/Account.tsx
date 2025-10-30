@@ -101,11 +101,11 @@ const Account = () => {
               <div className="mt-2">
                 <p className="text-sm text-amber-900">Quota d'annonces mensuel</p>
                 <div className="flex items-center gap-2 mt-1">
-                  <Badge variant="secondary">{monthlyCount}/{profile?.max_listings ?? 10}</Badge>
+                  <Badge variant="secondary">{monthlyCount}/{profile?.max_listings ?? 50}</Badge>
                   <a href="/account/subscription" className="text-sm text-amber-700 hover:underline">Gérer l'abonnement</a>
                 </div>
                 <div className="mt-2 max-w-xs">
-                  <Progress value={Math.min(100, Math.round((monthlyCount / (profile?.max_listings ?? 10)) * 100))} />
+                  <Progress value={Math.min(100, Math.round((monthlyCount / (profile?.max_listings ?? 50)) * 100))} />
                 </div>
               </div>
             )}

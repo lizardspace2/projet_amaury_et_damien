@@ -52,7 +52,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             .update({
               stripe_customer_id: customerId || null,
               stripe_subscription_status: 'active',
-              max_listings: 100,
+              max_listings: 500,
               updated_at: new Date().toISOString(),
             })
             .eq('user_id', userId);
@@ -67,7 +67,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           .from('profiles')
           .update({
             stripe_subscription_status: 'canceled',
-            max_listings: 10,
+            max_listings: 50,
             updated_at: new Date().toISOString(),
           })
           .eq('stripe_customer_id', customerId);
@@ -82,7 +82,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           .from('profiles')
           .update({
             stripe_subscription_status: status,
-            max_listings: status === 'active' ? 100 : 10,
+            max_listings: status === 'active' ? 500 : 50,
             updated_at: new Date().toISOString(),
           })
           .eq('stripe_customer_id', customerId);

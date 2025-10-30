@@ -289,6 +289,7 @@ const Navbar = () => {
   const [profileMaxListings, setProfileMaxListings] = useState<number | null>(null);
   const [userType, setUserType] = useState<string | null>(null);
   const [monthlyCount, setMonthlyCount] = useState<number>(0);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -320,7 +321,7 @@ const Navbar = () => {
               console.error('[Navbar] profiles fetch error', profileError);
             }
             console.log('[Navbar] checkAuth.profile ->', profile);
-            setProfileMaxListings((profile as any)?.max_listings ?? 10);
+            setProfileMaxListings((profile as any)?.max_listings ?? 50);
             setUserType((profile as any)?.user_type ?? null);
 
             const now = new Date();
@@ -356,6 +357,10 @@ const Navbar = () => {
       console.log('[Navbar] onAuthStateChange', event, session?.user?.id);
       setIsLoggedIn(!!session?.user);
       setUserEmail(session?.user?.email || '');
+      if (event === 'SIGNED_IN') {
+        console.log('[Navbar] onAuthStateChange: SIGNED_IN -> closing auth dialog');
+        setIsAuthDialogOpen(false);
+      }
       await checkAuth();
     });
 
@@ -371,7 +376,7 @@ const Navbar = () => {
   }, []);
 
   useEffect(() => {
-    const remaining = Math.max(0, (profileMaxListings ?? 10) - (monthlyCount ?? 0));
+    const remaining = Math.max(0, (profileMaxListings ?? 50) - (monthlyCount ?? 0));
     console.log('[Navbar] state', `isLoggedIn=${isLoggedIn}`, `email=${userEmail}`, `userType=${userType}`, `max=${profileMaxListings}`, `count=${monthlyCount}`, `remaining=${remaining}`);
   }, [isLoggedIn, userEmail, userType, profileMaxListings, monthlyCount]);
 
@@ -402,9 +407,33 @@ const Navbar = () => {
   };
 
   const handleLogout = async () => {
-    const success = await signOut();
-    if (success) {
-      toast.success('Déconnecté avec succès');
+    if (isLoggingOut) {
+      console.warn('[Navbar] handleLogout: ignored duplicate click');
+      return;
+    }
+    setIsLoggingOut(true);
+    console.log('[Navbar] handleLogout: click -> calling signOut');
+    try {
+      const success = await signOut();
+      console.log('[Navbar] handleLogout: signOut() returned ->', success);
+      if (success) {
+        // Ensure UI reflects logout immediately
+        setIsLoggedIn(false);
+        setUserEmail('');
+        setIsMenuOpen(false);
+        setIsAuthDialogOpen(false);
+        toast.success('Déconnecté avec succès');
+        // Redirect to home after logout
+        console.log('[Navbar] handleLogout: navigating to /');
+        navigate('/');
+      } else {
+        console.warn('[Navbar] handleLogout: signOut() returned false');
+      }
+    } catch (e) {
+      console.error('[Navbar] handleLogout: exception while signing out', e);
+    }
+    finally {
+      setIsLoggingOut(false);
     }
   };
 
@@ -772,7 +801,7 @@ const Navbar = () => {
                     <div className="p-2 rounded-md bg-amber-50 border border-amber-200 mb-1">
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-amber-900">Restant ce mois</span>
-                        <Badge variant="secondary">{Math.max(0, (profileMaxListings ?? 10) - (monthlyCount ?? 0))}/{profileMaxListings ?? 10}</Badge>
+                        <Badge variant="secondary">{Math.max(0, (profileMaxListings ?? 50) - (monthlyCount ?? 0))}/{profileMaxListings ?? 50}</Badge>
                       </div>
                       <Button asChild variant="outline" size="sm" className="w-full mt-2 h-8">
                         <Link to="/account/subscription">Abonnement</Link>
@@ -822,7 +851,7 @@ const Navbar = () => {
             {isLoggedIn && (
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="text-xs">
-                  {monthlyCount}/{profileMaxListings ?? 10}
+                  {monthlyCount}/{profileMaxListings ?? 50}
                 </Badge>
                 <Button asChild variant="outline" className="h-9">
                   <Link to="/account/subscription">Abonnement</Link>
@@ -840,7 +869,7 @@ const Navbar = () => {
               </Badge>
               {(() => { const show = isLoggedIn && userType === 'Professionnelle'; console.log('[Navbar] render.desktop.publishBadge show=', show, 'userType=', userType); return show; })() && (
                 <Badge variant="outline" className="ml-2 bg-white/90 text-slate-800 border-slate-300 text-xs">
-                  {Math.max(0, (profileMaxListings ?? 10) - (monthlyCount ?? 0))}/{profileMaxListings ?? 10}
+                  {Math.max(0, (profileMaxListings ?? 50) - (monthlyCount ?? 0))}/{profileMaxListings ?? 50}
                 </Badge>
               )}
             </Button>
@@ -943,7 +972,7 @@ const Navbar = () => {
               <div className="p-2 rounded-md bg-amber-50 border border-amber-200">
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-amber-900">Restant ce mois</span>
-                  <Badge variant="secondary" className="text-xs">{Math.max(0, (profileMaxListings ?? 10) - (monthlyCount ?? 0))}/{profileMaxListings ?? 10}</Badge>
+                  <Badge variant="secondary" className="text-xs">{Math.max(0, (profileMaxListings ?? 50) - (monthlyCount ?? 0))}/{profileMaxListings ?? 50}</Badge>
                 </div>
                 <Button asChild variant="outline" size="sm" className="w-full mt-2 h-8" onClick={closeMobileMenu}>
                   <Link to="/account/subscription">Abonnement</Link>

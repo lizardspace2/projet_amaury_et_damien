@@ -72,11 +72,15 @@ const SubscriptionPage: React.FC = () => {
 
   const startUpgrade = async () => {
     try {
+      console.log('[subscription] startUpgrade invoked');
       // Ensure we have a fresh authenticated user before calling the API
       const { data: { user: currentUser } } = await supabase.auth.getUser();
+      console.log('[subscription] after getUser', { hasUser: !!currentUser });
       if (!currentUser) throw new Error('Non authentifié');
       console.log('[subscription] startUpgrade: user', { id: currentUser.id, email: currentUser.email });
-      const r = await fetch(`${getApiBase()}/api/stripe/create-checkout-session`, {
+      const apiBase = getApiBase();
+      console.log('[subscription] apiBase', apiBase);
+      const r = await fetch(`${apiBase}/api/stripe/create-checkout-session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: currentUser.id, userEmail: currentUser.email }),
@@ -86,6 +90,7 @@ const SubscriptionPage: React.FC = () => {
       console.log('[subscription] checkout-session payload', json);
       if (!r.ok) throw new Error(json?.error || 'Impossible de démarrer le paiement');
       const { url } = json as { url?: string };
+      console.log('[subscription] redirecting to', url);
       window.location.href = url;
     } catch (e: any) {
       toast.error(e?.message || 'Erreur');

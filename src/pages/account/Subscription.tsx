@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/api/supabaseClient';
 import { toast } from 'sonner';
+import { getApiBase } from '@/lib/utils';
 
 const SubscriptionPage: React.FC = () => {
   const { data: user } = useQuery({
@@ -51,7 +52,7 @@ const SubscriptionPage: React.FC = () => {
     try {
       const { data: { user: currentUser } } = await supabase.auth.getUser();
       if (!currentUser) throw new Error('Non authentifié');
-      const resp = await fetch('/api/stripe/create-portal-session', {
+      const resp = await fetch(`${getApiBase()}/api/stripe/create-portal-session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: currentUser.id }),
@@ -66,7 +67,7 @@ const SubscriptionPage: React.FC = () => {
 
   const startUpgrade = async () => {
     try {
-      const r = await fetch('/api/stripe/create-checkout-session', {
+      const r = await fetch(`${getApiBase()}/api/stripe/create-checkout-session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user?.id, userEmail: user?.email }),

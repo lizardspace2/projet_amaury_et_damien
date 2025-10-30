@@ -1,10 +1,11 @@
 import { supabase } from '@/lib/api/supabaseClient';
+import { getApiBase } from '@/lib/utils';
 
 export const startProUpgradeCheckout = async (): Promise<void> => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('User not authenticated');
 
-  const response = await fetch('/api/stripe/create-checkout-session', {
+  const response = await fetch(`${getApiBase()}/api/stripe/create-checkout-session`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ userId: user.id, userEmail: user.email }),

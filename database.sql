@@ -1,6 +1,29 @@
 -- WARNING: This schema is for context only and is not meant to be run.
 -- Table order and constraints may not be valid for execution.
 
+CREATE TABLE public.ancillary_services (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  property_id uuid,
+  service_type text NOT NULL CHECK (service_type = ANY (ARRAY['demenagement'::text, 'travaux'::text, 'diagnostic'::text, 'nettoyage'::text, 'assurance'::text, 'amenagement'::text, 'courtier'::text, 'notaire'::text, 'banque'::text, 'artisan'::text, 'gestionnaire_patrimoine'::text, 'geometre'::text, 'maitre_oeuvre'::text, 'architecte'::text, 'amo'::text, 'promoteur_lotisseur'::text, 'autre'::text])),
+  description text,
+  estimated_cost numeric,
+  provider_name text,
+  provider_contact jsonb,
+  status text DEFAULT 'pending'::text CHECK (status = ANY (ARRAY['pending'::text, 'in_progress'::text, 'completed'::text, 'cancelled'::text])),
+  requested_at timestamp with time zone DEFAULT now(),
+  scheduled_date date,
+  completed_at timestamp with time zone,
+  metadata jsonb,
+  requested_by uuid,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  end_date date,
+  start_date date DEFAULT CURRENT_DATE,
+  is_active boolean DEFAULT true,
+  CONSTRAINT ancillary_services_pkey PRIMARY KEY (id),
+  CONSTRAINT ancillary_services_property_id_fkey FOREIGN KEY (property_id) REFERENCES public.properties(id),
+  CONSTRAINT ancillary_services_requested_by_fkey FOREIGN KEY (requested_by) REFERENCES public.profiles(user_id)
+);
 CREATE TABLE public.profiles (
   user_id uuid NOT NULL,
   phone text,
@@ -14,6 +37,10 @@ CREATE TABLE public.profiles (
   liked_properties jsonb DEFAULT '[]'::jsonb,
   profession text,
   siret text,
+  user_type text CHECK (user_type = ANY (ARRAY['Particulier'::text, 'Professionnelle'::text, 'Partenaire'::text])),
+  max_listings integer DEFAULT 50,
+  stripe_customer_id text,
+  stripe_subscription_status text,
   CONSTRAINT profiles_pkey PRIMARY KEY (user_id),
   CONSTRAINT profiles_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
 );

@@ -156,6 +156,18 @@ const Profile: React.FC = () => {
         <p className="text-slate-600">
           Gérez vos informations personnelles
         </p>
+        {profile?.user_type && (
+          <div className="mt-3 flex items-center gap-2">
+            <span className="text-sm text-slate-600">Statut</span>
+            <Badge variant="secondary">
+              {profile.user_type === 'Particulier'
+                ? '👤 Particulier'
+                : profile.user_type === 'Professionnelle'
+                ? '💼 Professionnelle'
+                : '🤝 Partenaire'}
+            </Badge>
+          </div>
+        )}
       </div>
 
       <form onSubmit={handleSubmit}>

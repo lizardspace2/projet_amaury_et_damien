@@ -67,10 +67,14 @@ const SubscriptionPage: React.FC = () => {
 
   const startUpgrade = async () => {
     try {
+      // Ensure we have a fresh authenticated user before calling the API
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      if (!currentUser) throw new Error('Non authentifié');
+
       const r = await fetch(`${getApiBase()}/api/stripe/create-checkout-session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user?.id, userEmail: user?.email }),
+        body: JSON.stringify({ userId: currentUser.id, userEmail: currentUser.email }),
       });
       if (!r.ok) throw new Error('Impossible de démarrer le paiement');
       const { url } = await r.json();

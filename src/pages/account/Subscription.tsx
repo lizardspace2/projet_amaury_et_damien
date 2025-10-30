@@ -70,11 +70,26 @@ const SubscriptionPage: React.FC = () => {
     }
   };
 
+  const [isStarting, setIsStarting] = React.useState(false);
+
   const startUpgrade = async () => {
     try {
       console.log('[subscription] startUpgrade invoked');
+      if (isStarting) {
+        console.log('[subscription] startUpgrade ignored: already in progress');
+        return;
+      }
+      setIsStarting(true);
       // Ensure we have a fresh authenticated user before calling the API
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      let currentUser = null as any;
+      try {
+        const res = await supabase.auth.getUser();
+        console.log('[subscription] getUser raw response', res);
+        currentUser = res?.data?.user || null;
+      } catch (err) {
+        console.error('[subscription] getUser threw error', err);
+        throw err;
+      }
       console.log('[subscription] after getUser', { hasUser: !!currentUser });
       if (!currentUser) throw new Error('Non authentifié');
       console.log('[subscription] startUpgrade: user', { id: currentUser.id, email: currentUser.email });
@@ -95,6 +110,9 @@ const SubscriptionPage: React.FC = () => {
     } catch (e: any) {
       toast.error(e?.message || 'Erreur');
       console.error('[subscription] startUpgrade error', e);
+    }
+    finally {
+      setIsStarting(false);
     }
   };
 
@@ -123,6 +141,7 @@ const SubscriptionPage: React.FC = () => {
                     console.log('[subscription] click upgrade button');
                     startUpgrade();
                   }}
+                  disabled={isStarting}
                   className="bg-teal-600 hover:bg-teal-700"
                 >
                   Passer à Pro+ (jusqu'à 500)

@@ -4,8 +4,14 @@
 CREATE OR REPLACE FUNCTION public.handle_new_auth_user()
 RETURNS trigger AS $$
 BEGIN
-  INSERT INTO public.profiles (user_id, email, created_at, updated_at)
-  VALUES (NEW.id, NEW.email, now(), now())
+  INSERT INTO public.profiles (user_id, email, user_type, created_at, updated_at)
+  VALUES (
+    NEW.id,
+    NEW.email,
+    COALESCE(((NEW.raw_user_meta_data ->> 'user_type')::text), 'Particulier'),
+    now(),
+    now()
+  )
   ON CONFLICT (user_id) DO NOTHING;
   RETURN NEW;
 END;

@@ -51,14 +51,45 @@ export const signUpWithEmail = async (
         emailRedirectTo: window.location.origin + '/account',
         data: {
           email_confirmed_at: new Date().toISOString(),
+          // Propager les infos utiles au trigger côté DB (si disponible)
+          user_type: profileData?.user_type || 'Particulier',
+          phone: profileData?.phone || null,
+          address: profileData?.address || null,
+          profession: profileData?.profession || null,
+          siret: profileData?.siret || null,
+          instagram: profileData?.instagram || null,
+          twitter: profileData?.twitter || null,
+          facebook: profileData?.facebook || null,
         }
       }
     });
 
     if (authError) throw authError;
 
-    // Le profil sera créé côté base via un trigger sur auth.users.
-    // On n'insère plus côté client pour éviter les erreurs de contrainte FK liées aux délais de propagation.
+    // Tentative d'upsert côté client si la session est dispo pour compléter les champs
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user && profileData) {
+        await supabase
+          .from('profiles')
+          .upsert({
+            user_id: user.id,
+            email: user.email,
+            user_type: profileData.user_type || 'Particulier',
+            phone: profileData.phone,
+            address: profileData.address,
+            profession: profileData.profession,
+            siret: profileData.siret,
+            instagram: profileData.instagram,
+            twitter: profileData.twitter,
+            facebook: profileData.facebook,
+            updated_at: new Date().toISOString()
+          });
+      }
+    } catch (e) {
+      // Non bloquant: le trigger assure la création, on complète plus tard si besoin
+      console.warn('[signUpWithEmail] upsert profil post-signup non bloquant:', e);
+    }
 
     toast.success("Compte créé ! Consultez votre boîte mail pour finaliser votre inscription.");
     return true;

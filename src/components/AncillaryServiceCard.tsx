@@ -135,7 +135,7 @@ const AncillaryServiceCard = ({
                 className="flex-1"
               >
                 <PlayCircle size={16} className="mr-2" />
-                Reprendre
+                Reprendre1
               </Button>
             )}
             {onDelete && (

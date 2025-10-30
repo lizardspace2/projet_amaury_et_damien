@@ -80,15 +80,21 @@ const SubscriptionPage: React.FC = () => {
         return;
       }
       setIsStarting(true);
-      // Ensure we have a fresh authenticated user before calling the API
-      let currentUser = null as any;
-      try {
-        const res = await supabase.auth.getUser();
-        console.log('[subscription] getUser raw response', res);
-        currentUser = res?.data?.user || null;
-      } catch (err) {
-        console.error('[subscription] getUser threw error', err);
-        throw err;
+      // Try to use the user we already loaded from React Query, fallback to Supabase call with timeout
+      let currentUser = user as any;
+      if (!currentUser) {
+        console.log('[subscription] no cached user, calling supabase.auth.getUser() with timeout');
+        const getUserWithTimeout = <T,>(p: Promise<T>, ms: number) => Promise.race([
+          p,
+          new Promise<T>((_, reject) => setTimeout(() => reject(new Error('getUser timeout')), ms))
+        ]);
+        try {
+          const res: any = await getUserWithTimeout(supabase.auth.getUser(), 5000);
+          console.log('[subscription] getUser raw response', res);
+          currentUser = res?.data?.user || null;
+        } catch (err) {
+          console.error('[subscription] getUser error/timeout', err);
+        }
       }
       console.log('[subscription] after getUser', { hasUser: !!currentUser });
       if (!currentUser) throw new Error('Non authentifié');

@@ -34,6 +34,8 @@ import AncillaryServices from "./pages/AncillaryServices"; // Import AncillarySe
 import Profile from "./pages/account/Profile"; // Import Profile
 import MyAds from "./pages/account/MyAds"; // Import MyAds
 import Subscription from "./pages/account/Subscription";
+import BillingSuccess from "./pages/billing/Success";
+import BillingCancel from "./pages/billing/Cancel";
 import Resources from "./pages/Resources"; // Import Resources
 import { supabase } from "@/lib/api/supabaseClient";
 import { useEffect, useState } from "react";
@@ -128,6 +130,8 @@ const App = () => {
                   <Route path="subscription" element={<Subscription />} />
                   <Route index element={<MyAds />} />
                 </Route>
+                <Route path="/billing/success" element={<BillingSuccess />} />
+                <Route path="/billing/cancel" element={<BillingCancel />} />
                 <Route path="/verification-error" element={<VerificationError />} />
                 <Route path="/edit-property/:propertyId" element={
                   <Wrapper apiKey={apiKey} libraries={["places"]}>

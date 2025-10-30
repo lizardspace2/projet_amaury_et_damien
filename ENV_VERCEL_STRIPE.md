@@ -9,7 +9,7 @@ Ajoutez ces variables dans Vercel > Project > Settings > Environment Variables.
 - SUPABASE_SERVICE_ROLE_KEY: clé service role Supabase
 - APP_BASE_URL: domaine de l’app sans protocole (ex: mon-app.vercel.app)
 
-Optionnel (utile en dev local avec Vite):
+Optionnell (utile en dev local avec Vite):
 - VITE_API_BASE_URL: URL de base pour pointer sur l’API déployée (ex: https://mon-app.vercel.app)
 
 Notes importantes:

@@ -808,7 +808,7 @@ const Navbar = () => {
                     <div className="p-2 rounded-md bg-amber-50 border border-amber-200 mb-1">
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-amber-900">Déjà Publié ce mois</span>
-                        <Badge variant="secondary">{Math.max(0, (profileMaxListings ?? 50) - (monthlyCount ?? 0))}/{profileMaxListings ?? 50}</Badge>
+                        <Badge variant="secondary">{monthlyCount ?? 0}/{profileMaxListings ?? 50}</Badge>
                       </div>
                       <Button asChild variant="outline" size="sm" className="w-full mt-2 h-8">
                         <Link to="/account/subscription">Abonnement</Link>
@@ -979,7 +979,7 @@ const Navbar = () => {
               <div className="p-2 rounded-md bg-amber-50 border border-amber-200">
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-amber-900">Déjà Publié ce mois</span>
-                  <Badge variant="secondary" className="text-xs">{Math.max(0, (profileMaxListings ?? 50) - (monthlyCount ?? 0))}/{profileMaxListings ?? 50}</Badge>
+                  <Badge variant="secondary" className="text-xs">{monthlyCount ?? 0}/{profileMaxListings ?? 50}</Badge>
                 </div>
                 <Button asChild variant="outline" size="sm" className="w-full mt-2 h-8" onClick={closeMobileMenu}>
                   <Link to="/account/subscription">Abonnement</Link>

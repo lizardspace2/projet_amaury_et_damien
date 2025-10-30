@@ -769,23 +769,15 @@ const Navbar = () => {
                 </PopoverTrigger>
                 <PopoverContent className="w-64 p-3" align="end">
                   <div className="flex flex-col gap-1">
-                    {(() => { const show = userType === 'Professionnelle'; console.log('[Navbar] render.desktop.accountPopover showQuota=', show, 'userType=', userType); return show; })() && (
-                      <div className="p-2 rounded-md bg-amber-50 border border-amber-200 mb-1">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-amber-900">Restant ce mois</span>
-                          <Badge variant="secondary">{Math.max(0, (profileMaxListings ?? 10) - (monthlyCount ?? 0))}/{profileMaxListings ?? 10}</Badge>
-                        </div>
-                        {(profileMaxListings ?? 10) < 100 && (
-                          <Button
-                            onClick={async () => { try { await startProUpgradeCheckout(); } catch (e: any) { toast.error(e?.message || 'Paiement indisponible'); } }}
-                            size="sm"
-                            className="w-full mt-2 h-8 bg-amber-600 hover:bg-amber-700"
-                          >
-                            Passer à Pro+
-                          </Button>
-                        )}
+                    <div className="p-2 rounded-md bg-amber-50 border border-amber-200 mb-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-amber-900">Restant ce mois</span>
+                        <Badge variant="secondary">{Math.max(0, (profileMaxListings ?? 10) - (monthlyCount ?? 0))}/{profileMaxListings ?? 10}</Badge>
                       </div>
-                    )}
+                      <Button asChild variant="outline" size="sm" className="w-full mt-2 h-8">
+                        <Link to="/account/subscription">Abonnement</Link>
+                      </Button>
+                    </div>
                     <Button asChild variant="ghost" className="justify-start h-10 rounded-lg">
                       <Link to="/account/profile" className="flex items-center gap-3">
                         <User size={18} className="text-slate-600" />
@@ -824,6 +816,16 @@ const Navbar = () => {
                   className="bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 shadow-md hover:shadow-lg transition-all"
                 >
                   S'inscrire
+                </Button>
+              </div>
+            )}
+            {isLoggedIn && (
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="text-xs">
+                  {monthlyCount}/{profileMaxListings ?? 10}
+                </Badge>
+                <Button asChild variant="outline" className="h-9">
+                  <Link to="/account/subscription">Abonnement</Link>
                 </Button>
               </div>
             )}
@@ -938,23 +940,15 @@ const Navbar = () => {
                   <p className="text-xs text-slate-500 truncate">{userEmail}</p>
                 </div>
               </div>
-              {(() => { const show = userType === 'Professionnelle'; console.log('[Navbar] render.mobile.accountCard showQuota=', show, 'userType=', userType); return show; })() && (
-                <div className="p-2 rounded-md bg-amber-50 border border-amber-200">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-amber-900">Restant ce mois</span>
-                    <Badge variant="secondary" className="text-xs">{Math.max(0, (profileMaxListings ?? 10) - (monthlyCount ?? 0))}/{profileMaxListings ?? 10}</Badge>
-                  </div>
-                  {(profileMaxListings ?? 10) < 100 && (
-                    <Button
-                      onClick={async () => { try { await startProUpgradeCheckout(); closeMobileMenu(); } catch (e: any) { toast.error(e?.message || 'Paiement indisponible'); } }}
-                      size="sm"
-                      className="w-full mt-2 h-8 bg-amber-600 hover:bg-amber-700"
-                    >
-                      Passer à Pro+
-                    </Button>
-                  )}
+              <div className="p-2 rounded-md bg-amber-50 border border-amber-200">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-amber-900">Restant ce mois</span>
+                  <Badge variant="secondary" className="text-xs">{Math.max(0, (profileMaxListings ?? 10) - (monthlyCount ?? 0))}/{profileMaxListings ?? 10}</Badge>
                 </div>
-              )}
+                <Button asChild variant="outline" size="sm" className="w-full mt-2 h-8" onClick={closeMobileMenu}>
+                  <Link to="/account/subscription">Abonnement</Link>
+                </Button>
+              </div>
               <Button asChild variant="ghost" className="justify-start h-10 rounded-lg text-sm">
                 <Link to="/account/profile" onClick={closeMobileMenu}>
                   <User size={16} className="mr-2" />

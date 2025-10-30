@@ -9,6 +9,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -197,6 +198,8 @@ const Hero = () => {
   const [selectedUserType, setSelectedUserType] = useState<string>('');
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('signup');
   const [signupStep, setSignupStep] = useState(0);
+  const [signupNoticeEmail, setSignupNoticeEmail] = useState<string | null>(null);
+  const [isSigningUp, setIsSigningUp] = useState(false);
   const [formData, setFormData] = useState({
     user_type: '',
     email: '',
@@ -251,6 +254,7 @@ const Hero = () => {
     setSignupStep(0);
     setSelectedUserType('');
     setAuthMode('signup');
+    setSignupNoticeEmail(null);
   };
 
   const handleEmailLogin = async (e: React.FormEvent) => {
@@ -265,6 +269,8 @@ const Hero = () => {
 
   const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSigningUp) return;
+    setIsSigningUp(true);
     const { email, password, ...profileData } = formData;
     const success = await signUpWithEmail(email, password, {
       user_type: profileData.user_type,
@@ -277,10 +283,10 @@ const Hero = () => {
       facebook: profileData.facebook
     });
     if (success) {
-      setIsAuthDialogOpen(false);
-      resetForm();
-      toast.success('Compte créé ! Consultez votre boîte mail pour finaliser votre inscription.');
+      setSignupNoticeEmail(email);
+      toast.success('Vérifiez votre boîte mail pour confirmer votre adresse.');
     }
+    setIsSigningUp(false);
   };
 
   const getUserTypeLabel = (type: string) => {
@@ -402,6 +408,14 @@ const Hero = () => {
                 : <>Vous souhaitez vous inscrire en tant que <strong>{getUserTypeLabel(selectedUserType)}</strong></>}
             </DialogDescription>
           </DialogHeader>
+          {signupNoticeEmail && (
+            <Alert className="border-amber-300 bg-amber-50 text-amber-900">
+              <AlertTitle className="font-semibold">Confirmez votre adresse email</AlertTitle>
+              <AlertDescription>
+                Un email de confirmation a été envoyé à <strong>{signupNoticeEmail}</strong>. Veuillez ouvrir votre boîte mail et cliquer sur le lien pour activer votre compte.
+              </AlertDescription>
+            </Alert>
+          )}
 
           {authMode === 'login' ? (
             <>
@@ -496,8 +510,10 @@ const Hero = () => {
                     <Button 
                       type="submit" 
                       className="h-11 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 shadow-md ml-auto"
+                      disabled={isSigningUp}
+                      aria-busy={isSigningUp}
                     >
-                      Créer mon compte
+                      {isSigningUp ? 'Création…' : 'Créer mon compte'}
                     </Button>
                   )}
                 </div>

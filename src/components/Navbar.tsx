@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Menu, X, User, ChevronDown, Home, Key, Users, CalendarDays, LogIn, LogOut, UserPlus, PlusCircle, Truck, Building, Search, Phone, MapPin, BookOpen, Calculator } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -269,6 +270,8 @@ const Navbar = () => {
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
   const [isPublishDialogOpen, setIsPublishDialogOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [signupNoticeEmail, setSignupNoticeEmail] = useState<string | null>(null);
+  const [isSigningUp, setIsSigningUp] = useState(false);
   const [signupStep, setSignupStep] = useState(0);
   const [showTypeSelection, setShowTypeSelection] = useState(false);
   const [formData, setFormData] = useState({
@@ -397,13 +400,16 @@ const Navbar = () => {
 
   const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSigningUp) return; // ignore double submit
+    setIsSigningUp(true);
     const { email, password, ...profileData } = formData;
     const success = await signUpWithEmail(email, password, profileData);
     if (success) {
-      setIsAuthDialogOpen(false);
-      resetForm();
-      toast.success('Compte créé ! Consultez votre boîte mail pour finaliser votre inscription.');
+      // Garder le modal ouvert et afficher une alerte très visible
+      setSignupNoticeEmail(email);
+      toast.success('Vérifiez votre boîte mail pour confirmer votre adresse.');
     }
+    setIsSigningUp(false);
   };
 
   const handleLogout = async () => {
@@ -452,6 +458,7 @@ const Navbar = () => {
     });
     setSignupStep(0);
     setShowTypeSelection(false);
+    setSignupNoticeEmail(null);
   };
 
   const handleTypeSelection = (userType: string) => {
@@ -1047,16 +1054,24 @@ const Navbar = () => {
                 : 'Rejoignez Trocadimmo et commencez dès aujourd\'hui.'}
             </DialogDescription>
           </DialogHeader>
+          {signupNoticeEmail && (
+            <Alert className="border-amber-300 bg-amber-50 text-amber-900">
+              <AlertTitle className="font-semibold">Confirmez votre adresse email</AlertTitle>
+              <AlertDescription>
+                Un email de confirmation a été envoyé à <strong>{signupNoticeEmail}</strong>. Veuillez ouvrir votre boîte mail et cliquer sur le lien pour activer votre compte.
+              </AlertDescription>
+            </Alert>
+          )}
           
           {authMode === 'login' ? (
             <form onSubmit={handleEmailLogin} className="space-y-4">
               <Step1 formData={formData} handleInputChange={handleInputChange} />
-              <Button 
-                type="submit" 
-                className="w-full h-11 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 shadow-md"
-              >
-                Se connecter
-              </Button>
+                <Button 
+                  type="submit" 
+                  className="w-full h-11 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 shadow-md"
+                >
+                  Se connecter
+                </Button>
             </form>
           ) : !showTypeSelection ? (
             <div className="space-y-4">
@@ -1123,8 +1138,10 @@ const Navbar = () => {
                     <Button 
                       type="submit" 
                       className="h-11 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 shadow-md ml-auto"
+                      disabled={isSigningUp}
+                      aria-busy={isSigningUp}
                     >
-                      Créer mon compte
+                      {isSigningUp ? 'Création…' : 'Créer mon compte'}
                     </Button>
                   )}
                 </div>

@@ -42,6 +42,19 @@ export const signUpWithEmail = async (
     facebook?: string;
   }
 ) => {
+  // Anti double-submit / bruteforce côté client pour éviter le 429 Supabase
+  // Supabase impose déjà une limite (~60s) entre tentatives d'inscription.
+  // On ajoute un cooldown local pour éviter de spammer.
+  const now = Date.now();
+  if (typeof (window as any).__lastSignupAttemptMs === 'number') {
+    const elapsed = now - (window as any).__lastSignupAttemptMs;
+    if (elapsed < 60_000) {
+      const remaining = Math.ceil((60_000 - elapsed) / 1000);
+      toast.error(`Veuillez patienter ${remaining}s avant une nouvelle tentative d'inscription.`);
+      return false;
+    }
+  }
+  (window as any).__lastSignupAttemptMs = now;
   try {
     // Étape 1: Création du compte d'authentification
     const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -95,10 +108,15 @@ export const signUpWithEmail = async (
     return true;
   } catch (error) {
     console.error("Error signing up:", error);
+    // Cas spécifique rate-limit 429
+    const status = (error as any)?.status;
+    const message = (error as any)?.message || (error instanceof Error ? error.message : "");
+    if (status === 429 || (typeof message === 'string' && message.toLowerCase().includes('only request this after'))) {
+      toast.error("Trop de tentatives. Réessayez dans environ 60 secondes.");
+      return false;
+    }
     
     let errorMessage = "Échec de l'inscription";
-    const message = (error as any)?.message || (error instanceof Error ? error.message : "");
-    const status = (error as any)?.status;
     const code = (error as any)?.code;
 
     const lowerMsg = typeof message === 'string' ? message.toLowerCase() : '';

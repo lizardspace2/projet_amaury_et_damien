@@ -807,7 +807,7 @@ const Navbar = () => {
                   <div className="flex flex-col gap-1">
                     <div className="p-2 rounded-md bg-amber-50 border border-amber-200 mb-1">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs text-amber-900">Restant ce mois</span>
+                        <span className="text-xs text-amber-900">Déjà Publié ce mois</span>
                         <Badge variant="secondary">{Math.max(0, (profileMaxListings ?? 50) - (monthlyCount ?? 0))}/{profileMaxListings ?? 50}</Badge>
                       </div>
                       <Button asChild variant="outline" size="sm" className="w-full mt-2 h-8">
@@ -978,7 +978,7 @@ const Navbar = () => {
               </div>
               <div className="p-2 rounded-md bg-amber-50 border border-amber-200">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-amber-900">Restant ce mois</span>
+                  <span className="text-xs text-amber-900">Déjà Publié ce mois</span>
                   <Badge variant="secondary" className="text-xs">{Math.max(0, (profileMaxListings ?? 50) - (monthlyCount ?? 0))}/{profileMaxListings ?? 50}</Badge>
                 </div>
                 <Button asChild variant="outline" size="sm" className="w-full mt-2 h-8" onClick={closeMobileMenu}>

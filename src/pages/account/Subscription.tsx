@@ -112,7 +112,16 @@ const SubscriptionPage: React.FC = () => {
             <p>Statut abonnement: {profile?.stripe_subscription_status || '—'}</p>
             <div className="flex gap-3 pt-2">
               {(profile?.max_listings ?? 50) < 500 && (
-                <Button onClick={startUpgrade} className="bg-teal-600 hover:bg-teal-700">Passer à Pro+ (jusqu'à 500)</Button>
+                <Button
+                  id="btn-upgrade-pro"
+                  onClick={() => {
+                    console.log('[subscription] click upgrade button');
+                    startUpgrade();
+                  }}
+                  className="bg-teal-600 hover:bg-teal-700"
+                >
+                  Passer à Pro+ (jusqu'à 500)
+                </Button>
               )}
               {profile?.stripe_subscription_status && (
                 <Button variant="outline" onClick={openPortal}>Ouvrir le portail client</Button>

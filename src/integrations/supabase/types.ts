@@ -21,6 +21,12 @@ export type Database = {
           updated_at: string
           email: string | null
           liked_properties: Json | null
+          profession: string | null
+          siret: string | null
+          user_type: string | null
+          max_listings: number
+          stripe_customer_id: string | null
+          stripe_subscription_status: string | null
         }
         Insert: {
           user_id: string
@@ -33,6 +39,12 @@ export type Database = {
           updated_at?: string
           email?: string | null
           liked_properties?: Json | null
+          profession?: string | null
+          siret?: string | null
+          user_type?: string | null
+          max_listings?: number
+          stripe_customer_id?: string | null
+          stripe_subscription_status?: string | null
         }
         Update: {
           user_id?: string
@@ -45,6 +57,12 @@ export type Database = {
           updated_at?: string
           email?: string | null
           liked_properties?: Json | null
+          profession?: string | null
+          siret?: string | null
+          user_type?: string | null
+          max_listings?: number
+          stripe_customer_id?: string | null
+          stripe_subscription_status?: string | null
         }
         Relationships: [
           {
@@ -165,6 +183,25 @@ export type Database = {
           agent_phone: string | null
           project_name: string | null
           price_per_m2: number | null
+          frais_agence: number | null
+          charges_mensuelles: number | null
+          taxe_fonciere: number | null
+          dpe_classe_energie: string | null
+          dpe_consommation: number | null
+          ges_classe_gaz: string | null
+          ges_emission: number | null
+          nom_agence: string | null
+          reference_annonce: string | null
+          nombre_photos: number
+          lien_visite_virtuelle: string | null
+          date_publication: string | null
+          date_mise_a_jour: string | null
+          code_postal: string | null
+          surface_balcon_terrasse: number | null
+          parking_box: number | null
+          cave: boolean
+          nombre_etages_immeuble: number | null
+          annee_construction: number | null
         }
         Insert: {
           id?: string
@@ -274,6 +311,25 @@ export type Database = {
           agent_phone?: string | null
           project_name?: string | null
           price_per_m2?: number | null
+          frais_agence?: number | null
+          charges_mensuelles?: number | null
+          taxe_fonciere?: number | null
+          dpe_classe_energie?: string | null
+          dpe_consommation?: number | null
+          ges_classe_gaz?: string | null
+          ges_emission?: number | null
+          nom_agence?: string | null
+          reference_annonce?: string | null
+          nombre_photos?: number
+          lien_visite_virtuelle?: string | null
+          date_publication?: string | null
+          date_mise_a_jour?: string | null
+          code_postal?: string | null
+          surface_balcon_terrasse?: number | null
+          parking_box?: number | null
+          cave?: boolean
+          nombre_etages_immeuble?: number | null
+          annee_construction?: number | null
         }
         Update: {
           id?: string
@@ -383,6 +439,25 @@ export type Database = {
           agent_phone?: string | null
           project_name?: string | null
           price_per_m2?: number | null
+          frais_agence?: number | null
+          charges_mensuelles?: number | null
+          taxe_fonciere?: number | null
+          dpe_classe_energie?: string | null
+          dpe_consommation?: number | null
+          ges_classe_gaz?: string | null
+          ges_emission?: number | null
+          nom_agence?: string | null
+          reference_annonce?: string | null
+          nombre_photos?: number
+          lien_visite_virtuelle?: string | null
+          date_publication?: string | null
+          date_mise_a_jour?: string | null
+          code_postal?: string | null
+          surface_balcon_terrasse?: number | null
+          parking_box?: number | null
+          cave?: boolean
+          nombre_etages_immeuble?: number | null
+          annee_construction?: number | null
         }
         Relationships: [
           {
@@ -391,6 +466,84 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
+          }
+        ]
+      }
+      ancillary_services: {
+        Row: {
+          id: string
+          property_id: string | null
+          service_type: string
+          description: string | null
+          estimated_cost: number | null
+          provider_name: string | null
+          provider_contact: Json | null
+          status: string
+          requested_at: string
+          scheduled_date: string | null
+          completed_at: string | null
+          metadata: Json | null
+          requested_by: string | null
+          created_at: string
+          updated_at: string
+          end_date: string | null
+          start_date: string
+          is_active: boolean
+        }
+        Insert: {
+          id?: string
+          property_id?: string | null
+          service_type: string
+          description?: string | null
+          estimated_cost?: number | null
+          provider_name?: string | null
+          provider_contact?: Json | null
+          status?: string
+          requested_at?: string
+          scheduled_date?: string | null
+          completed_at?: string | null
+          metadata?: Json | null
+          requested_by?: string | null
+          created_at?: string
+          updated_at?: string
+          end_date?: string | null
+          start_date?: string
+          is_active?: boolean
+        }
+        Update: {
+          id?: string
+          property_id?: string | null
+          service_type?: string
+          description?: string | null
+          estimated_cost?: number | null
+          provider_name?: string | null
+          provider_contact?: Json | null
+          status?: string
+          requested_at?: string
+          scheduled_date?: string | null
+          completed_at?: string | null
+          metadata?: Json | null
+          requested_by?: string | null
+          created_at?: string
+          updated_at?: string
+          end_date?: string | null
+          start_date?: string
+          is_active?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ancillary_services_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ancillary_services_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
           }
         ]
       }

@@ -2,20 +2,24 @@ import { supabase } from "./supabaseClient";
 
 export interface AncillaryService {
   id: string;
+  property_id?: string | null;
   service_type: string;
-  description: string;
-  estimated_cost?: number;
-  provider_name: string;
-  provider_contact: {
+  description?: string | null;
+  estimated_cost?: number | null;
+  provider_name?: string | null;
+  provider_contact?: {
     phone?: string;
     email?: string;
     website?: string;
-  };
+  } | null;
   status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+  requested_at?: string;
+  scheduled_date?: string | null;
+  completed_at?: string | null;
   is_active: boolean;
   start_date: string;
-  end_date?: string;
-  requested_by: string;
+  end_date?: string | null;
+  requested_by?: string | null;
   metadata?: any;
   created_at: string;
   updated_at: string;

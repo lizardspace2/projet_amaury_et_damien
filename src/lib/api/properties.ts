@@ -8,6 +8,7 @@ export interface CreatePropertyInput {
   price: number;
   phone_number?: string;
   cadastral_code?: string;
+  reference_number?: string;
   property_type?: PropertyType;
   listing_type?: ListingType;
   status?: PropertyStatus;
@@ -26,6 +27,7 @@ export interface CreatePropertyInput {
   has_ventilation?: boolean;
   has_air_conditioning?: boolean;
   is_accessible?: boolean;
+  has_vent?: boolean;
   amenities?: string[];
   equipment?: string[];
   internet_tv?: string[];

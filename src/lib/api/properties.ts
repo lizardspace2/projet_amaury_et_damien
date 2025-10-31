@@ -240,6 +240,9 @@ export const createProperty = async (input: CreatePropertyInput) => {
 
 export const getProperties = async (type?: ListingType): Promise<Property[]> => {
   try {
+    // Ensure we have a fresh session, but don't require authentication
+    const { data: { session } } = await supabase.auth.getSession();
+    
     let query = supabase.from('properties').select('*');
 
     if (type && type !== 'all') {
@@ -248,11 +251,20 @@ export const getProperties = async (type?: ListingType): Promise<Property[]> => 
 
     const { data: properties, error } = await query;
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching properties:', error);
+      throw error;
+    }
+    
+    if (!properties) return [];
+    
     return properties.map(transformProperty);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching properties:', error);
-    toast.error("Échec de la récupération des propriétés. Veuillez réessayer.");
+    // Only show toast if it's not a permission error (which might be silent)
+    if (error?.code !== 'PGRST301' && error?.code !== '42501') {
+      toast.error("Échec de la récupération des propriétés. Veuillez réessayer.");
+    }
     return [];
   }
 };
@@ -263,16 +275,28 @@ export const getPropertiesByType = async (listingType: 'sale' | 'rent' | 'rent_b
 
 export const getFeaturedProperties = async (): Promise<Property[]> => {
   try {
+    // Ensure we have a fresh session, but don't require authentication
+    const { data: { session } } = await supabase.auth.getSession();
+    
     const { data: properties, error } = await supabase
       .from('properties')
       .select('*')
       .eq('featured', true);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching featured properties:', error);
+      throw error;
+    }
+    
+    if (!properties) return [];
+    
     return properties.map(transformProperty);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching featured properties:', error);
-    toast.error("Échec de la récupération des propriétés en vedette. Veuillez réessayer.");
+    // Only show toast if it's not a permission error (which might be silent)
+    if (error?.code !== 'PGRST301' && error?.code !== '42501') {
+      toast.error("Échec de la récupération des propriétés en vedette. Veuillez réessayer.");
+    }
     return [];
   }
 };
@@ -414,37 +438,58 @@ export const signOut = async () => {
 
 export const getNewestProperties = async (): Promise<Property[]> => {
   try {
+    // Ensure we have a fresh session, but don't require authentication
+    const { data: { session } } = await supabase.auth.getSession();
+    
     const { data: properties, error } = await supabase
       .from('properties')
       .select('*')
       .order('created_at', { ascending: false })
       .limit(3);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching newest properties:', error);
+      throw error;
+    }
+    
+    if (!properties) return [];
 
     return properties.map(transformProperty);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching newest properties:', error);
-    toast.error("Failed to fetch newest properties. Please try again.");
+    // Only show toast if it's not a permission error (which might be silent)
+    if (error?.code !== 'PGRST301' && error?.code !== '42501') {
+      toast.error("Failed to fetch newest properties. Please try again.");
+    }
     return [];
   }
 };
 
 export const getPropertyById = async (id: string): Promise<Property | null> => {
   try {
+    // Ensure we have a fresh session, but don't require authentication
+    const { data: { session } } = await supabase.auth.getSession();
+    
     const { data: property, error } = await supabase
       .from('properties')
       .select('*')
       .eq('id', id)
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching property by ID:', error);
+      throw error;
+    }
+    
     if (!property) return null;
 
     return transformProperty(property);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching property by ID:', error);
-    toast.error("Échec de la récupération des détails de la propriété. Veuillez réessayer.");
+    // Only show toast if it's not a permission error or not found (which might be silent)
+    if (error?.code !== 'PGRST301' && error?.code !== '42501' && error?.code !== 'PGRST116') {
+      toast.error("Échec de la récupération des détails de la propriété. Veuillez réessayer.");
+    }
     return null;
   }
 };

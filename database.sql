@@ -1,29 +1,5 @@
--- WARNING: This schema is for context only and is not meant to be run.
--- Table order and constraints may not be valid for execution.
+-- Schema file with tables ordered to satisfy foreign key dependencies
 
-CREATE TABLE public.ancillary_services (
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  property_id uuid,
-  service_type text NOT NULL CHECK (service_type = ANY (ARRAY['demenagement'::text, 'travaux'::text, 'diagnostic'::text, 'nettoyage'::text, 'assurance'::text, 'amenagement'::text, 'courtier'::text, 'notaire'::text, 'banque'::text, 'artisan'::text, 'gestionnaire_patrimoine'::text, 'geometre'::text, 'maitre_oeuvre'::text, 'architecte'::text, 'amo'::text, 'promoteur_lotisseur'::text, 'autre'::text])),
-  description text,
-  estimated_cost numeric,
-  provider_name text,
-  provider_contact jsonb,
-  status text DEFAULT 'pending'::text CHECK (status = ANY (ARRAY['pending'::text, 'in_progress'::text, 'completed'::text, 'cancelled'::text])),
-  requested_at timestamp with time zone DEFAULT now(),
-  scheduled_date date,
-  completed_at timestamp with time zone,
-  metadata jsonb,
-  requested_by uuid,
-  created_at timestamp with time zone DEFAULT now(),
-  updated_at timestamp with time zone DEFAULT now(),
-  end_date date,
-  start_date date DEFAULT CURRENT_DATE,
-  is_active boolean DEFAULT true,
-  CONSTRAINT ancillary_services_pkey PRIMARY KEY (id),
-  CONSTRAINT ancillary_services_property_id_fkey FOREIGN KEY (property_id) REFERENCES public.properties(id),
-  CONSTRAINT ancillary_services_requested_by_fkey FOREIGN KEY (requested_by) REFERENCES public.profiles(user_id)
-);
 CREATE TABLE public.profiles (
   user_id uuid NOT NULL,
   phone text,
@@ -44,6 +20,7 @@ CREATE TABLE public.profiles (
   CONSTRAINT profiles_pkey PRIMARY KEY (user_id),
   CONSTRAINT profiles_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
 );
+
 CREATE TABLE public.properties (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   created_at timestamp with time zone DEFAULT now(),
@@ -73,13 +50,13 @@ CREATE TABLE public.properties (
   ceiling_height numeric,
   floor_level integer,
   total_floors integer,
-  amenities ARRAY DEFAULT '{}'::text[],
-  equipment ARRAY DEFAULT '{}'::text[],
-  internet_tv ARRAY DEFAULT '{}'::text[],
-  storage ARRAY DEFAULT '{}'::text[],
-  security ARRAY DEFAULT '{}'::text[],
-  nearby_places ARRAY DEFAULT '{}'::text[],
-  online_services ARRAY DEFAULT '{}'::text[],
+  amenities text[] DEFAULT '{}'::text[],
+  equipment text[] DEFAULT '{}'::text[],
+  internet_tv text[] DEFAULT '{}'::text[],
+  storage text[] DEFAULT '{}'::text[],
+  security text[] DEFAULT '{}'::text[],
+  nearby_places text[] DEFAULT '{}'::text[],
+  online_services text[] DEFAULT '{}'::text[],
   has_elevator boolean DEFAULT false,
   has_ventilation boolean DEFAULT false,
   has_air_conditioning boolean DEFAULT false,
@@ -144,7 +121,7 @@ CREATE TABLE public.properties (
   address_district text,
   lat numeric DEFAULT 41.7151,
   lng numeric DEFAULT 44.8271,
-  images ARRAY DEFAULT '{}'::text[],
+  images text[] DEFAULT '{}'::text[],
   property_type text,
   listing_type text,
   plan text,
@@ -174,6 +151,31 @@ CREATE TABLE public.properties (
   CONSTRAINT properties_pkey PRIMARY KEY (id),
   CONSTRAINT properties_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
 );
+
+CREATE TABLE public.ancillary_services (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  property_id uuid,
+  service_type text NOT NULL CHECK (service_type = ANY (ARRAY['demenagement'::text, 'travaux'::text, 'diagnostic'::text, 'nettoyage'::text, 'assurance'::text, 'amenagement'::text, 'courtier'::text, 'notaire'::text, 'banque'::text, 'artisan'::text, 'gestionnaire_patrimoine'::text, 'geometre'::text, 'maitre_oeuvre'::text, 'architecte'::text, 'amo'::text, 'promoteur_lotisseur'::text, 'autre'::text])),
+  description text,
+  estimated_cost numeric,
+  provider_name text,
+  provider_contact jsonb,
+  status text DEFAULT 'pending'::text CHECK (status = ANY (ARRAY['pending'::text, 'in_progress'::text, 'completed'::text, 'cancelled'::text])),
+  requested_at timestamp with time zone DEFAULT now(),
+  scheduled_date date,
+  completed_at timestamp with time zone,
+  metadata jsonb,
+  requested_by uuid,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  end_date date,
+  start_date date DEFAULT CURRENT_DATE,
+  is_active boolean DEFAULT true,
+  CONSTRAINT ancillary_services_pkey PRIMARY KEY (id),
+  CONSTRAINT ancillary_services_property_id_fkey FOREIGN KEY (property_id) REFERENCES public.properties(id),
+  CONSTRAINT ancillary_services_requested_by_fkey FOREIGN KEY (requested_by) REFERENCES public.profiles(user_id)
+);
+
 CREATE TABLE public.property_images (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   property_id uuid,

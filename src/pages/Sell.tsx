@@ -13,6 +13,7 @@ import Footer from "@/components/Footer";
 import { supabase } from "@/lib/api/supabaseClient";
 import { startProUpgradeCheckout } from "@/lib/billing";
 import { toast } from "sonner";
+import { useAuth } from "@/AuthContext";
 import {
   Dialog,
   DialogContent,
@@ -209,10 +210,10 @@ const SellPage = () => {
     { number: 6, label: "Publier" }
   ];
 
+  const { user } = useAuth();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<Partial<CreatePropertyInput>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [user, setUser] = useState<any>(null);
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
   const [signupStep, setSignupStep] = useState(0);
   const [showTypeSelection, setShowTypeSelection] = useState(false);
@@ -233,22 +234,6 @@ const SellPage = () => {
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [currentMaxListings, setCurrentMaxListings] = useState<number | null>(null);
   const [monthlyCount, setMonthlyCount] = useState<number>(0);
-  
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-    };
-
-    checkAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
 
   // Load profile for logged-in users to know type and current quota
   useEffect(() => {
@@ -270,8 +255,7 @@ const SellPage = () => {
   // Load count of properties created this month for the user
   useEffect(() => {
     const loadMonthlyCount = async () => {
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
-      if (!currentUser) {
+      if (!user) {
         setMonthlyCount(0);
         return;
       }
@@ -280,7 +264,7 @@ const SellPage = () => {
       const { count, error } = await supabase
         .from('properties')
         .select('id', { count: 'exact', head: true })
-        .eq('user_id', currentUser.id)
+        .eq('user_id', user.id)
         .gte('created_at', startOfMonth.toISOString())
         .lte('created_at', now.toISOString());
       if (!error) setMonthlyCount(count || 0);

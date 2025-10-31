@@ -18,6 +18,7 @@ import { getProperties } from "@/lib/api/properties";
 import { Property, PropertyType, ListingType } from "@/types/property";
 import { supabase } from "@/lib/api/supabaseClient";
 import { getUserProfile } from "@/lib/profiles";
+import { useAuth } from "@/AuthContext";
 import { FRENCH_CITIES } from "@/data/FrenchCities";
 
 // Properties Component
@@ -218,10 +219,11 @@ const Properties = () => {
     });
   }, [properties, listingType]);
 
+  const { user } = useAuth();
+  
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-      const { data: { user } } = await supabase.auth.getUser();
         if (user) {
           const profile = await getUserProfile(user.id);
           setUserLikedProperties(profile?.liked_properties || []);
@@ -234,7 +236,7 @@ const Properties = () => {
       }
     };
     fetchProfile();
-  }, []); // Empty dependency array to run once on mount
+  }, [user]);
 
   useEffect(() => {
     setMinPriceInput(minPrice.toString());

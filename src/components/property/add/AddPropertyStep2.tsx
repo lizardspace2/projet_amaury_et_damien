@@ -19,6 +19,7 @@ import { CreatePropertyInput } from '@/lib/api/properties';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
 import { supabase } from "@/lib/api/supabaseClient";
+import { useAuth } from "@/AuthContext";
 
 const MAX_PRICE = 100000000; // 100 millions d'euros
 const MAX_SURFACE = 10000; // 10000 m²
@@ -115,6 +116,7 @@ interface AddPropertyStep2Props {
 }
 
 const AddPropertyStep2 = ({ onBack, onNext, initialData }: AddPropertyStep2Props) => {
+  const { user } = useAuth();
   const [hasSiret, setHasSiret] = useState(true);
   const [userProfile, setUserProfile] = useState<any>(null);
 
@@ -156,7 +158,6 @@ const AddPropertyStep2 = ({ onBack, onNext, initialData }: AddPropertyStep2Props
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
         if (user) {
           const { data: profile } = await supabase
             .from('profiles')
@@ -173,7 +174,7 @@ const AddPropertyStep2 = ({ onBack, onNext, initialData }: AddPropertyStep2Props
     };
 
     fetchUserProfile();
-  }, []);
+  }, [user]);
 
   const onSubmit = async (data: FormValues) => {
     try {

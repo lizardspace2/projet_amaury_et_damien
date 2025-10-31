@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PropertyCard from "@/components/PropertyCard";
@@ -15,17 +15,18 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { startProUpgradeCheckout } from "@/lib/billing";
+import { useAuth } from "@/AuthContext";
 
 const MyAds: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [propertyToDelete, setPropertyToDelete] = useState<string | null>(null);
 
   const { data: profile } = useQuery({
     queryKey: ['user-profile'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
       const { data, error } = await supabase
         .from('profiles')
@@ -34,13 +35,13 @@ const MyAds: React.FC = () => {
         .single();
       if (error) throw error;
       return data;
-    }
+    },
+    enabled: !!user
   });
 
   const { data: monthlyCount } = useQuery({
     queryKey: ['my-properties-monthly-count'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) return 0;
       const now = new Date();
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -52,7 +53,8 @@ const MyAds: React.FC = () => {
         .lte('created_at', now.toISOString());
       if (error) return 0;
       return count || 0;
-    }
+    },
+    enabled: !!user
   });
 
   const { data: myProperties = [], isLoading: loadingMyProperties } = useQuery({

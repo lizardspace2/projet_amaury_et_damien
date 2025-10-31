@@ -10,6 +10,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { supabase } from "@/lib/api/supabaseClient";
 import { toast } from "sonner";
+import { useAuth } from "@/AuthContext";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon } from "lucide-react";
@@ -33,7 +34,7 @@ interface AncillaryServiceInput {
 
 const SellAncillaryService = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<any>(null);
+  const { user } = useAuth();
   const [userProfile, setUserProfile] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<AncillaryServiceInput>({
@@ -54,30 +55,24 @@ const SellAncillaryService = () => {
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-      
-      if (user) {
-        // Fetch user profile to check user_type
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('user_type')
-          .eq('user_id', user.id)
-          .single();
-        
-        setUserProfile(profile);
+    const loadProfile = async () => {
+      if (!user) {
+        setUserProfile(null);
+        return;
       }
+      
+      // Fetch user profile to check user_type
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('user_type')
+        .eq('user_id', user.id)
+        .single();
+      
+      setUserProfile(profile);
     };
 
-    checkAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+    loadProfile();
+  }, [user]);
 
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

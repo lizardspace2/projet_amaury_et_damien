@@ -13,6 +13,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { supabase } from "@/lib/api/supabaseClient";
 import { toast } from "sonner";
+import { useAuth } from "@/AuthContext";
 import { Wrapper } from "@googlemaps/react-wrapper";
 
 const CreateAuctionPage = () => {
@@ -29,16 +30,14 @@ const CreateAuctionPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
+  const { user } = useAuth();
+  
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast.error("Vous devez être connecté pour créer une vente aux enchères.");
-        navigate("/");
-      }
-    };
-    checkAuth();
-  }, [navigate]);
+    if (!user) {
+      toast.error("Vous devez être connecté pour créer une vente aux enchères.");
+      navigate("/");
+    }
+  }, [user, navigate]);
 
   const handleFinalSubmit = async (data: Partial<CreatePropertyInput>) => {
     try {

@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/api/supabaseClient';
 import { toast } from 'sonner';
+import { useAuth } from '@/AuthContext';
 import { Separator } from '@/components/ui/separator';
 import { startProUpgradeCheckout } from '@/lib/billing';
 import { Badge } from '@/components/ui/badge';
@@ -26,13 +27,7 @@ const Profile: React.FC = () => {
     user_type: '',
   });
 
-  const { data: user } = useQuery({
-    queryKey: ['user'],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      return user;
-    }
-  });
+  const { user } = useAuth();
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ['user-profile'],
@@ -52,14 +47,13 @@ const Profile: React.FC = () => {
   const { data: monthlyCount } = useQuery({
     queryKey: ['my-properties-monthly-count'],
     queryFn: async () => {
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
-      if (!currentUser) return 0;
+      if (!user) return 0;
       const now = new Date();
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
       const { count, error } = await supabase
         .from('properties')
         .select('id', { count: 'exact', head: true })
-        .eq('user_id', currentUser.id)
+        .eq('user_id', user.id)
         .gte('created_at', startOfMonth.toISOString())
         .lte('created_at', now.toISOString());
       if (error) return 0;

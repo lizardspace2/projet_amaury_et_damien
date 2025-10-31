@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useAuth } from '@/AuthContext';
 import { getApiBase } from '@/lib/utils';
 import { startProUpgradeCheckout } from '@/lib/billing';
 
@@ -22,13 +23,7 @@ const SubscriptionPage: React.FC = () => {
       window.removeEventListener('unhandledrejection', onUnhandled as any);
     };
   }, []);
-  const { data: user } = useQuery({
-    queryKey: ['user'],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      return user;
-    }
-  });
+  const { user } = useAuth();
 
   const { data: profile } = useQuery({
     queryKey: ['user-profile'],
@@ -48,14 +43,13 @@ const SubscriptionPage: React.FC = () => {
   const { data: monthlyCount } = useQuery({
     queryKey: ['my-properties-monthly-count'],
     queryFn: async () => {
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
-      if (!currentUser) return 0;
+      if (!user) return 0;
       const now = new Date();
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
       const { count } = await supabase
         .from('properties')
         .select('id', { count: 'exact', head: true })
-        .eq('user_id', currentUser.id)
+        .eq('user_id', user.id)
         .gte('created_at', startOfMonth.toISOString())
         .lte('created_at', now.toISOString());
       return count || 0;
@@ -66,15 +60,14 @@ const SubscriptionPage: React.FC = () => {
   const openPortal = async () => {
     try {
       toast.info('Ouverture du portail client…');
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
-      if (!currentUser) throw new Error('Non authentifié');
-      console.log('[subscription] openPortal: user', { id: currentUser.id, email: currentUser.email });
+      if (!user) throw new Error('Non authentifié');
+      console.log('[subscription] openPortal: user', { id: user.id, email: user.email });
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 15000);
       const resp = await fetch(`${getApiBase()}/api/stripe/create-portal-session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: currentUser.id }),
+        body: JSON.stringify({ userId: user.id }),
         signal: controller.signal,
       });
       clearTimeout(timeout);
@@ -102,13 +95,8 @@ const SubscriptionPage: React.FC = () => {
       setIsStarting(true);
       toast.info('Préparation du paiement…');
 
-      // Ensure user is authenticated (no artificial timeout)
-      let currentUser = user as any;
-      if (!currentUser) {
-        const { data: { user: fetched } } = await supabase.auth.getUser();
-        currentUser = fetched;
-      }
-      if (!currentUser) {
+      // Ensure user is authenticated
+      if (!user) {
         throw new Error('Veuillez vous connecter pour continuer');
       }
 

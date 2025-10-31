@@ -303,13 +303,14 @@ export const getFeaturedProperties = async (): Promise<Property[]> => {
 
 export const getMyProperties = async (): Promise<Property[]> => {
   try {
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) throw new Error("User not authenticated");
+    // Use getSession() for more reliable check
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !session?.user) throw new Error("User not authenticated");
 
     const { data: properties, error } = await supabase
       .from('properties')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('user_id', session.user.id)
       .order('created_at', { ascending: false });
 
     if (error) throw error;

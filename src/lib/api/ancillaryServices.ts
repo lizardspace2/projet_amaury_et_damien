@@ -27,13 +27,14 @@ export interface AncillaryService {
 
 export const getMyAncillaryServices = async () => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('User not authenticated');
+    // Use getSession() for more reliable check
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !session?.user) throw new Error('User not authenticated');
 
     const { data, error } = await supabase
       .from('ancillary_services')
       .select('*')
-      .eq('requested_by', user.id)
+      .eq('requested_by', session.user.id)
       .order('created_at', { ascending: false });
 
     if (error) throw error;

@@ -9,6 +9,7 @@ import { getProperties } from "@/lib/api/properties";
 import { Property } from "@/types/property";
 import { supabase } from "@/lib/api/supabaseClient";
 import { getUserProfile } from "@/lib/profiles";
+import { useAuth } from "@/AuthContext";
 
 const AuctionProperties = () => {
   const [userLikedProperties, setUserLikedProperties] = useState<string[] | null>(null);
@@ -18,10 +19,11 @@ const AuctionProperties = () => {
     queryFn: () => getProperties('auction'),
   });
 
+  const { user } = useAuth();
+  
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
         if (user) {
           const profile = await getUserProfile(user.id);
           setUserLikedProperties(profile?.liked_properties || []);
@@ -34,7 +36,7 @@ const AuctionProperties = () => {
       }
     };
     fetchProfile();
-  }, []);
+  }, [user]);
 
   return (
     <div className="flex flex-col min-h-screen bg-estate-background">

@@ -8,10 +8,19 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/api/supabaseClient";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { useAuth } from "@/AuthContext";
 
 const Account = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, loading, initialized } = useAuth();
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (initialized && !loading && !user) {
+      navigate('/', { replace: true });
+    }
+  }, [user, loading, initialized, navigate]);
 
   useEffect(() => {
     // Check for auth errors in hash
@@ -19,14 +28,6 @@ const Account = () => {
       handleAuthError(location.hash);
     }
   }, [location]);
-
-  const { data: user } = useQuery({
-    queryKey: ['user'],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      return user;
-    }
-  });
 
   const { data: profile } = useQuery({
     queryKey: ['user-profile'],
@@ -46,14 +47,15 @@ const Account = () => {
   const { data: monthlyCount = 0 } = useQuery({
     queryKey: ['my-properties-monthly-count'],
     queryFn: async () => {
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
-      if (!currentUser) return 0;
+      // Use getSession() for more reliable check
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) return 0;
       const now = new Date();
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
       const { count } = await supabase
         .from('properties')
         .select('id', { count: 'exact', head: true })
-        .eq('user_id', currentUser.id)
+        .eq('user_id', session.user.id)
         .gte('created_at', startOfMonth.toISOString())
         .lte('created_at', now.toISOString());
       return count || 0;
@@ -63,10 +65,30 @@ const Account = () => {
 
   // Redirect from /account to /account/myads
   useEffect(() => {
-    if (location.pathname === '/account') {
+    if (location.pathname === '/account' && initialized && !loading && user) {
       navigate('/account/myads', { replace: true });
     }
-  }, [location.pathname, navigate]);
+  }, [location.pathname, navigate, initialized, loading, user]);
+
+  // Show loading state while checking authentication
+  if (loading || !initialized) {
+    return (
+      <div>
+        <Navbar />
+        <div className="container py-8">
+          <div className="flex justify-center items-center min-h-[400px]">
+            <p>Chargement...</p>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Don't render content if not authenticated (will redirect)
+  if (!user) {
+    return null;
+  }
 
   return (
     <div>

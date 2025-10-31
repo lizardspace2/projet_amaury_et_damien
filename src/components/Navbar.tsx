@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { signInWithEmail, signUpWithEmail, signOut } from '@/lib/api/auth';
 import { supabase } from '@/lib/api/supabaseClient';
+import { useAuth } from '@/AuthContext';
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuContent, NavigationMenuLink } from '@/components/ui/navigation-menu';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -286,8 +287,9 @@ const Navbar = () => {
     twitter: '',
     facebook: ''
   });
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userEmail, setUserEmail] = useState('');
+  const { user, signOut: authSignOut } = useAuth();
+  const isLoggedIn = !!user;
+  const userEmail = user?.email || '';
   const [scrolled, setScrolled] = useState(false);
   const [profileMaxListings, setProfileMaxListings] = useState<number | null>(null);
   const [userType, setUserType] = useState<string | null>(null);
@@ -296,92 +298,67 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Load profile and monthly count when user changes
   useEffect(() => {
-    console.log('[Navbar] useEffect mount: initializing auth/profile checks');
-    const checkAuth = async () => {
+    const loadProfileData = async () => {
+      if (!user) {
+        setProfileMaxListings(null);
+        setUserType(null);
+        setMonthlyCount(0);
+        return;
+      }
+
       try {
-        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-        if (sessionError) {
-          console.error('[Navbar] getSession error', sessionError);
-        }
-        const sessionUser = sessionData?.session?.user || null;
-        console.log('[Navbar] checkAuth.session ->', sessionUser?.id, sessionUser?.email);
-
-        const { data: { user } } = await supabase.auth.getUser();
-        console.log('[Navbar] checkAuth.start getUser ->', user?.id, user?.email);
-        const effectiveUser = user || sessionUser;
-        setIsLoggedIn(!!effectiveUser);
-        setUserEmail(effectiveUser?.email || '');
-
-        if (effectiveUser) {
-          try {
-            const { data: profile, error: profileError } = await supabase
-              .from('profiles')
-              .select('*')
-              .eq('user_id', effectiveUser.id)
-              .single();
-            if (profileError) {
-              console.error('[Navbar] profiles fetch error', profileError);
-            }
-            console.log('[Navbar] checkAuth.profile ->', profile);
-            setProfileMaxListings((profile as any)?.max_listings ?? 50);
-            setUserType((profile as any)?.user_type ?? null);
-
-            const now = new Date();
-            const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-            const { count, error: countError } = await supabase
-              .from('properties')
-              .select('id', { count: 'exact', head: true })
-              .eq('user_id', effectiveUser.id)
-              .gte('created_at', startOfMonth.toISOString())
-              .lte('created_at', now.toISOString());
-            if (countError) {
-              console.error('[Navbar] properties count error', countError);
-            }
-            console.log('[Navbar] checkAuth.monthlyCount ->', count);
-            setMonthlyCount(count || 0);
-            console.log('[Navbar] checkAuth.end');
-          } catch (innerErr) {
-            console.error('[Navbar] fetch profile/count failed', innerErr);
-          }
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
+        if (profileError) {
+          console.error('[Navbar] profiles fetch error', profileError);
         } else {
-          setProfileMaxListings(null);
-          setUserType(null);
-          setMonthlyCount(0);
+          setProfileMaxListings((profile as any)?.max_listings ?? 50);
+          setUserType((profile as any)?.user_type ?? null);
+        }
+
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const { count, error: countError } = await supabase
+          .from('properties')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .gte('created_at', startOfMonth.toISOString())
+          .lte('created_at', now.toISOString());
+        if (countError) {
+          console.error('[Navbar] properties count error', countError);
+        } else {
+          setMonthlyCount(count || 0);
         }
       } catch (err) {
-        console.error('[Navbar] getUser failed', err);
+        console.error('[Navbar] loadProfileData failed', err);
       }
     };
 
-    checkAuth();
+    loadProfileData();
+  }, [user]);
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('[Navbar] onAuthStateChange', event, session?.user?.id);
-      setIsLoggedIn(!!session?.user);
-      setUserEmail(session?.user?.email || '');
-      if (event === 'SIGNED_IN') {
-        console.log('[Navbar] onAuthStateChange: SIGNED_IN -> closing auth dialog');
-        setIsAuthDialogOpen(false);
-      }
-      await checkAuth();
-    });
+  // Listen for auth state changes to close dialog on sign in
+  useEffect(() => {
+    if (isLoggedIn && isAuthDialogOpen) {
+      setIsAuthDialogOpen(false);
+    }
+  }, [isLoggedIn, isAuthDialogOpen]);
 
+  useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => {
-      subscription.unsubscribe();
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
-
-  useEffect(() => {
-    const remaining = Math.max(0, (profileMaxListings ?? 50) - (monthlyCount ?? 0));
-    console.log('[Navbar] state', `isLoggedIn=${isLoggedIn}`, `email=${userEmail}`, `userType=${userType}`, `max=${profileMaxListings}`, `count=${monthlyCount}`, `remaining=${remaining}`);
-  }, [isLoggedIn, userEmail, userType, profileMaxListings, monthlyCount]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -420,25 +397,19 @@ const Navbar = () => {
     setIsLoggingOut(true);
     console.log('[Navbar] handleLogout: click -> calling signOut');
     try {
-      const success = await signOut();
-      console.log('[Navbar] handleLogout: signOut() returned ->', success);
-      if (success) {
-        // Ensure UI reflects logout immediately
-        setIsLoggedIn(false);
-        setUserEmail('');
-        setIsMenuOpen(false);
-        setIsAuthDialogOpen(false);
-        toast.success('Déconnecté avec succès');
-        // Redirect to home after logout
-        console.log('[Navbar] handleLogout: navigating to /');
-        navigate('/');
-      } else {
-        console.warn('[Navbar] handleLogout: signOut() returned false');
-      }
+      await authSignOut();
+      // Also call the auth module signOut for cleanup
+      await signOut();
+      setIsMenuOpen(false);
+      setIsAuthDialogOpen(false);
+      toast.success('Déconnecté avec succès');
+      // Redirect to home after logout
+      console.log('[Navbar] handleLogout: navigating to /');
+      navigate('/');
     } catch (e) {
       console.error('[Navbar] handleLogout: exception while signing out', e);
-    }
-    finally {
+      toast.error('Erreur lors de la déconnexion');
+    } finally {
       setIsLoggingOut(false);
     }
   };

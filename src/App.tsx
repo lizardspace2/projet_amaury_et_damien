@@ -37,9 +37,8 @@ import Subscription from "./pages/account/Subscription";
 import BillingSuccess from "./pages/billing/Success";
 import BillingCancel from "./pages/billing/Cancel";
 import Resources from "./pages/Resources"; // Import Resources
-import { supabase } from "@/lib/api/supabaseClient";
-import { useEffect, useState } from "react";
 import { CurrencyProvider } from './CurrencyContext';
+import { AuthProvider } from './AuthContext';
 
 // Import des pages de ressources
 import SimulateurRemere from "./pages/resources/SimulateurRemere";
@@ -74,24 +73,6 @@ import { Wrapper } from "@googlemaps/react-wrapper";
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    // Check authentication state on load
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
-
-    // Listen for authentication changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setUser(session?.user ?? null);
-      }
-    );
-
-    return () => subscription.unsubscribe();
-  }, []);
-
   const apiKey = "AIzaSyAjAs9O5AqVbaCZth-QDJm4KJfoq2ZzgUI"; // Replace with your actual API key
 
   return (
@@ -99,8 +80,9 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <CurrencyProvider>
-          <BrowserRouter>
+        <AuthProvider>
+          <CurrencyProvider>
+            <BrowserRouter>
             <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/property/:id" element={<PropertyDetail />} />
@@ -168,8 +150,9 @@ const App = () => {
                 <Route path="/resources/guide-copropriete" element={<GuideCopropriete />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
-          </BrowserRouter>
-        </CurrencyProvider>
+            </BrowserRouter>
+          </CurrencyProvider>
+        </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

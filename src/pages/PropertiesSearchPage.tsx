@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { Property, ListingType } from "@/types/property";
-import { getProperties } from "@/lib/api/properties";
+import { getProperties } from "@/lib/properties";
 import { useQuery } from "@tanstack/react-query";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";

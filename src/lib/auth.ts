@@ -1,4 +1,4 @@
-import { supabase } from "./supabaseClient";
+import { supabase } from "@/lib/client";
 import { toast } from "sonner";
 
 /**
@@ -313,3 +313,37 @@ export const handleAuthError = (hash: string) => {
   }
   return false;
 };
+
+/**
+ * Crée un profil utilisateur
+ */
+export const createUserProfile = async (userId: string, email: string, userType?: string) => {
+  const { data, error } = await supabase
+    .from('profiles')
+    .insert([
+      { 
+        user_id: userId,
+        email,
+        user_type: userType || null,
+        created_at: new Date().toISOString()
+      }
+    ]);
+
+  if (error) throw error;
+  return data;
+};
+
+/**
+ * Récupère le profil d'un utilisateur par son ID
+ */
+export const getUserProfile = async (userId: string) => {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('user_id', userId)
+    .single();
+
+  if (error) throw error;
+  return data;
+};
+

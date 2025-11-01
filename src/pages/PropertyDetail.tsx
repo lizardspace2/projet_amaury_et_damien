@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { getPropertyById } from "@/lib/api/properties";
+import { getPropertyById } from "@/lib/properties";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PropertyGallery from "@/components/property/PropertyGallery";

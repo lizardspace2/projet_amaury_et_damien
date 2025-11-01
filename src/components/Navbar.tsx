@@ -11,8 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { signInWithEmail, signUpWithEmail, signOut } from '@/lib/api/auth';
-import { supabase } from '@/lib/api/supabaseClient';
+import { signInWithEmail, signUpWithEmail, signOut } from '@/lib/auth';
+import { supabase } from '@/lib/client';
 import { useAuth } from '@/AuthContext';
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuContent, NavigationMenuLink } from '@/components/ui/navigation-menu';
 import { cn } from '@/lib/utils';

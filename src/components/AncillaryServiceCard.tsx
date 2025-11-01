@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2, PauseCircle, PlayCircle, CalendarIcon, DollarSign, User, Phone, Mail, Globe } from "lucide-react";
-import { AncillaryService } from "@/lib/api/ancillaryServices";
+import { AncillaryService } from "@/lib/ancillaryServices";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 

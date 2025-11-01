@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/api/supabaseClient';
+import { supabase } from '@/lib/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/AuthContext';
 import { Separator } from '@/components/ui/separator';

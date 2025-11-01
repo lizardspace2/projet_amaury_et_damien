@@ -1,4 +1,4 @@
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/client';
 import { getApiBase } from '@/lib/utils';
 
 export const startProUpgradeCheckout = async (): Promise<void> => {

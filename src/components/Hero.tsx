@@ -15,8 +15,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import Autoplay from "embla-carousel-autoplay";
-import { signInWithEmail, signUpWithEmail } from "@/lib/api/auth";
-import { supabase } from "@/lib/api/supabaseClient";
+import { signInWithEmail, signUpWithEmail } from "@/lib/auth";
+import { supabase } from "@/lib/client";
 import { toast } from "sonner";
 import { Building, Truck, PlusCircle } from "lucide-react";
 

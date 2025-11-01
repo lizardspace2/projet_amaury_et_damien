@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/api/supabaseClient";
+import { supabase } from "@/lib/client";
 import { Property, PropertyType, ListingType, PropertyStatus, PropertyCondition, KitchenType } from "@/types/property";
 import { toast } from "sonner";
 

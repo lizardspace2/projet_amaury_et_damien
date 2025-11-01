@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Images, MapPin, AlertTriangle } from "lucide-react";
-import { CreatePropertyInput } from "@/lib/api/properties";
+import { CreatePropertyInput } from "@/lib/properties";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import LocationMapLeaflet from "./LocationMapLeaflet";

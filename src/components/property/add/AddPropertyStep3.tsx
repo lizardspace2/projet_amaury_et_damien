@@ -85,7 +85,7 @@ const rules = [
   { id: "allows_smoking", label: "Fumeurs autorisés" },
 ];
 
-import { CreatePropertyInput } from "@/lib/api/properties";
+import { CreatePropertyInput } from "@/lib/properties";
 
 const internetTvOptions = ["Internet", "Télévision par câble", "Télévision par satellite", "Ligne téléphonique"];
 

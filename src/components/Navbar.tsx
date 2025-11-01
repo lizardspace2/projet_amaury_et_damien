@@ -287,6 +287,17 @@ const Step3 = ({ formData, handleInputChange }: { formData: any; handleInputChan
   </div>
 );
 
+const Step4 = ({ email }: { email: string }) => (
+  <div className="space-y-4">
+    <Alert className="border-amber-300 bg-amber-50 text-amber-900">
+      <AlertTitle className="font-semibold">Confirmez votre adresse email</AlertTitle>
+      <AlertDescription>
+        Un email de confirmation a été envoyé à <strong>{email}</strong>. Veuillez ouvrir votre boîte mail et cliquer sur le lien pour activer votre compte.
+      </AlertDescription>
+    </Alert>
+  </div>
+);
+
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
@@ -399,21 +410,9 @@ const Navbar = () => {
   const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    // Ne soumettre que si on est à la dernière étape (étape 2 = index 2)
-    if (signupStep !== 2) {
-      console.log('[handleEmailSignUp] Prevented submission: signupStep =', signupStep, 'expected 2');
-      return;
-    }
-    if (isSigningUp) return; // ignore double submit
-    setIsSigningUp(true);
-    const { email, password, ...profileData } = formData;
-    const success = await signUpWithEmail(email, password, profileData);
-    if (success) {
-      // Garder le modal ouvert et afficher une alerte très visible
-      setSignupNoticeEmail(email);
-      toast.success('Vérifiez votre boîte mail pour confirmer votre adresse.');
-    }
-    setIsSigningUp(false);
+    // Le formulaire ne devrait plus être soumis directement, la création se fait dans nextStep
+    // Mais on garde cette fonction au cas où
+    return;
   };
 
   const handleLogout = async () => {
@@ -470,8 +469,22 @@ const Navbar = () => {
     resetForm();
   };
 
-  const nextStep = () => {
-    setSignupStep(prev => prev + 1);
+  const nextStep = async () => {
+    // Si on est à l'étape 3 (réseaux sociaux), créer le compte avant de passer à l'étape suivante (confirmation)
+    if (signupStep === 3) {
+      if (isSigningUp) return; // ignore double submit
+      setIsSigningUp(true);
+      const { email, password, ...profileData } = formData;
+      const success = await signUpWithEmail(email, password, profileData);
+      if (success) {
+        setSignupNoticeEmail(email);
+        toast.success('Vérifiez votre boîte mail pour confirmer votre adresse.');
+        setSignupStep(prev => prev + 1); // Passer à l'étape de confirmation
+      }
+      setIsSigningUp(false);
+    } else {
+      setSignupStep(prev => prev + 1);
+    }
   };
 
   const prevStep = () => {
@@ -1097,6 +1110,7 @@ const Navbar = () => {
             </form>
           ) : !showTypeSelection ? (
             <div className="space-y-4">
+              <StepIndicator currentStep={1} totalSteps={4} />
               <div className="grid grid-cols-1 gap-3">
                 <Button
                   type="button"
@@ -1129,45 +1143,52 @@ const Navbar = () => {
             </div>
           ) : (
             <div className="space-y-6">
-              <StepIndicator currentStep={signupStep + 1} totalSteps={3} />
+              <StepIndicator currentStep={signupStep + 1} totalSteps={4} />
               
-              <form onSubmit={handleEmailSignUp} className="space-y-4">
-                {signupStep === 0 && <Step1 formData={formData} handleInputChange={handleInputChange} onEnterKey={nextStep} />}
-                {signupStep === 1 && <Step2 formData={formData} handleInputChange={handleInputChange} setFormData={setFormData} onEnterKey={nextStep} />}
-                {signupStep === 2 && <Step3 formData={formData} handleInputChange={handleInputChange} />}
-                
-                <div className="flex justify-between pt-4">
-                  {signupStep > 0 && (
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      onClick={prevStep}
-                      className="h-11"
-                    >
-                      Précédent
-                    </Button>
-                  )}
+              {signupStep === 4 ? (
+                // Étape de confirmation (pas de formulaire)
+                <Step4 email={formData.email} />
+              ) : (
+                <form onSubmit={handleEmailSignUp} className="space-y-4">
+                  {signupStep === 1 && <Step1 formData={formData} handleInputChange={handleInputChange} onEnterKey={nextStep} />}
+                  {signupStep === 2 && <Step2 formData={formData} handleInputChange={handleInputChange} setFormData={setFormData} onEnterKey={nextStep} />}
+                  {signupStep === 3 && <Step3 formData={formData} handleInputChange={handleInputChange} />}
                   
-                  {signupStep < 2 ? (
-                    <Button 
-                      type="button" 
-                      onClick={nextStep}
-                      className="h-11 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 shadow-md ml-auto"
-                    >
-                      Suivant
-                    </Button>
-                  ) : (
-                    <Button 
-                      type="submit" 
-                      className="h-11 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 shadow-md ml-auto"
-                      disabled={isSigningUp}
-                      aria-busy={isSigningUp}
-                    >
-                      {isSigningUp ? 'Création…' : 'Créer mon compte'}
-                    </Button>
-                  )}
-                </div>
-              </form>
+                  <div className="flex justify-between pt-4">
+                    {signupStep > 0 && (
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={prevStep}
+                        className="h-11"
+                        disabled={isSigningUp}
+                      >
+                        Précédent
+                      </Button>
+                    )}
+                    
+                    {signupStep < 3 ? (
+                      <Button 
+                        type="button" 
+                        onClick={nextStep}
+                        className="h-11 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 shadow-md ml-auto"
+                        disabled={isSigningUp}
+                      >
+                        Suivant
+                      </Button>
+                    ) : (
+                      <Button 
+                        type="button" 
+                        onClick={nextStep}
+                        className="h-11 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 shadow-md ml-auto"
+                        disabled={isSigningUp}
+                      >
+                        {isSigningUp ? 'Création…' : 'Créer mon compte'}
+                      </Button>
+                    )}
+                  </div>
+                </form>
+              )}
             </div>
           )}
           

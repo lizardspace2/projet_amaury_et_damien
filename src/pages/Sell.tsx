@@ -21,6 +21,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -221,6 +222,17 @@ const Step3 = ({ formData, handleInputChange }: { formData: any; handleInputChan
   </div>
 );
 
+const Step4 = ({ email }: { email: string }) => (
+  <div className="space-y-4">
+    <Alert className="border-amber-300 bg-amber-50 text-amber-900">
+      <AlertTitle className="font-semibold">Confirmez votre adresse email</AlertTitle>
+      <AlertDescription>
+        Un email de confirmation a été envoyé à <strong>{email}</strong>. Veuillez ouvrir votre boîte mail et cliquer sur le lien pour activer votre compte.
+      </AlertDescription>
+    </Alert>
+  </div>
+);
+
 const SellPage = () => {
   const steps = [
     { number: 1, label: "Authentification" },
@@ -313,6 +325,7 @@ const SellPage = () => {
     });
     setSignupStep(0);
     setShowTypeSelection(false);
+    setSignupNoticeEmail(null);
   };
 
   const handleTypeSelection = (userType: string) => {
@@ -321,8 +334,25 @@ const SellPage = () => {
     setSignupStep(0);
   };
 
-  const nextStep = () => {
-    setSignupStep(prev => prev + 1);
+  const [signupNoticeEmail, setSignupNoticeEmail] = useState<string | null>(null);
+  const [isSigningUp, setIsSigningUp] = useState(false);
+
+  const nextStep = async () => {
+    // Si on est à l'étape 3 (réseaux sociaux), créer le compte avant de passer à l'étape suivante (confirmation)
+    if (signupStep === 3) {
+      if (isSigningUp) return; // ignore double submit
+      setIsSigningUp(true);
+      const { email, password, ...profileData } = authFormData;
+      const success = await signUpWithEmail(email, password, profileData);
+      if (success) {
+        setSignupNoticeEmail(email);
+        toast.success('Vérifiez votre boîte mail pour confirmer votre adresse.');
+        setSignupStep(prev => prev + 1); // Passer à l'étape de confirmation
+      }
+      setIsSigningUp(false);
+    } else {
+      setSignupStep(prev => prev + 1);
+    }
   };
 
   const prevStep = () => {
@@ -348,20 +378,9 @@ const SellPage = () => {
   const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    // Ne soumettre que si on est à la dernière étape (étape 2 = index 2)
-    if (signupStep !== 2) {
-      console.log('[handleEmailSignUp] Prevented submission: signupStep =', signupStep, 'expected 2');
-      return;
-    }
-    const { email, password, ...profileData } = authFormData;
-    const success = await signUpWithEmail(email, password, profileData);
-
-    if (success) {
-      // signUpWithEmail already creates/updates the profile via AuthContext
-      setIsAuthDialogOpen(false);
-      resetAuthForm();
-      toast.success("Compte créé ! Consultez votre boîte mail pour finaliser votre inscription.");
-    }
+    // Le formulaire ne devrait plus être soumis directement, la création se fait dans nextStep
+    // Mais on garde cette fonction au cas où
+    return;
   };
 
   const handleFinalSubmit = async (data: Partial<CreatePropertyInput>) => {
@@ -638,43 +657,52 @@ const SellPage = () => {
             </div>
           ) : (
             <div className="space-y-6">
-              <StepIndicator currentStep={signupStep + 1} totalSteps={3} />
+              <StepIndicator currentStep={signupStep + 1} totalSteps={4} />
               
-              <form onSubmit={handleEmailSignUp} className="space-y-4">
-                {signupStep === 0 && <Step1 formData={authFormData} handleInputChange={handleAuthInputChange} onEnterKey={nextStep} />}
-                {signupStep === 1 && <Step2 formData={authFormData} handleInputChange={handleAuthInputChange} setFormData={setAuthFormData} onEnterKey={nextStep} />}
-                {signupStep === 2 && <Step3 formData={authFormData} handleInputChange={handleAuthInputChange} />}
-                
-                <div className="flex justify-between pt-4">
-                  {signupStep > 0 && (
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      onClick={prevStep}
-                      className="h-11"
-                    >
-                      Précédent
-                    </Button>
-                  )}
+              {signupStep === 4 ? (
+                // Étape de confirmation (pas de formulaire)
+                <Step4 email={authFormData.email} />
+              ) : (
+                <form onSubmit={handleEmailSignUp} className="space-y-4">
+                  {signupStep === 1 && <Step1 formData={authFormData} handleInputChange={handleAuthInputChange} onEnterKey={nextStep} />}
+                  {signupStep === 2 && <Step2 formData={authFormData} handleInputChange={handleAuthInputChange} setFormData={setAuthFormData} onEnterKey={nextStep} />}
+                  {signupStep === 3 && <Step3 formData={authFormData} handleInputChange={handleAuthInputChange} />}
                   
-                  {signupStep < 2 ? (
-                    <Button 
-                      type="button" 
-                      onClick={nextStep}
-                      className="h-11 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 shadow-md ml-auto"
-                    >
-                      Suivant
-                    </Button>
-                  ) : (
-                    <Button 
-                      type="submit" 
-                      className="h-11 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 shadow-md ml-auto"
-                    >
-                      Créer mon compte
-                    </Button>
-                  )}
-                </div>
-              </form>
+                  <div className="flex justify-between pt-4">
+                    {signupStep > 0 && (
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={prevStep}
+                        className="h-11"
+                        disabled={isSigningUp}
+                      >
+                        Précédent
+                      </Button>
+                    )}
+                    
+                    {signupStep < 3 ? (
+                      <Button 
+                        type="button" 
+                        onClick={nextStep}
+                        className="h-11 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 shadow-md ml-auto"
+                        disabled={isSigningUp}
+                      >
+                        Suivant
+                      </Button>
+                    ) : (
+                      <Button 
+                        type="button" 
+                        onClick={nextStep}
+                        className="h-11 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 shadow-md ml-auto"
+                        disabled={isSigningUp}
+                      >
+                        {isSigningUp ? 'Création…' : 'Créer mon compte'}
+                      </Button>
+                    )}
+                  </div>
+                </form>
+              )}
             </div>
           )}
 

@@ -331,15 +331,20 @@ const Navbar = () => {
   // Invalidate and refetch profile queries when user changes
   useEffect(() => {
     if (user) {
-      console.log('[Navbar] User logged in, invalidating profile queries');
+      console.log('[Navbar] User logged in, invalidating profile queries for user:', user.id);
+      // Invalidate and refetch immediately
       queryClient.invalidateQueries({ queryKey: ['user-profile'] });
       queryClient.invalidateQueries({ queryKey: ['my-properties-monthly-count'] });
+      // Force refetch
+      queryClient.refetchQueries({ queryKey: ['user-profile'] });
+      queryClient.refetchQueries({ queryKey: ['my-properties-monthly-count'] });
     } else {
       // Clear queries when user logs out
+      console.log('[Navbar] User logged out, clearing profile queries');
       queryClient.removeQueries({ queryKey: ['user-profile'] });
       queryClient.removeQueries({ queryKey: ['my-properties-monthly-count'] });
     }
-  }, [user, queryClient]);
+  }, [user?.id, queryClient]); // Use user?.id instead of user to avoid unnecessary re-renders
 
   // Load profile using React Query for better caching and automatic updates
   const { data: profile } = useQuery({

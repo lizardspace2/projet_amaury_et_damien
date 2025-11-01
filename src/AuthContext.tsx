@@ -75,7 +75,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, newSession) => {
-        console.log('[AuthContext] Auth state changed:', event, { hasSession: !!newSession });
+        console.log('[AuthContext] Auth state changed:', event, { 
+          hasSession: !!newSession,
+          userId: newSession?.user?.id,
+          email: newSession?.user?.email 
+        });
         
         if (!mounted) return;
 
@@ -84,43 +88,48 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           console.log('[AuthContext] User signed out, clearing state');
           setSession(null);
           setUser(null);
+          setLoading(false);
           return;
         }
 
-        // Always verify session with getSession() for reliability
-        // This ensures we don't lose the session on route changes or other events
+        // For SIGNED_IN or TOKEN_REFRESHED, update state immediately
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          if (newSession) {
+            console.log('[AuthContext] User signed in/refreshed, updating state with newSession');
+            setSession(newSession);
+            setUser(newSession.user ?? null);
+            setLoading(false);
+            return;
+          }
+        }
+
+        // For other events, verify session with getSession() for reliability
         try {
           const { data: { session: verifiedSession }, error } = await supabase.auth.getSession();
           
           if (error) {
             console.error('[AuthContext] Error getting session during state change:', error);
             // Only clear if it's truly a session-related error
-            // Don't clear on network errors or other transient issues
             if (error.message?.includes('session') || error.message?.includes('token')) {
               setSession(null);
               setUser(null);
+              setLoading(false);
             }
             return;
           }
 
-          // Always update with verified session if it exists
+          // Update with verified session
           if (verifiedSession) {
             console.log('[AuthContext] Session verified, updating state');
             setSession(verifiedSession);
             setUser(verifiedSession.user ?? null);
           } else if (newSession) {
-            // Fallback to newSession if verified session is null but newSession exists
+            // Fallback to newSession
             console.log('[AuthContext] Using newSession as fallback');
             setSession(newSession);
             setUser(newSession.user ?? null);
-          } else {
-            // Both are null - only clear if this is an explicit sign-out event
-            // For other events (like INITIAL_SESSION when no session exists), don't clear
-            // This prevents losing session on route changes
-            if (event !== 'INITIAL_SESSION') {
-              console.log('[AuthContext] No session found for event:', event, '- keeping current state');
-            }
           }
+          setLoading(false);
         } catch (err) {
           console.error('[AuthContext] Error verifying session after state change:', err);
           // Fallback to newSession if verification fails
@@ -128,7 +137,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setSession(newSession);
             setUser(newSession.user ?? null);
           }
-          // Don't clear state on verification errors - keep current session
+          setLoading(false);
         }
       }
     );
@@ -141,7 +150,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signIn = async (email: string, password: string): Promise<boolean> => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
@@ -149,12 +158,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (error) {
         console.error('[AuthContext] Sign in error:', error);
         toast.error("Échec de la connexion : " + error.message);
-        // State will be updated by onAuthStateChange listener (or stay null if error)
         return false;
+      }
+
+      // Update state immediately after successful sign in
+      if (data.session) {
+        console.log('[AuthContext] Sign in successful, updating state immediately');
+        setSession(data.session);
+        setUser(data.session.user ?? null);
       }
       
       toast.success("Connexion réussie");
-      // State will be updated by onAuthStateChange listener
+      // State will also be updated by onAuthStateChange listener for consistency
       return true;
     } catch (error) {
       console.error('[AuthContext] Sign in exception:', error);

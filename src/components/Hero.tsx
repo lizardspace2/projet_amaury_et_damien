@@ -15,8 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import Autoplay from "embla-carousel-autoplay";
-import { signInWithEmail, signUpWithEmail } from "@/lib/api";
-import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/AuthContext";
 import { toast } from "sonner";
 import { Building, Truck, PlusCircle } from "lucide-react";
 
@@ -193,6 +192,7 @@ const Step3 = ({ formData, handleInputChange }: { formData: any; handleInputChan
 
 const Hero = () => {
   const navigate = useNavigate();
+  const { signIn, signUp } = useAuth();
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
   const [isPublishDialogOpen, setIsPublishDialogOpen] = useState(false);
   const [selectedUserType, setSelectedUserType] = useState<string>('');
@@ -259,11 +259,10 @@ const Hero = () => {
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const success = await signInWithEmail(formData.email, formData.password);
+    const success = await signIn(formData.email, formData.password);
     if (success) {
       setIsAuthDialogOpen(false);
       resetForm();
-      toast.success('Connecté avec succès');
     }
   };
 
@@ -272,7 +271,7 @@ const Hero = () => {
     if (isSigningUp) return;
     setIsSigningUp(true);
     const { email, password, ...profileData } = formData;
-    const success = await signUpWithEmail(email, password, {
+    const success = await signUp(email, password, {
       user_type: profileData.user_type,
       phone: profileData.phone,
       address: profileData.address,
@@ -284,7 +283,6 @@ const Hero = () => {
     });
     if (success) {
       setSignupNoticeEmail(email);
-      toast.success('Vérifiez votre boîte mail pour confirmer votre adresse.');
     }
     setIsSigningUp(false);
   };

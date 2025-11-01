@@ -25,7 +25,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { signInWithEmail, signUpWithEmail } from "@/lib/api";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 
@@ -243,7 +242,7 @@ const SellPage = () => {
     { number: 6, label: "Publier" }
   ];
 
-  const { user } = useAuth();
+  const { user, signIn, signUp } = useAuth();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<Partial<CreatePropertyInput>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -343,10 +342,9 @@ const SellPage = () => {
       if (isSigningUp) return; // ignore double submit
       setIsSigningUp(true);
       const { email, password, ...profileData } = authFormData;
-      const success = await signUpWithEmail(email, password, profileData);
+      const success = await signUp(email, password, profileData);
       if (success) {
         setSignupNoticeEmail(email);
-        toast.success('Vérifiez votre boîte mail pour confirmer votre adresse.');
         setSignupStep(4); // Passer directement à l'étape de confirmation (étape 4)
       }
       setIsSigningUp(false);
@@ -366,12 +364,11 @@ const SellPage = () => {
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const success = await signInWithEmail(authFormData.email, authFormData.password);
+    const success = await signIn(authFormData.email, authFormData.password);
 
     if (success) {
       setIsAuthDialogOpen(false);
       resetAuthForm();
-      toast.success("Connexion réussie");
     }
   };
 

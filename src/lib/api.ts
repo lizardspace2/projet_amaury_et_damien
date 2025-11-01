@@ -6,6 +6,7 @@ import { getApiBase } from "@/lib/utils";
 // ===== AUTHENTICATION & USER PROFILES =====
 
 /**
+ * @deprecated Utilisez useAuth().signIn() depuis AuthContext à la place
  * Authentifie un utilisateur avec email et mot de passe
  */
 export const signInWithEmail = async (email: string, password: string) => {
@@ -29,8 +30,9 @@ export const signInWithEmail = async (email: string, password: string) => {
 };
 
 /**
- * CrÃ©e un nouveau compte utilisateur avec email et mot de passe
- * et crÃ©e automatiquement un profil associÃ©
+ * @deprecated Utilisez useAuth().signUp() depuis AuthContext à la place
+ * Crée un nouveau compte utilisateur avec email et mot de passe
+ * et crée automatiquement un profil associé
  */
 export const signUpWithEmail = async (
   email: string, 
@@ -151,7 +153,8 @@ export const signUpWithEmail = async (
 };
 
 /**
- * DÃ©connecte l'utilisateur
+ * @deprecated Utilisez useAuth().signOut() depuis AuthContext à la place
+ * Déconnecte l'utilisateur
  */
 export const signOut = async () => {
   try {

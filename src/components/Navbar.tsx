@@ -11,7 +11,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { signInWithEmail, signUpWithEmail, signOut } from '@/lib/api';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/AuthContext';
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuContent, NavigationMenuLink } from '@/components/ui/navigation-menu';
@@ -419,11 +418,10 @@ const Navbar = () => {
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const success = await signInWithEmail(formData.email, formData.password);
+    const success = await signIn(formData.email, formData.password);
     if (success) {
       setIsAuthDialogOpen(false);
       resetForm();
-      toast.success('Connecté avec succès');
     }
   };
 
@@ -441,20 +439,14 @@ const Navbar = () => {
       return;
     }
     setIsLoggingOut(true);
-    console.log('[Navbar] handleLogout: click -> calling signOut');
     try {
-      await authSignOut();
-      // Also call the auth module signOut for cleanup
       await signOut();
       setIsMenuOpen(false);
       setIsAuthDialogOpen(false);
-      toast.success('Déconnecté avec succès');
       // Redirect to home after logout
-      console.log('[Navbar] handleLogout: navigating to /');
       navigate('/');
     } catch (e) {
       console.error('[Navbar] handleLogout: exception while signing out', e);
-      toast.error('Erreur lors de la déconnexion');
     } finally {
       setIsLoggingOut(false);
     }
@@ -477,10 +469,9 @@ const Navbar = () => {
       if (isSigningUp) return; // ignore double submit
       setIsSigningUp(true);
       const { email, password, ...profileData } = formData;
-      const success = await signUpWithEmail(email, password, profileData);
+      const success = await signUp(email, password, profileData);
       if (success) {
         setSignupNoticeEmail(email);
-        toast.success('Vérifiez votre boîte mail pour confirmer votre adresse.');
         setSignupStep(4); // Passer directement à l'étape de confirmation (étape 4)
       }
       setIsSigningUp(false);

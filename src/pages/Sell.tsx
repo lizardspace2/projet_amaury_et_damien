@@ -657,7 +657,7 @@ const SellPage = () => {
             </div>
           ) : (
             <div className="space-y-6">
-              <StepIndicator currentStep={signupStep + 1} totalSteps={4} />
+              <StepIndicator currentStep={signupStep} totalSteps={4} />
               
               {signupStep === 4 ? (
                 // Étape de confirmation (pas de formulaire)

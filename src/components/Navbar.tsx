@@ -1089,14 +1089,6 @@ const Navbar = () => {
                 : 'Rejoignez Trocadimmo et commencez dès aujourd\'hui.'}
             </DialogDescription>
           </DialogHeader>
-          {signupNoticeEmail && (
-            <Alert className="border-amber-300 bg-amber-50 text-amber-900">
-              <AlertTitle className="font-semibold">Confirmez votre adresse email</AlertTitle>
-              <AlertDescription>
-                Un email de confirmation a été envoyé à <strong>{signupNoticeEmail}</strong>. Veuillez ouvrir votre boîte mail et cliquer sur le lien pour activer votre compte.
-              </AlertDescription>
-            </Alert>
-          )}
           
           {authMode === 'login' ? (
             <form onSubmit={handleEmailLogin} className="space-y-4">
@@ -1110,7 +1102,6 @@ const Navbar = () => {
             </form>
           ) : !showTypeSelection ? (
             <div className="space-y-4">
-              <StepIndicator currentStep={1} totalSteps={4} />
               <div className="grid grid-cols-1 gap-3">
                 <Button
                   type="button"

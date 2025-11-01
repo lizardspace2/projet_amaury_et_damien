@@ -125,7 +125,7 @@ const SubscriptionPage: React.FC = () => {
     <div className="py-4">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-slate-800 mb-2">Mon abonnement</h1>
-        <p className="text-slate-600">Gérez votre offre et vos limites d’annonces</p>
+        <p className="text-slate-600">Publier des annonces de services annexes</p>
       </div>
 
       <div className="grid grid-cols-1 gap-6">
@@ -136,15 +136,11 @@ const SubscriptionPage: React.FC = () => {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <p><strong>Type de compte:</strong> {profile?.user_type || '—'}</p>
-              <div className="mt-3 pt-3 border-t">
-                <p className="text-sm font-semibold text-slate-700 mb-2">Annonces immobilières</p>
-                <p><strong>Quota actuel:</strong> {subscriptionInfo.maxListings} annonces</p>
-                <p><strong>Annonces publiées ce mois-ci:</strong> {monthlyCount ?? 0}</p>
-              </div>
+              
               {(profile?.user_type === 'Professionnelle' || profile?.user_type === 'Partenaire') && (
                 <div className="mt-3 pt-3 border-t">
                   <p className="text-sm font-semibold text-slate-700 mb-2">Services annexes</p>
-                  <p><strong>Quota actuel:</strong> {subscriptionInfo.maxAncillaryServices} services</p>
+                  <p><strong>Quota actuel:</strong> {subscriptionInfo.maxAncillaryServices} annonces de services annexes</p>
                   <p><strong>Services publiés ce mois-ci:</strong> {monthlyAncillaryCount ?? 0}</p>
                 </div>
               )}
@@ -190,7 +186,7 @@ const SubscriptionPage: React.FC = () => {
                   disabled={isStarting}
                   className="bg-teal-600 hover:bg-teal-700"
                 >
-                  Passer à Pro+ (500 annonces + 20 services)
+                  Passer à Pro+ 
                 </Button>
               )}
               {(subscriptionInfo.stripeCustomerId || profile?.stripe_subscription_status) && (

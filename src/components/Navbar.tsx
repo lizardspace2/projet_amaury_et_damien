@@ -803,10 +803,6 @@ const Navbar = () => {
                   <div className="flex flex-col gap-1">
                     <div className="p-2 rounded-md bg-amber-50 border border-amber-200 mb-1">
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs text-amber-900">Annonces immobilières</span>
-                        <Badge variant="secondary" className="text-xs">{monthlyCount ?? 0}/{profileMaxListings ?? 1000}</Badge>
-                      </div>
-                      <div className="flex items-center justify-between mb-1">
                         <span className="text-xs text-orange-900">Services annexes</span>
                         {subscriptionInfo.maxAncillaryServices > 0 ? (
                           <Badge variant="secondary" className="text-xs">{monthlyAncillaryCount ?? 0}/{subscriptionInfo.maxAncillaryServices}</Badge>
@@ -869,18 +865,8 @@ const Navbar = () => {
             )}
             {isLoggedIn && (userType === 'Professionnelle' || userType === 'Partenaire') && (
               <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-xs">
-                  {monthlyCount}/{profileMaxListings ?? 1000}
-                </Badge>
-                {subscriptionInfo.maxAncillaryServices > 0 ? (
-                  <Badge variant="outline" className="text-xs bg-orange-50 text-orange-700 border-orange-200">
-                    {monthlyAncillaryCount}/{subscriptionInfo.maxAncillaryServices}
-                  </Badge>
-                ) : (
-                  <Badge variant="outline" className="text-xs bg-red-50 text-red-700 border-red-200">
-                    Abonnement requis
-                  </Badge>
-                )}
+                
+                
                 <Button asChild variant="outline" className="h-9">
                   <Link to="/account/subscription">Abonnement</Link>
                 </Button>
@@ -894,12 +880,7 @@ const Navbar = () => {
               Publier
               <Badge variant="secondary" className="ml-1 bg-white/20 text-white border-0 text-xs">
                 Gratuit
-              </Badge>
-              {isLoggedIn && userType === 'Professionnelle' && (
-                <Badge variant="outline" className="ml-2 bg-white/90 text-slate-800 border-slate-300 text-xs">
-                  {Math.max(0, (profileMaxListings ?? 1000) - (monthlyCount ?? 0))}/{profileMaxListings ?? 1000}
-                </Badge>
-              )}
+              </Badge>        
             </Button>
           </div>
         </div>
@@ -998,10 +979,6 @@ const Navbar = () => {
                 </div>
               </div>
               <div className="p-2 rounded-md bg-amber-50 border border-amber-200">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs text-amber-900">Annonces immobilières</span>
-                  <Badge variant="secondary" className="text-xs">{monthlyCount ?? 0}/{profileMaxListings ?? 1000}</Badge>
-                </div>
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs text-orange-900">Services annexes</span>
                   {subscriptionInfo.maxAncillaryServices > 0 ? (

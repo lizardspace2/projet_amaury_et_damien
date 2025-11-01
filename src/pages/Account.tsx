@@ -91,24 +91,7 @@ const Account = () => {
             )}
             {(profile?.user_type === 'Professionnelle' || profile?.user_type === 'Partenaire') && (
               <>
-                <div className="mt-2">
-                  <p className="text-sm text-amber-900">Quota d'annonces immobilières mensuel</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Badge variant="secondary">{monthlyCount}/{subscriptionInfo.maxListings}</Badge>
-                    {subscriptionInfo.isSubscribed && (
-                      <Badge variant="outline" className="bg-teal-50 text-teal-700 border-teal-200">
-                        Pro+ Actif
-                      </Badge>
-                    )}
-                    <a href="/account/subscription" className="text-sm text-amber-700 hover:underline">Gérer l'abonnement</a>
-                  </div>
-                  <div className="mt-2 max-w-xs">
-                    <Progress value={Math.min(100, Math.round((monthlyCount / subscriptionInfo.maxListings) * 100))} />
-                  </div>
-                  {subscriptionInfo.isExpired && (
-                    <p className="text-xs text-red-600 mt-1">⚠️ Votre abonnement a expiré</p>
-                  )}
-                </div>
+                
                 <div className="mt-3">
                   <p className="text-sm text-orange-900">Quota de services annexes mensuel</p>
                   {subscriptionInfo.isSubscribed && subscriptionInfo.maxAncillaryServices > 0 ? (

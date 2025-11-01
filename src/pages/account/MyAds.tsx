@@ -241,7 +241,7 @@ const startProUpgradeCheckout = async (): Promise<void> => {
 const MyAds: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { user, monthlyCount } = useAuth();
+  const { user, monthlyCount, monthlyAncillaryCount, subscriptionInfo } = useAuth();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [propertyToDelete, setPropertyToDelete] = useState<string | null>(null);
 
@@ -333,28 +333,66 @@ const MyAds: React.FC = () => {
 
   return (
     <div className="py-4">
-      {profile?.user_type === 'Professionnelle' && (
-        <div className="mb-6 rounded-md border border-amber-200 p-4 bg-amber-50">
-          <div className="flex items-center justify-between gap-3">
-            <div className="w-full">
-              <p className="font-semibold text-amber-900">Quota d'annonces mensuel</p>
-              <div className="flex items-center gap-2 mt-1">
-                <Badge variant="secondary">{monthlyCount ?? 0}/{profile?.max_listings ?? 50}</Badge>
-                <span className="text-sm text-amber-700">
-                  {Math.max(0, (profile?.max_listings ?? 50) - (monthlyCount ?? 0))} restantes
-                </span>
+      {(profile?.user_type === 'Professionnelle' || profile?.user_type === 'Partenaire') && (
+        <>
+          <div className="mb-6 rounded-md border border-amber-200 p-4 bg-amber-50">
+            <div className="flex items-center justify-between gap-3">
+              <div className="w-full">
+                <p className="font-semibold text-amber-900">Quota d'annonces immobilières mensuel</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <Badge variant="secondary">{monthlyCount ?? 0}/{profile?.max_listings ?? 50}</Badge>
+                  {subscriptionInfo.isSubscribed && (
+                    <Badge variant="outline" className="bg-teal-50 text-teal-700 border-teal-200">
+                      Pro+ Actif
+                    </Badge>
+                  )}
+                  <span className="text-sm text-amber-700">
+                    {Math.max(0, (profile?.max_listings ?? 50) - (monthlyCount ?? 0))} restantes
+                  </span>
+                </div>
+                <div className="mt-2 max-w-sm">
+                  <Progress value={Math.min(100, Math.round(((monthlyCount ?? 0) / (profile?.max_listings ?? 50)) * 100))} />
+                </div>
               </div>
-              <div className="mt-2 max-w-sm">
-                <Progress value={Math.min(100, Math.round(((monthlyCount ?? 0) / (profile?.max_listings ?? 50)) * 100))} />
-              </div>
+              {(profile?.max_listings ?? 50) < 500 && (
+                <Button onClick={async () => {
+                  try { await startProUpgradeCheckout(); } catch (e: any) { toast.error(e?.message || 'Impossible de démarrer le paiement'); }
+                }} className="bg-amber-600 hover:bg-amber-700 whitespace-nowrap">Passer à Pro+ (29,99 € / mois)</Button>
+              )}
             </div>
-            {(profile?.max_listings ?? 50) < 500 && (
-              <Button onClick={async () => {
-                try { await startProUpgradeCheckout(); } catch (e: any) { toast.error(e?.message || 'Impossible de démarrer le paiement'); }
-              }} className="bg-amber-600 hover:bg-amber-700 whitespace-nowrap">Passer à Pro+ (29,99 € / mois)</Button>
-            )}
           </div>
-        </div>
+          <div className="mb-6 rounded-md border border-orange-200 p-4 bg-orange-50">
+            <div className="flex items-center justify-between gap-3">
+              <div className="w-full">
+                <p className="font-semibold text-orange-900">Quota de services annexes mensuel</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <Badge variant="secondary">{monthlyAncillaryCount ?? 0}/{subscriptionInfo.maxAncillaryServices}</Badge>
+                  {subscriptionInfo.isSubscribed && (
+                    <Badge variant="outline" className="bg-teal-50 text-teal-700 border-teal-200">
+                      Pro+ Actif
+                    </Badge>
+                  )}
+                  <span className="text-sm text-orange-700">
+                    {Math.max(0, subscriptionInfo.maxAncillaryServices - (monthlyAncillaryCount ?? 0))} restantes
+                  </span>
+                </div>
+                <div className="mt-2 max-w-sm">
+                  <Progress value={Math.min(100, Math.round(((monthlyAncillaryCount ?? 0) / subscriptionInfo.maxAncillaryServices) * 100))} />
+                </div>
+                {!subscriptionInfo.isSubscribed && (
+                  <p className="text-sm text-orange-700 mt-1">
+                    Passez à Pro+ pour publier jusqu'à 20 services annexes par mois (29,99 € / mois).
+                  </p>
+                )}
+              </div>
+              {subscriptionInfo.maxAncillaryServices < 20 && (
+                <Button onClick={async () => {
+                  try { await startProUpgradeCheckout(); } catch (e: any) { toast.error(e?.message || 'Impossible de démarrer le paiement'); }
+                }} className="bg-orange-600 hover:bg-orange-700 whitespace-nowrap">Passer à Pro+ (29,99 € / mois)</Button>
+              )}
+            </div>
+          </div>
+        </>
       )}
       <Tabs defaultValue="properties" className="w-full">
         <TabsList className="grid w-full grid-cols-2">

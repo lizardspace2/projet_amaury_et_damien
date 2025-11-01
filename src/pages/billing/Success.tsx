@@ -7,7 +7,7 @@ const BillingSuccess: React.FC = () => {
     <div className="max-w-2xl mx-auto py-16 px-4 text-center">
       <h1 className="text-3xl font-bold text-slate-800 mb-4">Paiement confirmé</h1>
       <p className="text-slate-600 mb-8">
-        Merci ! Votre abonnement Pro+ est actif. Vous pouvez désormais publier jusqu'à 500 annonces.
+        Merci ! Votre abonnement Pro+ est actif. Vous pouvez désormais publier jusqu'à 500 annonces immobilières et 20 services annexes par mois.
       </p>
       <div className="flex justify-center gap-3">
         <Link to="/account/profile">

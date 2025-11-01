@@ -74,11 +74,12 @@ const StripePaiementCheckout: React.FC = () => {
 
           <div className="space-y-2">
             <p className="text-slate-600">
-              Accédez à l'abonnement Pro+ et publiez jusqu'à 500 annonces.
+              Accédez à l'abonnement Pro+ et augmentez vos limites de publication.
             </p>
             <ul className="list-disc list-inside text-slate-600 space-y-1">
               <li>Prix : 29,99€ / mois</li>
-              <li>Jusqu'à 500 annonces actives</li>
+              <li>Jusqu'à 500 annonces immobilières par mois</li>
+              <li>Jusqu'à 20 services annexes par mois</li>
               <li>Résiliation à tout moment</li>
             </ul>
           </div>

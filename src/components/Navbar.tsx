@@ -323,7 +323,7 @@ const Navbar = () => {
     twitter: '',
     facebook: ''
   });
-  const { user, signIn, signUp, signOut, monthlyCount } = useAuth();
+  const { user, signIn, signUp, signOut, monthlyCount, monthlyAncillaryCount, subscriptionInfo } = useAuth();
   const queryClient = useQueryClient();
   const isLoggedIn = !!user;
   const userEmail = user?.email || '';
@@ -802,9 +802,13 @@ const Navbar = () => {
                 <PopoverContent className="w-64 p-3" align="end">
                   <div className="flex flex-col gap-1">
                     <div className="p-2 rounded-md bg-amber-50 border border-amber-200 mb-1">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-amber-900">Déjà Publié ce mois</span>
-                        <Badge variant="secondary">{monthlyCount ?? 0}/{profileMaxListings ?? 50}</Badge>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs text-amber-900">Annonces immobilières</span>
+                        <Badge variant="secondary" className="text-xs">{monthlyCount ?? 0}/{profileMaxListings ?? 50}</Badge>
+                      </div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs text-orange-900">Services annexes</span>
+                        <Badge variant="secondary" className="text-xs">{monthlyAncillaryCount ?? 0}/{subscriptionInfo.maxAncillaryServices}</Badge>
                       </div>
                       <Button asChild variant="outline" size="sm" className="w-full mt-2 h-8">
                         <Link to="/account/subscription">Abonnement</Link>
@@ -859,10 +863,13 @@ const Navbar = () => {
                 </Button>
               </div>
             )}
-            {isLoggedIn && (
+            {isLoggedIn && (userType === 'Professionnelle' || userType === 'Partenaire') && (
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="text-xs">
                   {monthlyCount}/{profileMaxListings ?? 50}
+                </Badge>
+                <Badge variant="outline" className="text-xs bg-orange-50 text-orange-700 border-orange-200">
+                  {monthlyAncillaryCount}/{subscriptionInfo.maxAncillaryServices}
                 </Badge>
                 <Button asChild variant="outline" className="h-9">
                   <Link to="/account/subscription">Abonnement</Link>
@@ -981,9 +988,13 @@ const Navbar = () => {
                 </div>
               </div>
               <div className="p-2 rounded-md bg-amber-50 border border-amber-200">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-amber-900">Déjà Publié ce mois</span>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs text-amber-900">Annonces immobilières</span>
                   <Badge variant="secondary" className="text-xs">{monthlyCount ?? 0}/{profileMaxListings ?? 50}</Badge>
+                </div>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs text-orange-900">Services annexes</span>
+                  <Badge variant="secondary" className="text-xs">{monthlyAncillaryCount ?? 0}/{subscriptionInfo.maxAncillaryServices}</Badge>
                 </div>
                 <Button asChild variant="outline" size="sm" className="w-full mt-2 h-8" onClick={closeMobileMenu}>
                   <Link to="/account/subscription">Abonnement</Link>

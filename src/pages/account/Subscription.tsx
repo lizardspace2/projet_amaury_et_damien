@@ -56,7 +56,7 @@ const SubscriptionPage: React.FC = () => {
       window.removeEventListener('unhandledrejection', onUnhandled as any);
     };
   }, []);
-  const { user, monthlyCount, subscriptionInfo } = useAuth();
+  const { user, monthlyCount, monthlyAncillaryCount, subscriptionInfo } = useAuth();
   
   // Use custom hook for profile with specific fields
   const { data: profile } = useUserProfile<{ 
@@ -136,15 +136,27 @@ const SubscriptionPage: React.FC = () => {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <p><strong>Type de compte:</strong> {profile?.user_type || '—'}</p>
-              <p><strong>Quota actuel:</strong> {subscriptionInfo.maxListings} annonces</p>
-              <p><strong>Annonces publiées ce mois-ci:</strong> {monthlyCount ?? 0}</p>
-              <p><strong>Statut abonnement:</strong> {
-                subscriptionInfo.subscriptionStatus 
-                  ? subscriptionInfo.subscriptionStatus === 'active' 
-                    ? (subscriptionInfo.isExpired ? 'Expiré' : 'Actif ✅') 
-                    : subscriptionInfo.subscriptionStatus 
-                  : 'Non abonné'
-              }</p>
+              <div className="mt-3 pt-3 border-t">
+                <p className="text-sm font-semibold text-slate-700 mb-2">Annonces immobilières</p>
+                <p><strong>Quota actuel:</strong> {subscriptionInfo.maxListings} annonces</p>
+                <p><strong>Annonces publiées ce mois-ci:</strong> {monthlyCount ?? 0}</p>
+              </div>
+              {(profile?.user_type === 'Professionnelle' || profile?.user_type === 'Partenaire') && (
+                <div className="mt-3 pt-3 border-t">
+                  <p className="text-sm font-semibold text-slate-700 mb-2">Services annexes</p>
+                  <p><strong>Quota actuel:</strong> {subscriptionInfo.maxAncillaryServices} services</p>
+                  <p><strong>Services publiés ce mois-ci:</strong> {monthlyAncillaryCount ?? 0}</p>
+                </div>
+              )}
+              <div className="mt-3 pt-3 border-t">
+                <p><strong>Statut abonnement:</strong> {
+                  subscriptionInfo.subscriptionStatus 
+                    ? subscriptionInfo.subscriptionStatus === 'active' 
+                      ? (subscriptionInfo.isExpired ? 'Expiré' : 'Actif ✅') 
+                      : subscriptionInfo.subscriptionStatus 
+                    : 'Non abonné'
+                }</p>
+              </div>
               
               {subscriptionInfo.currentPeriodStart && subscriptionInfo.currentPeriodEnd && (
                 <div className="mt-3 pt-3 border-t">
@@ -178,7 +190,7 @@ const SubscriptionPage: React.FC = () => {
                   disabled={isStarting}
                   className="bg-teal-600 hover:bg-teal-700"
                 >
-                  Passer à Pro+ (jusqu'à 500)
+                  Passer à Pro+ (500 annonces + 20 services)
                 </Button>
               )}
               {(subscriptionInfo.stripeCustomerId || profile?.stripe_subscription_status) && (

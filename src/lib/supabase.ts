@@ -27,6 +27,7 @@ export type Database = {
           siret: string | null
           user_type: string | null
           max_listings: number
+          max_ancillary_services: number
           stripe_customer_id: string | null
           stripe_subscription_status: string | null
           stripe_subscription_id: string | null
@@ -49,6 +50,7 @@ export type Database = {
           siret?: string | null
           user_type?: string | null
           max_listings?: number
+          max_ancillary_services?: number
           stripe_customer_id?: string | null
           stripe_subscription_status?: string | null
           stripe_subscription_id?: string | null
@@ -71,6 +73,7 @@ export type Database = {
           siret?: string | null
           user_type?: string | null
           max_listings?: number
+          max_ancillary_services?: number
           stripe_customer_id?: string | null
           stripe_subscription_status?: string | null
           stripe_subscription_id?: string | null

@@ -326,6 +326,10 @@ const SellPage = () => {
 
   const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Ne soumettre que si on est à la dernière étape (étape 2 = index 2)
+    if (signupStep !== 2) {
+      return;
+    }
     const { email, password, ...profileData } = authFormData;
     const success = await signUpWithEmail(email, password, profileData);
 

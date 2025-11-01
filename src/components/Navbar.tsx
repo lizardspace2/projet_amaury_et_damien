@@ -318,7 +318,7 @@ const Navbar = () => {
     twitter: '',
     facebook: ''
   });
-  const { user, signOut: authSignOut } = useAuth();
+  const { user, signIn, signUp, signOut } = useAuth();
   const isLoggedIn = !!user;
   const userEmail = user?.email || '';
   const [scrolled, setScrolled] = useState(false);

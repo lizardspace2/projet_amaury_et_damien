@@ -4,6 +4,21 @@ import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 
 /**
+ * Interface pour les informations d'abonnement
+ */
+export interface SubscriptionInfo {
+  isSubscribed: boolean;
+  subscriptionStatus: string | null;
+  maxListings: number;
+  stripeCustomerId: string | null;
+  stripeSubscriptionId: string | null;
+  currentPeriodStart: string | null;
+  currentPeriodEnd: string | null;
+  cancelAtPeriodEnd: boolean;
+  isExpired: boolean; // Calculé : true si la date de fin est passée
+}
+
+/**
  * Interface du contexte d'authentification
  * 
  * - user: L'utilisateur actuellement connecté (null si non connecté)
@@ -11,6 +26,7 @@ import { toast } from 'sonner';
  * - loading: Indique si l'authentification est en cours de chargement initial
  * - initialized: Indique si l'authentification a été initialisée
  * - monthlyCount: Nombre d'annonces déjà publiées ce mois-ci (0 si non connecté)
+ * - subscriptionInfo: Informations sur l'abonnement de l'utilisateur
  * - signIn: Fonction pour connecter un utilisateur
  * - signUp: Fonction pour créer un nouveau compte
  * - signOut: Fonction pour déconnecter l'utilisateur
@@ -21,6 +37,7 @@ interface AuthContextType {
   loading: boolean;
   initialized: boolean;
   monthlyCount: number;
+  subscriptionInfo: SubscriptionInfo;
   signIn: (email: string, password: string) => Promise<boolean>;
   signUp: (
     email: string,
@@ -47,6 +64,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [initialized, setInitialized] = useState<boolean>(false);
   const [monthlyCount, setMonthlyCount] = useState<number>(0);
+  const [subscriptionInfo, setSubscriptionInfo] = useState<SubscriptionInfo>({
+    isSubscribed: false,
+    subscriptionStatus: null,
+    maxListings: 50,
+    stripeCustomerId: null,
+    stripeSubscriptionId: null,
+    currentPeriodStart: null,
+    currentPeriodEnd: null,
+    cancelAtPeriodEnd: false,
+    isExpired: false,
+  });
 
   useEffect(() => {
     let mounted = true;
@@ -162,40 +190,134 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  // Fetch monthly count when user changes
+  // Fetch monthly count and subscription info when user changes
   useEffect(() => {
-    const fetchMonthlyCount = async () => {
+    const fetchUserData = async () => {
       if (!user) {
         setMonthlyCount(0);
+        setSubscriptionInfo({
+          isSubscribed: false,
+          subscriptionStatus: null,
+          maxListings: 50,
+          stripeCustomerId: null,
+          stripeSubscriptionId: null,
+          currentPeriodStart: null,
+          currentPeriodEnd: null,
+          cancelAtPeriodEnd: false,
+          isExpired: false,
+        });
         return;
       }
 
       try {
+        // Fetch monthly count
         const now = new Date();
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-        const { count, error } = await supabase
+        const { count, error: countError } = await supabase
           .from('properties')
           .select('id', { count: 'exact', head: true })
           .eq('user_id', user.id)
           .gte('created_at', startOfMonth.toISOString())
           .lte('created_at', now.toISOString());
 
-        if (error) {
-          console.error('[AuthContext] Error fetching monthly count:', error);
+        if (countError) {
+          console.error('[AuthContext] Error fetching monthly count:', countError);
           setMonthlyCount(0);
         } else {
           setMonthlyCount(count || 0);
         }
+
+        // Fetch subscription info from profile
+        // Note: Some columns may not exist yet in the database, so we handle errors gracefully
+        // First, fetch the basic columns that definitely exist
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('stripe_subscription_status, max_listings, stripe_customer_id')
+          .eq('user_id', user.id)
+          .single();
+
+        if (profileError) {
+          console.error('[AuthContext] Error fetching subscription info:', profileError);
+          setSubscriptionInfo({
+            isSubscribed: false,
+            subscriptionStatus: null,
+            maxListings: 50,
+            stripeCustomerId: null,
+            stripeSubscriptionId: null,
+            currentPeriodStart: null,
+            currentPeriodEnd: null,
+            cancelAtPeriodEnd: false,
+            isExpired: false,
+          });
+        } else {
+          const status = profile?.stripe_subscription_status || null;
+          const isActive = status === 'active';
+          
+          // Try to fetch additional subscription fields if columns exist
+          let subscriptionId: string | null = null;
+          let periodStart: string | null = null;
+          let periodEnd: string | null = null;
+          let cancelAtPeriodEnd = false;
+          
+          try {
+            const { data: profileExtended } = await supabase
+              .from('profiles')
+              .select('stripe_subscription_id, subscription_current_period_start, subscription_current_period_end, subscription_cancel_at_period_end')
+              .eq('user_id', user.id)
+              .single();
+            
+            subscriptionId = (profileExtended as any)?.stripe_subscription_id || null;
+            periodStart = (profileExtended as any)?.subscription_current_period_start || null;
+            periodEnd = (profileExtended as any)?.subscription_current_period_end || null;
+            cancelAtPeriodEnd = (profileExtended as any)?.subscription_cancel_at_period_end || false;
+          } catch {
+            // Columns don't exist yet, that's ok - they will be added via migration
+            // Use null values as defaults
+          }
+          
+          const now = new Date();
+          
+          // Calculer si l'abonnement est expiré
+          const isExpired = periodEnd 
+            ? new Date(periodEnd) < now 
+            : false;
+          
+          // Si l'abonnement est expiré, considérer comme non actif
+          const actuallyActive = isActive && !isExpired;
+          
+          setSubscriptionInfo({
+            isSubscribed: actuallyActive,
+            subscriptionStatus: status,
+            maxListings: profile?.max_listings ?? 50,
+            stripeCustomerId: profile?.stripe_customer_id || null,
+            stripeSubscriptionId: subscriptionId,
+            currentPeriodStart: periodStart,
+            currentPeriodEnd: periodEnd,
+            cancelAtPeriodEnd,
+            isExpired,
+          });
+        }
       } catch (error) {
-        console.error('[AuthContext] Exception fetching monthly count:', error);
+        console.error('[AuthContext] Exception fetching user data:', error);
         setMonthlyCount(0);
+        setSubscriptionInfo({
+          isSubscribed: false,
+          subscriptionStatus: null,
+          maxListings: 50,
+          stripeCustomerId: null,
+          stripeSubscriptionId: null,
+          currentPeriodStart: null,
+          currentPeriodEnd: null,
+          cancelAtPeriodEnd: false,
+          isExpired: false,
+        });
       }
     };
 
-    fetchMonthlyCount();
+    fetchUserData();
 
-    // Refresh monthly count every minute to keep it up to date
-    const interval = setInterval(fetchMonthlyCount, 60000);
+    // Refresh data every minute to keep it up to date
+    const interval = setInterval(fetchUserData, 60000);
 
     return () => clearInterval(interval);
   }, [user]);
@@ -405,6 +527,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     loading,
     initialized,
     monthlyCount,
+    subscriptionInfo,
     signIn,
     signUp,
     signOut,

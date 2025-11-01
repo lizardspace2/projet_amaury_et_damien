@@ -13,3 +13,4 @@ WHERE COALESCE(stripe_subscription_status, 'canceled') <> 'active'
   AND (max_listings IS NULL OR max_listings < 50);
 
 
+

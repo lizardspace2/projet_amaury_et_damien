@@ -332,26 +332,7 @@ const SellPage = () => {
     const success = await signUpWithEmail(email, password, profileData);
 
     if (success) {
-      const { data: { user } } = await supabase.auth.getUser();
-
-      if (user) {
-        await supabase
-          .from('profiles')
-          .upsert({
-            user_id: user.id,
-            email: user.email,
-            user_type: authFormData.user_type,
-            phone: authFormData.phone,
-            address: authFormData.address,
-            profession: authFormData.profession,
-            siret: authFormData.siret,
-            instagram: authFormData.instagram,
-            twitter: authFormData.twitter,
-            facebook: authFormData.facebook,
-            updated_at: new Date().toISOString()
-          });
-      }
-
+      // signUpWithEmail already creates/updates the profile via AuthContext
       setIsAuthDialogOpen(false);
       resetAuthForm();
       toast.success("Compte créé ! Consultez votre boîte mail pour finaliser votre inscription.");

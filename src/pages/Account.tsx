@@ -13,7 +13,7 @@ import { useAuth } from "@/AuthContext";
 const Account = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, loading, initialized } = useAuth();
+  const { user, session, loading, initialized } = useAuth();
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -47,15 +47,13 @@ const Account = () => {
   const { data: monthlyCount = 0 } = useQuery({
     queryKey: ['my-properties-monthly-count'],
     queryFn: async () => {
-      // Use getSession() for more reliable check
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) return 0;
+      if (!user) return 0;
       const now = new Date();
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
       const { count } = await supabase
         .from('properties')
         .select('id', { count: 'exact', head: true })
-        .eq('user_id', session.user.id)
+        .eq('user_id', user.id)
         .gte('created_at', startOfMonth.toISOString())
         .lte('created_at', now.toISOString());
       return count || 0;

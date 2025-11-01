@@ -15,11 +15,13 @@ import AddPropertyStep2 from "@/components/property/add/AddPropertyStep2";
 import AddPropertyStep3 from "@/components/property/add/AddPropertyStep3";
 import AddPropertyStep4 from "@/components/property/add/AddPropertyStep4";
 import StepsIndicator from "@/components/property/add/StepsIndicator";
+import { useAuth } from '@/AuthContext';
 
 const EditProperty = () => {
   const { propertyId } = useParams<{ propertyId: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { user, loading: authLoading, initialized } = useAuth();
 
   const steps = [
     { number: 1, label: "Type d'annonce" },
@@ -31,6 +33,13 @@ const EditProperty = () => {
 
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<Partial<CreatePropertyInput>>({});
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (initialized && !authLoading && !user) {
+      navigate('/', { replace: true });
+    }
+  }, [user, authLoading, initialized, navigate]);
 
   const { data: fetchedProperty, isLoading, isError, error } = useQuery({
     queryKey: ['property', propertyId],
@@ -94,6 +103,27 @@ const EditProperty = () => {
 
     updatePropertyMutation.mutate({ propertyId, input: finalFormData });
   };
+
+  // Show loading state while checking authentication
+  if (authLoading || !initialized) {
+    return (
+      <div>
+        <Navbar />
+        <div className="container py-8">
+          <div className="flex justify-center items-center min-h-[400px]">
+            <Loader2 className="h-8 w-8 animate-spin mr-2" />
+            <p>Chargement...</p>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Don't render content if not authenticated (will redirect)
+  if (!user) {
+    return null;
+  }
 
   if (isLoading) {
     return (

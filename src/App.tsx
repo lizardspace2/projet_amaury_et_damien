@@ -36,6 +36,7 @@ import MyAds from "./pages/account/MyAds"; // Import MyAds
 import Subscription from "./pages/account/Subscription";
 import BillingSuccess from "./pages/billing/Success";
 import BillingCancel from "./pages/billing/Cancel";
+import StripePaiementCheckout from "./pages/subscription/StripePaiementCheckout";
 import Resources from "./pages/Resources"; // Import Resources
 import { CurrencyProvider } from './CurrencyContext';
 import { AuthProvider } from './AuthContext';
@@ -114,6 +115,7 @@ const App = () => {
                 </Route>
                 <Route path="/billing/success" element={<BillingSuccess />} />
                 <Route path="/billing/cancel" element={<BillingCancel />} />
+                <Route path="/subscription/stripe_paiement_checkout" element={<StripePaiementCheckout />} />
                 <Route path="/verification-error" element={<VerificationError />} />
                 <Route path="/edit-property/:propertyId" element={
                   <Wrapper apiKey={apiKey} libraries={["places"]}>

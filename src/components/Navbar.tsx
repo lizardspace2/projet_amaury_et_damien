@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/AuthContext';
+import { useQuery } from '@tanstack/react-query';
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuContent, NavigationMenuLink } from '@/components/ui/navigation-menu';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -322,56 +323,49 @@ const Navbar = () => {
   const isLoggedIn = !!user;
   const userEmail = user?.email || '';
   const [scrolled, setScrolled] = useState(false);
-  const [profileMaxListings, setProfileMaxListings] = useState<number | null>(null);
-  const [userType, setUserType] = useState<string | null>(null);
-  const [monthlyCount, setMonthlyCount] = useState<number>(0);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Load profile and monthly count when user changes
-  useEffect(() => {
-    const loadProfileData = async () => {
-      if (!user) {
-        setProfileMaxListings(null);
-        setUserType(null);
-        setMonthlyCount(0);
-        return;
-      }
+  // Load profile using React Query for better caching and automatic updates
+  const { data: profile } = useQuery({
+    queryKey: ['user-profile'],
+    queryFn: async () => {
+      if (!user) return null;
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+    staleTime: 0 // Consider data stale immediately, so it refetches when user changes
+  });
 
-      try {
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('user_id', user.id)
-          .single();
-        if (profileError) {
-          console.error('[Navbar] profiles fetch error', profileError);
-        } else {
-          setProfileMaxListings((profile as any)?.max_listings ?? 50);
-          setUserType((profile as any)?.user_type ?? null);
-        }
+  // Load monthly count using React Query
+  const { data: monthlyCount = 0 } = useQuery({
+    queryKey: ['my-properties-monthly-count'],
+    queryFn: async () => {
+      if (!user) return 0;
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const { count, error } = await supabase
+        .from('properties')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .gte('created_at', startOfMonth.toISOString())
+        .lte('created_at', now.toISOString());
+      if (error) return 0;
+      return count || 0;
+    },
+    enabled: !!user
+  });
 
-        const now = new Date();
-        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-        const { count, error: countError } = await supabase
-          .from('properties')
-          .select('id', { count: 'exact', head: true })
-          .eq('user_id', user.id)
-          .gte('created_at', startOfMonth.toISOString())
-          .lte('created_at', now.toISOString());
-        if (countError) {
-          console.error('[Navbar] properties count error', countError);
-        } else {
-          setMonthlyCount(count || 0);
-        }
-      } catch (err) {
-        console.error('[Navbar] loadProfileData failed', err);
-      }
-    };
-
-    loadProfileData();
-  }, [user]);
+  // Extract values from profile
+  const userType = profile?.user_type ?? null;
+  const profileMaxListings = profile?.max_listings ?? 50;
 
   const resetForm = useCallback(() => {
     setFormData({ 
@@ -886,7 +880,7 @@ const Navbar = () => {
               <Badge variant="secondary" className="ml-1 bg-white/20 text-white border-0 text-xs">
                 Gratuit
               </Badge>
-              {(() => { const show = isLoggedIn && userType === 'Professionnelle'; console.log('[Navbar] render.desktop.publishBadge show=', show, 'userType=', userType); return show; })() && (
+              {isLoggedIn && userType === 'Professionnelle' && (
                 <Badge variant="outline" className="ml-2 bg-white/90 text-slate-800 border-slate-300 text-xs">
                   {Math.max(0, (profileMaxListings ?? 50) - (monthlyCount ?? 0))}/{profileMaxListings ?? 50}
                 </Badge>

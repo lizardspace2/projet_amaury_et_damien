@@ -8,6 +8,33 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY as string
 );
 
+function getBaseUrl(req: VercelRequest): string {
+  // Try multiple sources for the base URL
+  let appBaseUrl = process.env.APP_BASE_URL || process.env.VERCEL_URL || '';
+  
+  // Fallback to request headers if env vars are not set
+  if (!appBaseUrl || appBaseUrl.trim().length === 0) {
+    const host = req.headers.host || req.headers['x-forwarded-host'];
+    if (host) {
+      appBaseUrl = host;
+    }
+  }
+  
+  if (!appBaseUrl || appBaseUrl.trim().length === 0) {
+    throw new Error('APP_BASE_URL or VERCEL_URL environment variable is not set, and cannot determine host from request');
+  }
+  
+  // Remove any existing protocol if present
+  const cleanUrl = appBaseUrl.replace(/^https?:\/\//, '').trim();
+  
+  // Ensure we have a valid domain
+  if (!cleanUrl || cleanUrl.length === 0) {
+    throw new Error('Invalid base URL configuration');
+  }
+  
+  return cleanUrl;
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
@@ -34,7 +61,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .eq('user_id', userId);
     }
 
-    const returnUrl = `https://${process.env.APP_BASE_URL || process.env.VERCEL_URL}`;
+    const baseUrl = getBaseUrl(req);
+    const returnUrl = `https://${baseUrl}`;
     const session = await stripe.billingPortal.sessions.create({
       customer: customerId!,
       return_url: returnUrl,

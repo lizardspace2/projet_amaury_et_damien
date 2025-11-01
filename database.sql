@@ -184,3 +184,161 @@ CREATE TABLE public.property_images (
   CONSTRAINT property_images_pkey PRIMARY KEY (id),
   CONSTRAINT property_images_property_id_fkey FOREIGN KEY (property_id) REFERENCES public.properties(id)
 );
+
+-- Enable Row Level Security
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.properties ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.ancillary_services ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.property_images ENABLE ROW LEVEL SECURITY;
+
+-- ===== PROFILES POLICIES =====
+
+-- Allow users to view their own profile
+CREATE POLICY "Users can view their own profile"
+  ON public.profiles FOR SELECT
+  USING (auth.uid() = user_id);
+
+-- Allow users to insert their own profile
+CREATE POLICY "Users can insert their own profile"
+  ON public.profiles FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+-- Allow users to update their own profile
+CREATE POLICY "Users can update their own profile"
+  ON public.profiles FOR UPDATE
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+-- ===== PROPERTIES POLICIES =====
+
+-- Allow anyone to view properties (public listings)
+CREATE POLICY "Properties are viewable by everyone"
+  ON public.properties FOR SELECT
+  USING (true);
+
+-- Allow authenticated users to insert their own properties
+CREATE POLICY "Users can insert their own properties"
+  ON public.properties FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+-- Allow users to update their own properties
+CREATE POLICY "Users can update their own properties"
+  ON public.properties FOR UPDATE
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+-- Allow users to delete their own properties
+CREATE POLICY "Users can delete their own properties"
+  ON public.properties FOR DELETE
+  USING (auth.uid() = user_id);
+
+-- ===== ANCILLARY SERVICES POLICIES =====
+
+-- Allow users to view ancillary services
+CREATE POLICY "Ancillary services are viewable by everyone"
+  ON public.ancillary_services FOR SELECT
+  USING (true);
+
+-- Allow authenticated users to insert ancillary services
+CREATE POLICY "Users can insert ancillary services"
+  ON public.ancillary_services FOR INSERT
+  WITH CHECK (auth.uid() = requested_by OR auth.uid() IS NOT NULL);
+
+-- Allow users to update their own ancillary services
+CREATE POLICY "Users can update their own ancillary services"
+  ON public.ancillary_services FOR UPDATE
+  USING (auth.uid() = requested_by)
+  WITH CHECK (auth.uid() = requested_by);
+
+-- Allow users to delete their own ancillary services
+CREATE POLICY "Users can delete their own ancillary services"
+  ON public.ancillary_services FOR DELETE
+  USING (auth.uid() = requested_by);
+
+-- ===== PROPERTY IMAGES POLICIES =====
+
+-- Allow anyone to view property images
+CREATE POLICY "Property images are viewable by everyone"
+  ON public.property_images FOR SELECT
+  USING (true);
+
+-- Allow authenticated users to insert property images for their own properties
+CREATE POLICY "Users can insert images for their own properties"
+  ON public.property_images FOR INSERT
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.properties
+      WHERE properties.id = property_images.property_id
+      AND properties.user_id = auth.uid()
+    )
+  );
+
+-- Allow users to update images for their own properties
+CREATE POLICY "Users can update images for their own properties"
+  ON public.property_images FOR UPDATE
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.properties
+      WHERE properties.id = property_images.property_id
+      AND properties.user_id = auth.uid()
+    )
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.properties
+      WHERE properties.id = property_images.property_id
+      AND properties.user_id = auth.uid()
+    )
+  );
+
+-- Allow users to delete images for their own properties
+CREATE POLICY "Users can delete images for their own properties"
+  ON public.property_images FOR DELETE
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.properties
+      WHERE properties.id = property_images.property_id
+      AND properties.user_id = auth.uid()
+    )
+  );
+
+-- ===== STORAGE BUCKET POLICIES =====
+-- Note: These policies are for the Supabase Storage bucket 'property_images'
+-- They allow users to upload/delete files in their own folder (user_id/*)
+
+-- Allow authenticated users to view all images in the bucket
+CREATE POLICY "Anyone can view property images"
+  ON storage.objects FOR SELECT
+  USING (bucket_id = 'property_images');
+
+-- Allow authenticated users to upload images to their own folder
+CREATE POLICY "Users can upload images to their own folder"
+  ON storage.objects FOR INSERT
+  WITH CHECK (
+    bucket_id = 'property_images' 
+    AND auth.role() = 'authenticated'
+    AND (string_to_array(name, '/'))[1] = auth.uid()::text
+  );
+
+-- Allow authenticated users to update images in their own folder
+CREATE POLICY "Users can update images in their own folder"
+  ON storage.objects FOR UPDATE
+  USING (
+    bucket_id = 'property_images'
+    AND auth.role() = 'authenticated'
+    AND (string_to_array(name, '/'))[1] = auth.uid()::text
+  )
+  WITH CHECK (
+    bucket_id = 'property_images'
+    AND auth.role() = 'authenticated'
+    AND (string_to_array(name, '/'))[1] = auth.uid()::text
+  );
+
+-- Allow authenticated users to delete images from their own folder
+CREATE POLICY "Users can delete images from their own folder"
+  ON storage.objects FOR DELETE
+  USING (
+    bucket_id = 'property_images'
+    AND auth.role() = 'authenticated'
+    AND (string_to_array(name, '/'))[1] = auth.uid()::text
+  );

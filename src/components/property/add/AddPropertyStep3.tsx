@@ -12,7 +12,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
-
+import { PropertyType, ListingType, PropertyStatus, PropertyCondition, KitchenType } from "@/types/property";
 
 const amenities = [
   { id: "has_elevator", label: "Ascenseur" },
@@ -85,7 +85,29 @@ const rules = [
   { id: "allows_smoking", label: "Fumeurs autorisés" },
 ];
 
-import { CreatePropertyInput } from "@/lib/api";
+export type CreatePropertyInput = {
+  title?: string;
+  description?: string;
+  price?: number;
+  phone_number?: string;
+  cadastral_code?: string;
+  reference_number?: string;
+  property_type?: PropertyType;
+  listing_type?: ListingType;
+  status?: PropertyStatus;
+  condition?: PropertyCondition;
+  plan?: string;
+  address_street?: string;
+  address_city?: string;
+  address_district?: string;
+  lat?: number;
+  lng?: number;
+  beds?: number;
+  baths?: number;
+  m2?: number;
+  rooms?: number;
+  [key: string]: any;
+};
 
 const internetTvOptions = ["Internet", "Télévision par câble", "Télévision par satellite", "Ligne téléphonique"];
 

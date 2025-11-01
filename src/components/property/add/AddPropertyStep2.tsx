@@ -15,7 +15,32 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CreatePropertyInput } from '@/lib/api';
+import { PropertyType, ListingType, PropertyStatus, PropertyCondition, KitchenType } from "@/types/property";
+
+export type CreatePropertyInput = {
+  title?: string;
+  description?: string;
+  price?: number;
+  phone_number?: string;
+  cadastral_code?: string;
+  reference_number?: string;
+  property_type?: PropertyType;
+  listing_type?: ListingType;
+  status?: PropertyStatus;
+  condition?: PropertyCondition;
+  plan?: string;
+  address_street?: string;
+  address_city?: string;
+  address_district?: string;
+  lat?: number;
+  lng?: number;
+  beds?: number;
+  baths?: number;
+  m2?: number;
+  rooms?: number;
+  [key: string]: any;
+};
+
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
 import { supabase } from "@/lib/supabase";

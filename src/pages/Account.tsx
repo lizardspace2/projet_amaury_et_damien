@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { handleAuthError } from "@/lib/api";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Outlet } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -21,8 +20,14 @@ const Account = () => {
 
   useEffect(() => {
     // Check for auth errors in hash
-    if (location.hash) {
-      handleAuthError(location.hash);
+    if (location.hash && location.hash.includes('error=')) {
+      const params = new URLSearchParams(location.hash.substring(1));
+      const error = params.get('error');
+      const errorDescription = params.get('error_description');
+      
+      if (error === 'access_denied' && errorDescription?.includes('expired')) {
+        window.location.href = '/verification-error' + location.hash;
+      }
     }
   }, [location]);
 

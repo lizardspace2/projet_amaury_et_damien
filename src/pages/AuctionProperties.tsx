@@ -5,9 +5,65 @@ import PropertyCard from "@/components/PropertyCard";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useQuery } from "@tanstack/react-query";
-import { getProperties } from "@/lib/api";
-import { Property } from "@/types/property";
+import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
+import { Property, ListingType } from "@/types/property";
 import { useUserLikedProperties } from "@/hooks/useUserProfile";
+
+const transformProperty = (property: any): Property => {
+  const transformed = { ...property };
+  
+  if (typeof transformed.price === 'string') {
+    transformed.price = parseFloat(transformed.price) || 0;
+  }
+  
+  if (typeof transformed.m2 === 'string') {
+    transformed.m2 = parseFloat(transformed.m2) || 0;
+  }
+  
+  ['beds', 'baths', 'rooms', 'terrace_area', 'ceiling_height', 'floor_level', 
+   'total_floors', 'year_built', 'parking_box', 'nombre_etages_immeuble', 
+   'nombre_photos', 'dpe_consommation', 'ges_emission', 'price_per_m2',
+   'frais_agence', 'charges_mensuelles', 'taxe_fonciere', 'surface_balcon_terrasse',
+   'annee_construction'].forEach(field => {
+    if (transformed[field] !== null && transformed[field] !== undefined) {
+      if (typeof transformed[field] === 'string') {
+        transformed[field] = parseFloat(transformed[field]) || 0;
+      }
+    }
+  });
+  
+  return transformed as Property;
+};
+
+const getProperties = async (type?: ListingType): Promise<Property[]> => {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    let query = supabase.from('properties').select('*');
+
+    if (type && type !== 'all') {
+      query = query.eq('listing_type', type);
+    }
+
+    const { data: properties, error } = await query;
+
+    if (error) {
+      console.error('Error fetching properties:', error);
+      throw error;
+    }
+    
+    if (!properties) return [];
+    
+    return properties.map(transformProperty);
+  } catch (error: any) {
+    console.error('Error fetching properties:', error);
+    if (error?.code !== 'PGRST301' && error?.code !== '42501') {
+      toast.error("Échec de la récupération des propriétés. Veuillez réessayer.");
+    }
+    return [];
+  }
+};
 
 const AuctionProperties = () => {
   const { data: properties = [], isLoading } = useQuery({

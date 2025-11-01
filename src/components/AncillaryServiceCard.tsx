@@ -2,9 +2,34 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2, PauseCircle, PlayCircle, CalendarIcon, DollarSign, User, Phone, Mail, Globe } from "lucide-react";
-import { AncillaryService } from "@/lib/api";
 import { format } from "date-fns";
+
 import { fr } from "date-fns/locale";
+
+export interface AncillaryService {
+  id: string;
+  property_id?: string | null;
+  service_type: string;
+  description?: string | null;
+  estimated_cost?: number | null;
+  provider_name?: string | null;
+  provider_contact?: {
+    phone?: string;
+    email?: string;
+    website?: string;
+  } | null;
+  status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+  requested_at?: string;
+  scheduled_date?: string | null;
+  completed_at?: string | null;
+  is_active: boolean;
+  start_date: string;
+  end_date?: string | null;
+  requested_by?: string | null;
+  metadata?: any;
+  created_at: string;
+  updated_at: string;
+}
 
 interface AncillaryServiceCardProps {
   service: AncillaryService;

@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { getPropertyById } from "@/lib/api";
 import Navbar from "@/components/Navbar";
+import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
 import Footer from "@/components/Footer";
 import PropertyGallery from "@/components/property/PropertyGallery";
 import PropertyHeader from "@/components/property/PropertyHeader";
@@ -18,6 +19,59 @@ import { Skeleton } from "@/components/ui/skeleton";
 import NavigationButton from "@/components/ui/navigation-button";
 import { toast } from "sonner";
 import { Property } from "@/types/property";
+
+const transformProperty = (property: any): Property => {
+  const transformed = { ...property };
+  
+  if (typeof transformed.price === 'string') {
+    transformed.price = parseFloat(transformed.price) || 0;
+  }
+  
+  if (typeof transformed.m2 === 'string') {
+    transformed.m2 = parseFloat(transformed.m2) || 0;
+  }
+  
+  ['beds', 'baths', 'rooms', 'terrace_area', 'ceiling_height', 'floor_level', 
+   'total_floors', 'year_built', 'parking_box', 'nombre_etages_immeuble', 
+   'nombre_photos', 'dpe_consommation', 'ges_emission', 'price_per_m2',
+   'frais_agence', 'charges_mensuelles', 'taxe_fonciere', 'surface_balcon_terrasse',
+   'annee_construction'].forEach(field => {
+    if (transformed[field] !== null && transformed[field] !== undefined) {
+      if (typeof transformed[field] === 'string') {
+        transformed[field] = parseFloat(transformed[field]) || 0;
+      }
+    }
+  });
+  
+  return transformed as Property;
+};
+
+const getPropertyById = async (id: string): Promise<Property | null> => {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    const { data: property, error } = await supabase
+      .from('properties')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      console.error('Error fetching property by ID:', error);
+      throw error;
+    }
+    
+    if (!property) return null;
+
+    return transformProperty(property);
+  } catch (error: any) {
+    console.error('Error fetching property by ID:', error);
+    if (error?.code !== 'PGRST301' && error?.code !== '42501' && error?.code !== 'PGRST116') {
+      toast.error("Échec de la récupération des détails de la propriété. Veuillez réessayer.");
+    }
+    return null;
+  }
+};
 
 const PropertyDetail = () => {
   const { id } = useParams();

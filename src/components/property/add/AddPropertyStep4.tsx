@@ -6,7 +6,35 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Images, MapPin, AlertTriangle } from "lucide-react";
-import { CreatePropertyInput } from "@/lib/api";
+import { PropertyType, ListingType, PropertyStatus, PropertyCondition, KitchenType } from "@/types/property";
+
+export type CreatePropertyInput = {
+  title?: string;
+  description?: string;
+  price?: number;
+  phone_number?: string;
+  cadastral_code?: string;
+  reference_number?: string;
+  property_type?: PropertyType;
+  listing_type?: ListingType;
+  status?: PropertyStatus;
+  condition?: PropertyCondition;
+  plan?: string;
+  address_street?: string;
+  address_city?: string;
+  address_district?: string;
+  lat?: number;
+  lng?: number;
+  beds?: number;
+  baths?: number;
+  m2?: number;
+  rooms?: number;
+  images?: File[];
+  existingImageUrls?: string[];
+  removedImageUrls?: string[];
+  [key: string]: any;
+};
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import LocationMapLeaflet from "./LocationMapLeaflet";
@@ -58,9 +86,22 @@ const AddPropertyStep4 = ({
   const totalImages = existingImageUrls.length + newImageFiles.length;
 
   useEffect(() => {
-    if (initialData?.images && initialData.images.length > 0) {
-      setExistingImageUrls(initialData.images as string[]);
-      setPreviewUrls(initialData.images as string[]);
+    if (initialData?.existingImageUrls && initialData.existingImageUrls.length > 0) {
+      // Use existingImageUrls if available (these are strings)
+      setExistingImageUrls(initialData.existingImageUrls);
+      setPreviewUrls(initialData.existingImageUrls);
+    } else if (initialData?.images && initialData.images.length > 0) {
+      // Check if images are strings or Files
+      const imageArray = initialData.images;
+      if (imageArray.length > 0) {
+        const firstItem = imageArray[0];
+        if (typeof firstItem === 'string') {
+          // All items are strings
+          setExistingImageUrls(imageArray as unknown as string[]);
+          setPreviewUrls(imageArray as unknown as string[]);
+        }
+        // If they are Files, we don't set them as existing URLs
+      }
     }
   }, [initialData]);
 

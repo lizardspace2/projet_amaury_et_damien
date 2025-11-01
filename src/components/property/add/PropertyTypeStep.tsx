@@ -6,8 +6,33 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { CreatePropertyInput } from "@/lib/api";
 import { ListingType } from "@/types/property";
+import { PropertyType, PropertyStatus, PropertyCondition, KitchenType } from "@/types/property";
+
+// Import from parent files that define this interface
+export type CreatePropertyInput = {
+  title?: string;
+  description?: string;
+  price?: number;
+  phone_number?: string;
+  cadastral_code?: string;
+  reference_number?: string;
+  property_type?: PropertyType;
+  listing_type?: ListingType;
+  status?: PropertyStatus;
+  condition?: PropertyCondition;
+  plan?: string;
+  address_street?: string;
+  address_city?: string;
+  address_district?: string;
+  lat?: number;
+  lng?: number;
+  beds?: number;
+  baths?: number;
+  m2?: number;
+  rooms?: number;
+  [key: string]: any;
+};
 
 type CreateListingType = Exclude<ListingType, 'all'>;
 

@@ -18,7 +18,6 @@ import { useUserProfile } from '@/hooks/useUserProfile';
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuContent, NavigationMenuLink } from '@/components/ui/navigation-menu';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { startProUpgradeCheckout } from '@/lib/api';
 
 const Logo = () => (
   <Link to="/" className="flex items-center gap-3 text-xl font-bold text-slate-900 no-underline group">

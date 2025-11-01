@@ -5,9 +5,63 @@ import { Button } from "@/components/ui/button";
 import NavigationButton from "@/components/ui/navigation-button";
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { getNewestProperties } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
+import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
+
+const transformProperty = (property: any): Property => {
+  const transformed = { ...property };
+  
+  if (typeof transformed.price === 'string') {
+    transformed.price = parseFloat(transformed.price) || 0;
+  }
+  
+  if (typeof transformed.m2 === 'string') {
+    transformed.m2 = parseFloat(transformed.m2) || 0;
+  }
+  
+  ['beds', 'baths', 'rooms', 'terrace_area', 'ceiling_height', 'floor_level', 
+   'total_floors', 'year_built', 'parking_box', 'nombre_etages_immeuble', 
+   'nombre_photos', 'dpe_consommation', 'ges_emission', 'price_per_m2',
+   'frais_agence', 'charges_mensuelles', 'taxe_fonciere', 'surface_balcon_terrasse',
+   'annee_construction'].forEach(field => {
+    if (transformed[field] !== null && transformed[field] !== undefined) {
+      if (typeof transformed[field] === 'string') {
+        transformed[field] = parseFloat(transformed[field]) || 0;
+      }
+    }
+  });
+  
+  return transformed as Property;
+};
+
+const getNewestProperties = async (): Promise<Property[]> => {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    const { data: properties, error } = await supabase
+      .from('properties')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(3);
+
+    if (error) {
+      console.error('Error fetching newest properties:', error);
+      throw error;
+    }
+    
+    if (!properties) return [];
+
+    return properties.map(transformProperty);
+  } catch (error: any) {
+    console.error('Error fetching newest properties:', error);
+    if (error?.code !== 'PGRST301' && error?.code !== '42501') {
+      toast.error("Failed to fetch newest properties. Please try again.");
+    }
+    return [];
+  }
+};
 
 const NewestProperties = () => {
   const navigate = useNavigate();

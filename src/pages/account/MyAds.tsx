@@ -4,8 +4,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PropertyCard from "@/components/PropertyCard";
 import AncillaryServiceCard from "@/components/AncillaryServiceCard";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getMyProperties, pauseProperty, resumeProperty, deleteProperty } from "@/lib/api";
-import { getMyAncillaryServices, deleteAncillaryService, AncillaryService } from "@/lib/api";
 import { Property } from "@/types/property";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
@@ -13,9 +11,228 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { startProUpgradeCheckout } from "@/lib/api";
 import { useAuth } from "@/AuthContext";
 import { useUserProfile } from "@/hooks/useUserProfile";
+import { getApiBase } from "@/lib/utils";
+
+// ===== TYPES & INTERFACES =====
+
+export interface AncillaryService {
+  id: string;
+  property_id?: string | null;
+  service_type: string;
+  description?: string | null;
+  estimated_cost?: number | null;
+  provider_name?: string | null;
+  provider_contact?: {
+    phone?: string;
+    email?: string;
+    website?: string;
+  } | null;
+  status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+  requested_at?: string;
+  scheduled_date?: string | null;
+  completed_at?: string | null;
+  is_active: boolean;
+  start_date: string;
+  end_date?: string | null;
+  requested_by?: string | null;
+  metadata?: any;
+  created_at: string;
+  updated_at: string;
+}
+
+// ===== API FUNCTIONS =====
+
+const transformProperty = (property: any): Property => {
+  const transformed = { ...property };
+  
+  if (typeof transformed.price === 'string') {
+    transformed.price = parseFloat(transformed.price) || 0;
+  }
+  
+  if (typeof transformed.m2 === 'string') {
+    transformed.m2 = parseFloat(transformed.m2) || 0;
+  }
+  
+  ['beds', 'baths', 'rooms', 'terrace_area', 'ceiling_height', 'floor_level', 
+   'total_floors', 'year_built', 'parking_box', 'nombre_etages_immeuble', 
+   'nombre_photos', 'dpe_consommation', 'ges_emission', 'price_per_m2',
+   'frais_agence', 'charges_mensuelles', 'taxe_fonciere', 'surface_balcon_terrasse',
+   'annee_construction'].forEach(field => {
+    if (transformed[field] !== null && transformed[field] !== undefined) {
+      if (typeof transformed[field] === 'string') {
+        transformed[field] = parseFloat(transformed[field]) || 0;
+      }
+    }
+  });
+  
+  return transformed as Property;
+};
+
+export const getMyProperties = async (): Promise<Property[]> => {
+  try {
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !session?.user) throw new Error("User not authenticated");
+
+    const { data: properties, error } = await supabase
+      .from('properties')
+      .select('*')
+      .eq('user_id', session.user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return properties.map(transformProperty);
+  } catch (error) {
+    console.error('Error fetching user properties:', error);
+    toast.error("Échec de la récupération de vos propriétés. Veuillez réessayer.");
+    return [];
+  }
+};
+
+export const pauseProperty = async (propertyId: string) => {
+  try {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) throw new Error("User not authenticated");
+
+    const { error } = await supabase
+      .from('properties')
+      .update({ status: 'pause' })
+      .eq('id', propertyId)
+      .eq('user_id', user.id);
+
+    if (error) throw error;
+    toast.success("Propriété mise en pause avec succès");
+    return true;
+  } catch (error) {
+    console.error('Error pausing property:', error);
+    toast.error("Échec de la mise en pause de la propriété. Veuillez réessayer.");
+    return false;
+  }
+};
+
+export const resumeProperty = async (propertyId: string) => {
+  try {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) throw new Error("User not authenticated");
+
+    const { error } = await supabase
+      .from('properties')
+      .update({ status: 'free' })
+      .eq('id', propertyId)
+      .eq('user_id', user.id);
+
+    if (error) throw error;
+    toast.success("Propriété reprise avec succès");
+    return true;
+  } catch (error) {
+    console.error('Error resuming property:', error);
+    toast.error("Échec de la reprise de la propriété. Veuillez réessayer.");
+    return false;
+  }
+};
+
+export const deleteProperty = async (propertyId: string) => {
+  try {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) throw new Error("User not authenticated");
+
+    const { data: property, error: fetchError } = await supabase
+      .from('properties')
+      .select('images')
+      .eq('id', propertyId)
+      .single();
+
+    if (fetchError) throw fetchError;
+
+    if (property?.images && property.images.length > 0) {
+      const imagePaths = property.images.map(url => url.substring(url.lastIndexOf('/') + 1));
+      const { error: storageError } = await supabase.storage.from('property_images').remove(imagePaths);
+      if (storageError) {
+        console.error("Error deleting images from storage:", storageError);
+      }
+    }
+    
+    const { error } = await supabase
+      .from('properties')
+      .delete()
+      .eq('id', propertyId)
+      .eq('user_id', user.id);
+
+    if (error) throw error;
+
+    toast.success("Propriété supprimée avec succès");
+    return true;
+  } catch (error) {
+    console.error('Error deleting property:', error);
+    toast.error("Échec de la suppression de la propriété");
+    return false;
+  }
+};
+
+export const getMyAncillaryServices = async () => {
+  try {
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !session?.user) throw new Error('User not authenticated');
+
+    const { data, error } = await supabase
+      .from('ancillary_services')
+      .select('*')
+      .eq('requested_by', session.user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data as AncillaryService[];
+  } catch (error) {
+    console.error('Error fetching ancillary services:', error);
+    throw error;
+  }
+};
+
+export const deleteAncillaryService = async (serviceId: string) => {
+  try {
+    const { error } = await supabase
+      .from('ancillary_services')
+      .delete()
+      .eq('id', serviceId);
+
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    console.error('Error deleting ancillary service:', error);
+    throw error;
+  }
+};
+
+const startProUpgradeCheckout = async (): Promise<void> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('User not authenticated');
+
+  console.log('[billing] startProUpgradeCheckout: user', {
+    id: user.id,
+    email: user.email,
+  });
+
+  const response = await fetch(`${getApiBase()}/api/stripe/create-checkout-session`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId: user.id, userEmail: user.email }),
+  });
+
+  console.log('[billing] create-checkout-session status', response.status);
+  const json = await response.json().catch(() => ({} as any));
+  console.log('[billing] create-checkout-session payload', json);
+  if (!response.ok) {
+    throw new Error(json?.error || `Unable to start checkout (status ${response.status})`);
+  }
+
+  const { url } = json as { url?: string };
+  if (url) {
+    window.location.href = url;
+  } else {
+    throw new Error('No checkout URL received');
+  }
+};
 
 const MyAds: React.FC = () => {
   const navigate = useNavigate();

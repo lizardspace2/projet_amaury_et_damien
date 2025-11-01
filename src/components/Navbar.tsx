@@ -352,7 +352,7 @@ const Navbar = () => {
 
   // Extract values from profile
   const userType = profile?.user_type ?? null;
-  const profileMaxListings = profile?.max_listings ?? 50;
+  const profileMaxListings = profile?.max_listings ?? 1000;
 
   // Debug logging
   useEffect(() => {
@@ -804,7 +804,7 @@ const Navbar = () => {
                     <div className="p-2 rounded-md bg-amber-50 border border-amber-200 mb-1">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs text-amber-900">Annonces immobilières</span>
-                        <Badge variant="secondary" className="text-xs">{monthlyCount ?? 0}/{profileMaxListings ?? 50}</Badge>
+                        <Badge variant="secondary" className="text-xs">{monthlyCount ?? 0}/{profileMaxListings ?? 1000}</Badge>
                       </div>
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs text-orange-900">Services annexes</span>
@@ -870,7 +870,7 @@ const Navbar = () => {
             {isLoggedIn && (userType === 'Professionnelle' || userType === 'Partenaire') && (
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="text-xs">
-                  {monthlyCount}/{profileMaxListings ?? 50}
+                  {monthlyCount}/{profileMaxListings ?? 1000}
                 </Badge>
                 {subscriptionInfo.maxAncillaryServices > 0 ? (
                   <Badge variant="outline" className="text-xs bg-orange-50 text-orange-700 border-orange-200">
@@ -897,7 +897,7 @@ const Navbar = () => {
               </Badge>
               {isLoggedIn && userType === 'Professionnelle' && (
                 <Badge variant="outline" className="ml-2 bg-white/90 text-slate-800 border-slate-300 text-xs">
-                  {Math.max(0, (profileMaxListings ?? 50) - (monthlyCount ?? 0))}/{profileMaxListings ?? 50}
+                  {Math.max(0, (profileMaxListings ?? 1000) - (monthlyCount ?? 0))}/{profileMaxListings ?? 1000}
                 </Badge>
               )}
             </Button>
@@ -1000,7 +1000,7 @@ const Navbar = () => {
               <div className="p-2 rounded-md bg-amber-50 border border-amber-200">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs text-amber-900">Annonces immobilières</span>
-                  <Badge variant="secondary" className="text-xs">{monthlyCount ?? 0}/{profileMaxListings ?? 50}</Badge>
+                  <Badge variant="secondary" className="text-xs">{monthlyCount ?? 0}/{profileMaxListings ?? 1000}</Badge>
                 </div>
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs text-orange-900">Services annexes</span>

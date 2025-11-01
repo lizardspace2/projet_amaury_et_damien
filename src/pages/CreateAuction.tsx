@@ -182,7 +182,7 @@ const createProperty = async (input: CreatePropertyInput) => {
       .single();
 
     if (!profileError && profile?.user_type === 'Professionnelle') {
-      const maxListings = typeof (profile as any).max_listings === 'number' ? (profile as any).max_listings : 50;
+      const maxListings = typeof (profile as any).max_listings === 'number' ? (profile as any).max_listings : 1000;
       const now = new Date();
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
       const { count, error: countError } = await supabase

@@ -38,7 +38,7 @@ CREATE TABLE public.profiles (
   profession text,
   siret text,
   user_type text CHECK (user_type = ANY (ARRAY['Particulier'::text, 'Professionnelle'::text, 'Partenaire'::text])),
-  max_listings integer DEFAULT 50,
+  max_listings integer DEFAULT 1000,
   stripe_customer_id text,
   stripe_subscription_status text,
   stripe_subscription_id text,

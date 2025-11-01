@@ -71,7 +71,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [subscriptionInfo, setSubscriptionInfo] = useState<SubscriptionInfo>({
     isSubscribed: false,
     subscriptionStatus: null,
-    maxListings: 50,
+    maxListings: 1000,
     maxAncillaryServices: 0,
     stripeCustomerId: null,
     stripeSubscriptionId: null,
@@ -204,7 +204,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setSubscriptionInfo({
           isSubscribed: false,
           subscriptionStatus: null,
-          maxListings: 50,
+          maxListings: 1000,
           maxAncillaryServices: 5,
           stripeCustomerId: null,
           stripeSubscriptionId: null,
@@ -263,7 +263,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setSubscriptionInfo({
             isSubscribed: false,
             subscriptionStatus: null,
-            maxListings: 50,
+            maxListings: 1000,
             maxAncillaryServices: 5,
             stripeCustomerId: null,
             stripeSubscriptionId: null,
@@ -311,7 +311,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setSubscriptionInfo({
             isSubscribed: actuallyActive,
             subscriptionStatus: status,
-            maxListings: profile?.max_listings ?? 50,
+            maxListings: profile?.max_listings ?? 1000,
             maxAncillaryServices: (profile as any)?.max_ancillary_services ?? 0,
             stripeCustomerId: profile?.stripe_customer_id || null,
             stripeSubscriptionId: subscriptionId,
@@ -328,7 +328,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setSubscriptionInfo({
           isSubscribed: false,
           subscriptionStatus: null,
-          maxListings: 50,
+          maxListings: 1000,
           maxAncillaryServices: 5,
           stripeCustomerId: null,
           stripeSubscriptionId: null,

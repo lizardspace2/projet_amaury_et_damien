@@ -215,7 +215,7 @@ export const createProperty = async (input: CreatePropertyInput) => {
       .single();
 
     if (!profileError && profile?.user_type === 'Professionnelle') {
-      const maxListings = typeof (profile as any).max_listings === 'number' ? (profile as any).max_listings : 50;
+      const maxListings = typeof (profile as any).max_listings === 'number' ? (profile as any).max_listings : 1000;
       const now = new Date();
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
       const { count, error: countError } = await supabase
@@ -1039,7 +1039,7 @@ const SellPage = () => {
           <DialogHeader>
             <DialogTitle>Augmentez votre limite d'annonces</DialogTitle>
             <DialogDescription>
-              {currentMaxListings ? `Votre quota de ${currentMaxListings} annonces est atteint.` : "Votre quota d'annonces est atteint."} Passez à l'offre Pro+ pour publier jusqu'à 500 annonces pour 29,99 € / mois.
+              {currentMaxListings ? `Votre quota de ${currentMaxListings} annonces est atteint.` : "Votre quota d'annonces est atteint."} Passez à l'offre Pro+ pour publier jusqu'à 2000 annonces pour 29,99 € / mois.
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end gap-2">

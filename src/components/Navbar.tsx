@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/AuthContext';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuContent, NavigationMenuLink } from '@/components/ui/navigation-menu';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -320,6 +320,7 @@ const Navbar = () => {
     facebook: ''
   });
   const { user, signIn, signUp, signOut } = useAuth();
+  const queryClient = useQueryClient();
   const isLoggedIn = !!user;
   const userEmail = user?.email || '';
   const [scrolled, setScrolled] = useState(false);
@@ -327,21 +328,38 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Invalidate and refetch profile queries when user changes
+  useEffect(() => {
+    if (user) {
+      console.log('[Navbar] User logged in, invalidating profile queries');
+      queryClient.invalidateQueries({ queryKey: ['user-profile'] });
+      queryClient.invalidateQueries({ queryKey: ['my-properties-monthly-count'] });
+    } else {
+      // Clear queries when user logs out
+      queryClient.removeQueries({ queryKey: ['user-profile'] });
+      queryClient.removeQueries({ queryKey: ['my-properties-monthly-count'] });
+    }
+  }, [user, queryClient]);
+
   // Load profile using React Query for better caching and automatic updates
   const { data: profile } = useQuery({
     queryKey: ['user-profile'],
     queryFn: async () => {
       if (!user) return null;
+      console.log('[Navbar] Fetching profile for user:', user.id);
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', user.id)
         .single();
-      if (error) throw error;
+      if (error) {
+        console.error('[Navbar] Profile fetch error:', error);
+        throw error;
+      }
+      console.log('[Navbar] Profile fetched:', data);
       return data;
     },
-    enabled: !!user,
-    staleTime: 0 // Consider data stale immediately, so it refetches when user changes
+    enabled: !!user
   });
 
   // Load monthly count using React Query
@@ -366,6 +384,17 @@ const Navbar = () => {
   // Extract values from profile
   const userType = profile?.user_type ?? null;
   const profileMaxListings = profile?.max_listings ?? 50;
+
+  // Debug logging
+  useEffect(() => {
+    console.log('[Navbar] Profile state:', { 
+      hasUser: !!user, 
+      hasProfile: !!profile, 
+      userType, 
+      profileMaxListings,
+      userId: user?.id 
+    });
+  }, [user, profile, userType, profileMaxListings]);
 
   const resetForm = useCallback(() => {
     setFormData({ 

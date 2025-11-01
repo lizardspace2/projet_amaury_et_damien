@@ -16,7 +16,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useCurrency } from '@/CurrencyContext';
 import { Property, PropertyType, ListingType } from "@/types/property";
 import { supabase } from "@/lib/supabase";
-import { toast } from "sonner";
 import { useAuth } from "@/AuthContext";
 import { useUserLikedProperties } from "@/hooks/useUserProfile";
 import { FRENCH_CITIES } from "@/data/FrenchCities";

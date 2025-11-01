@@ -808,7 +808,11 @@ const Navbar = () => {
                       </div>
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs text-orange-900">Services annexes</span>
-                        <Badge variant="secondary" className="text-xs">{monthlyAncillaryCount ?? 0}/{subscriptionInfo.maxAncillaryServices}</Badge>
+                        {subscriptionInfo.maxAncillaryServices > 0 ? (
+                          <Badge variant="secondary" className="text-xs">{monthlyAncillaryCount ?? 0}/{subscriptionInfo.maxAncillaryServices}</Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-xs bg-red-50 text-red-700 border-red-200">Abonnement requis</Badge>
+                        )}
                       </div>
                       <Button asChild variant="outline" size="sm" className="w-full mt-2 h-8">
                         <Link to="/account/subscription">Abonnement</Link>
@@ -868,9 +872,15 @@ const Navbar = () => {
                 <Badge variant="outline" className="text-xs">
                   {monthlyCount}/{profileMaxListings ?? 50}
                 </Badge>
-                <Badge variant="outline" className="text-xs bg-orange-50 text-orange-700 border-orange-200">
-                  {monthlyAncillaryCount}/{subscriptionInfo.maxAncillaryServices}
-                </Badge>
+                {subscriptionInfo.maxAncillaryServices > 0 ? (
+                  <Badge variant="outline" className="text-xs bg-orange-50 text-orange-700 border-orange-200">
+                    {monthlyAncillaryCount}/{subscriptionInfo.maxAncillaryServices}
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="text-xs bg-red-50 text-red-700 border-red-200">
+                    Abonnement requis
+                  </Badge>
+                )}
                 <Button asChild variant="outline" className="h-9">
                   <Link to="/account/subscription">Abonnement</Link>
                 </Button>
@@ -994,7 +1004,11 @@ const Navbar = () => {
                 </div>
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs text-orange-900">Services annexes</span>
-                  <Badge variant="secondary" className="text-xs">{monthlyAncillaryCount ?? 0}/{subscriptionInfo.maxAncillaryServices}</Badge>
+                  {subscriptionInfo.maxAncillaryServices > 0 ? (
+                    <Badge variant="secondary" className="text-xs">{monthlyAncillaryCount ?? 0}/{subscriptionInfo.maxAncillaryServices}</Badge>
+                  ) : (
+                    <Badge variant="outline" className="text-xs bg-red-50 text-red-700 border-red-200">Abonnement requis</Badge>
+                  )}
                 </div>
                 <Button asChild variant="outline" size="sm" className="w-full mt-2 h-8" onClick={closeMobileMenu}>
                   <Link to="/account/subscription">Abonnement</Link>

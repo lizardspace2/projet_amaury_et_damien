@@ -69,7 +69,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       subscription_current_period_end: currentPeriodEnd,
       subscription_cancel_at_period_end: subscription.cancel_at_period_end || false,
       max_listings: isActive ? 500 : 50,
-      max_ancillary_services: isActive ? 20 : 5,
+      max_ancillary_services: isActive ? 20 : 0,
       updated_at: new Date().toISOString(),
     };
 
@@ -131,7 +131,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             stripe_subscription_status: 'canceled',
             stripe_subscription_id: subscription.id,
             max_listings: 50,
-            max_ancillary_services: 5,
+            max_ancillary_services: 0,
             subscription_current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
             subscription_cancel_at_period_end: false,
             updated_at: new Date().toISOString(),
@@ -171,7 +171,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               .update({
                 stripe_subscription_status: subscription.status,
                 max_listings: 50, // Réduire les limites en cas d'échec
-                max_ancillary_services: 5, // Réduire les limites en cas d'échec
+                max_ancillary_services: 0, // Bloquer les services annexes en cas d'échec
                 updated_at: new Date().toISOString(),
               })
               .eq('stripe_customer_id', customerId);

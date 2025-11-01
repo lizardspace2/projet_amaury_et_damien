@@ -111,20 +111,32 @@ const Account = () => {
                 </div>
                 <div className="mt-3">
                   <p className="text-sm text-orange-900">Quota de services annexes mensuel</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Badge variant="secondary">{monthlyAncillaryCount}/{subscriptionInfo.maxAncillaryServices}</Badge>
-                    {subscriptionInfo.isSubscribed && (
-                      <Badge variant="outline" className="bg-teal-50 text-teal-700 border-teal-200">
-                        Pro+ Actif
-                      </Badge>
-                    )}
-                    <a href="/account/subscription" className="text-sm text-orange-700 hover:underline">Gérer l'abonnement</a>
-                  </div>
-                  <div className="mt-2 max-w-xs">
-                    <Progress value={Math.min(100, Math.round((monthlyAncillaryCount / subscriptionInfo.maxAncillaryServices) * 100))} />
-                  </div>
-                  {subscriptionInfo.isExpired && (
-                    <p className="text-xs text-red-600 mt-1">⚠️ Votre abonnement a expiré</p>
+                  {subscriptionInfo.isSubscribed && subscriptionInfo.maxAncillaryServices > 0 ? (
+                    <>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge variant="secondary">{monthlyAncillaryCount}/{subscriptionInfo.maxAncillaryServices}</Badge>
+                        <Badge variant="outline" className="bg-teal-50 text-teal-700 border-teal-200">
+                          Pro+ Actif
+                        </Badge>
+                        <a href="/account/subscription" className="text-sm text-orange-700 hover:underline">Gérer l'abonnement</a>
+                      </div>
+                      <div className="mt-2 max-w-xs">
+                        <Progress value={Math.min(100, Math.round((monthlyAncillaryCount / subscriptionInfo.maxAncillaryServices) * 100))} />
+                      </div>
+                      {subscriptionInfo.isExpired && (
+                        <p className="text-xs text-red-600 mt-1">⚠️ Votre abonnement a expiré</p>
+                      )}
+                    </>
+                  ) : (
+                    <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-md">
+                      <p className="text-sm font-semibold text-red-900 mb-1">
+                        ⚠️ Abonnement obligatoire
+                      </p>
+                      <p className="text-sm text-red-700 mb-2">
+                        Un abonnement Pro+ est requis pour publier des annonces de services annexes.
+                      </p>
+                      <a href="/account/subscription" className="text-sm text-orange-700 hover:underline font-semibold">S'abonner maintenant</a>
+                    </div>
                   )}
                 </div>
               </>

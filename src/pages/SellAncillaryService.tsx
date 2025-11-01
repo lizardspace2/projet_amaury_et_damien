@@ -197,13 +197,23 @@ const SellAncillaryService = () => {
         }
       }
 
-      // Check monthly limit for professionals
+      // Check subscription requirement for professionals
       const profileData = profile as any;
       if (profileData?.user_type === 'Professionnelle' || profileData?.user_type === 'Partenaire') {
         const maxAncillaryServices = typeof profileData?.max_ancillary_services === 'number' 
           ? profileData.max_ancillary_services 
-          : 5;
+          : 0;
         
+        // Abonnement obligatoire pour les services annexes
+        if (maxAncillaryServices === 0 || !subscriptionInfo.isSubscribed) {
+          setIsSubmitting(false);
+          const errorWithCode: any = new Error('Subscription required for ancillary services');
+          errorWithCode.code = 'SUBSCRIPTION_REQUIRED';
+          setShowUpgradeDialog(true);
+          throw errorWithCode;
+        }
+        
+        // Vérifier le quota mensuel
         const now = new Date();
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
         
@@ -249,7 +259,7 @@ const SellAncillaryService = () => {
       navigate('/account');
     } catch (error: any) {
       console.error('Error creating service:', error);
-      if (error?.code === 'ANCILLARY_SERVICE_LIMIT_REACHED') {
+      if (error?.code === 'ANCILLARY_SERVICE_LIMIT_REACHED' || error?.code === 'SUBSCRIPTION_REQUIRED') {
         // Dialog already shown, don't show another error toast
         return;
       }
@@ -425,46 +435,52 @@ const SellAncillaryService = () => {
                       <div className="mb-6 rounded-md border border-amber-200 p-4 bg-amber-50">
                         <div className="flex items-center justify-between gap-3">
                           <div className="w-full">
-                            <p className="font-semibold text-amber-900">Quota de services annexes mensuel</p>
-                            <div className="flex items-center gap-2 mt-1">
-                              <Badge variant="secondary">{monthlyAncillaryCount}/{subscriptionInfo.maxAncillaryServices}</Badge>
-                              {subscriptionInfo.isSubscribed && (
-                                <Badge variant="outline" className="bg-teal-50 text-teal-700 border-teal-200">
-                                  Pro+ Actif
-                                </Badge>
-                              )}
-                              <span className="text-sm text-amber-700">
-                                {Math.max(0, subscriptionInfo.maxAncillaryServices - monthlyAncillaryCount)} restantes
-                              </span>
-                            </div>
-                            <div className="mt-2">
-                              <Progress value={Math.min(100, Math.round((monthlyAncillaryCount / subscriptionInfo.maxAncillaryServices) * 100))} />
-                            </div>
-                            {!subscriptionInfo.isSubscribed && (
-                              <p className="text-sm text-amber-700 mt-1">
-                                Passez à Pro+ pour publier jusqu'à 20 services annexes par mois (29,99 € / mois).
-                              </p>
-                            )}
-                            {subscriptionInfo.isExpired && (
-                              <p className="text-sm text-red-600 mt-1">
-                                ⚠️ Votre abonnement a expiré. Réabonnez-vous pour continuer à publier.
-                              </p>
+                            <p className="font-semibold text-orange-900">Quota de services annexes mensuel</p>
+                            {subscriptionInfo.isSubscribed && subscriptionInfo.maxAncillaryServices > 0 ? (
+                              <>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Badge variant="secondary">{monthlyAncillaryCount}/{subscriptionInfo.maxAncillaryServices}</Badge>
+                                  <Badge variant="outline" className="bg-teal-50 text-teal-700 border-teal-200">
+                                    Pro+ Actif
+                                  </Badge>
+                                  <span className="text-sm text-orange-700">
+                                    {Math.max(0, subscriptionInfo.maxAncillaryServices - monthlyAncillaryCount)} restantes
+                                  </span>
+                                </div>
+                                <div className="mt-2">
+                                  <Progress value={Math.min(100, Math.round((monthlyAncillaryCount / subscriptionInfo.maxAncillaryServices) * 100))} />
+                                </div>
+                                {subscriptionInfo.isExpired && (
+                                  <p className="text-sm text-red-600 mt-1">
+                                    ⚠️ Votre abonnement a expiré. Réabonnez-vous pour continuer à publier.
+                                  </p>
+                                )}
+                              </>
+                            ) : (
+                              <>
+                                <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-md">
+                                  <p className="text-sm font-semibold text-red-900 mb-1">
+                                    ⚠️ Abonnement obligatoire
+                                  </p>
+                                  <p className="text-sm text-red-700">
+                                    Un abonnement Pro+ est requis pour publier des annonces de services annexes. Avec l'abonnement, vous pourrez publier jusqu'à 20 services annexes par mois.
+                                  </p>
+                                </div>
+                                <Button 
+                                  onClick={async () => {
+                                    try { 
+                                      await startProUpgradeCheckout(); 
+                                    } catch (e: any) { 
+                                      toast.error(e?.message || 'Impossible de démarrer le paiement'); 
+                                    }
+                                  }} 
+                                  className="bg-orange-600 hover:bg-orange-700 whitespace-nowrap mt-3 w-full"
+                                >
+                                  S'abonner à Pro+ (29,99 € / mois)
+                                </Button>
+                              </>
                             )}
                           </div>
-                          {!subscriptionInfo.isSubscribed && (
-                            <Button 
-                              onClick={async () => {
-                                try { 
-                                  await startProUpgradeCheckout(); 
-                                } catch (e: any) { 
-                                  toast.error(e?.message || 'Impossible de démarrer le paiement'); 
-                                }
-                              }} 
-                              className="bg-amber-600 hover:bg-amber-700 whitespace-nowrap"
-                            >
-                              Passer à Pro+ (29,99 € / mois)
-                            </Button>
-                          )}
                         </div>
                       </div>
                     )}
@@ -681,9 +697,17 @@ const SellAncillaryService = () => {
       <Dialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Augmentez votre limite de services annexes</DialogTitle>
+            <DialogTitle>
+              {subscriptionInfo.maxAncillaryServices === 0 
+                ? "Abonnement Pro+ requis" 
+                : "Limite de services annexes atteinte"}
+            </DialogTitle>
             <DialogDescription>
-              {currentMaxAncillary ? `Votre quota de ${currentMaxAncillary} services annexes est atteint.` : "Votre quota de services annexes est atteint."} Passez à l'offre Pro+ pour publier jusqu'à 20 services annexes par mois pour 29,99 € / mois.
+              {subscriptionInfo.maxAncillaryServices === 0 
+                ? "Un abonnement Pro+ est obligatoire pour publier des annonces de services annexes. Passez à l'offre Pro+ pour publier jusqu'à 20 services annexes par mois pour 29,99 € / mois."
+                : currentMaxAncillary 
+                  ? `Votre quota de ${currentMaxAncillary} services annexes est atteint.` 
+                  : "Votre quota de services annexes est atteint."} Passez à l'offre Pro+ pour publier jusqu'à 20 services annexes par mois pour 29,99 € / mois.
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end gap-2">

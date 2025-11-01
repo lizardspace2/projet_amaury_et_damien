@@ -14,3 +14,4 @@ WHERE COALESCE(stripe_subscription_status, 'canceled') <> 'active'
 
 
 
+

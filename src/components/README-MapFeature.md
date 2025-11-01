@@ -5,7 +5,7 @@ Cette fonctionnalité permet d'afficher les propriétés immobilières sur une c
 ## Composants créés
 
 ### 1. PropertiesMap.tsx
-Composant principal pour afficher une carte avec toutes les propriétés..
+Composant principal pour afficher une carte avec toutes les propriétés.
 
 **Fonctionnalités :**
 - Marqueurs colorés selon le type de propriété (vente, location, enchères)

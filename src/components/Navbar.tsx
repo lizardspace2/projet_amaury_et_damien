@@ -16,8 +16,13 @@ import { useAuth } from '@/AuthContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuContent, NavigationMenuLink } from '@/components/ui/navigation-menu';
-import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+const cn = (...inputs: ClassValue[]) => {
+  return twMerge(clsx(inputs));
+};
 
 const Logo = () => (
   <Link to="/" className="flex items-center gap-3 text-xl font-bold text-slate-900 no-underline group">

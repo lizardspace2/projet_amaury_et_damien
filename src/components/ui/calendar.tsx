@@ -1,9 +1,13 @@
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DayPicker } from "react-day-picker";
-
-import { cn } from "@/lib/utils";
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 import { buttonVariants } from "@/components/ui/button";
+
+const cn = (...inputs: ClassValue[]) => {
+  return twMerge(clsx(inputs));
+};
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>;
 

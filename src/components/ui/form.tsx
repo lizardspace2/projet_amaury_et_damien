@@ -9,9 +9,13 @@ import {
   FormProvider,
   useFormContext,
 } from "react-hook-form"
-
-import { cn } from "@/lib/utils"
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
 import { Label } from "@/components/ui/label"
+
+const cn = (...inputs: ClassValue[]) => {
+  return twMerge(clsx(inputs));
+}
 
 const Form = FormProvider
 

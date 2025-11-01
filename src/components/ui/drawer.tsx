@@ -1,7 +1,11 @@
 import * as React from "react"
 import { Drawer as DrawerPrimitive } from "vaul"
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
 
-import { cn } from "@/lib/utils"
+const cn = (...inputs: ClassValue[]) => {
+  return twMerge(clsx(inputs));
+}
 
 const Drawer = ({
   shouldScaleBackground = true,

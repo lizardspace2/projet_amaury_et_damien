@@ -13,7 +13,11 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/AuthContext";
 import { useUserProfile } from "@/hooks/useUserProfile";
-import { getApiBase } from "@/lib/utils";
+
+const getApiBase = (): string => {
+  const base = (import.meta as any)?.env?.VITE_API_BASE_URL as string | undefined;
+  return base && base.trim().length > 0 ? base.replace(/\/$/, '') : '';
+};
 
 // ===== TYPES & INTERFACES =====
 

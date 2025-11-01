@@ -1,7 +1,12 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 import { ArrowLeft, ArrowRight, ChevronLeft } from 'lucide-react';
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+const cn = (...inputs: ClassValue[]) => {
+  return twMerge(clsx(inputs));
+};
 
 interface NavigationButtonProps {
   children: React.ReactNode;

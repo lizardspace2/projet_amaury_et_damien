@@ -11,8 +11,12 @@ import { useAuth } from '@/AuthContext';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { getApiBase } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
+
+const getApiBase = (): string => {
+  const base = (import.meta as any)?.env?.VITE_API_BASE_URL as string | undefined;
+  return base && base.trim().length > 0 ? base.replace(/\/$/, '') : '';
+};
 
 const startProUpgradeCheckout = async (): Promise<void> => {
   const { data: { user } } = await supabase.auth.getUser();

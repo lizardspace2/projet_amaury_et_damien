@@ -657,9 +657,23 @@ const SellPage = () => {
             </div>
           ) : (
             <div className="space-y-6">
-              <StepIndicator currentStep={signupStep} totalSteps={4} />
+              {signupStep > 0 && <StepIndicator currentStep={signupStep} totalSteps={4} />}
               
-              {signupStep === 4 ? (
+              {signupStep === 0 ? (
+                // Première étape après sélection du type : Email/Mot de passe
+                <form onSubmit={handleEmailSignUp} className="space-y-4">
+                  <Step1 formData={authFormData} handleInputChange={handleAuthInputChange} onEnterKey={nextStep} />
+                  <div className="flex justify-between pt-4">
+                    <Button 
+                      type="button" 
+                      onClick={nextStep}
+                      className="h-11 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 shadow-md w-full"
+                    >
+                      Suivant
+                    </Button>
+                  </div>
+                </form>
+              ) : signupStep === 4 ? (
                 // Étape de confirmation (pas de formulaire)
                 <Step4 email={authFormData.email} />
               ) : (
@@ -669,17 +683,15 @@ const SellPage = () => {
                   {signupStep === 3 && <Step3 formData={authFormData} handleInputChange={handleAuthInputChange} />}
                   
                   <div className="flex justify-between pt-4">
-                    {signupStep > 0 && (
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        onClick={prevStep}
-                        className="h-11"
-                        disabled={isSigningUp}
-                      >
-                        Précédent
-                      </Button>
-                    )}
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={prevStep}
+                      className="h-11"
+                      disabled={isSigningUp}
+                    >
+                      Précédent
+                    </Button>
                     
                     {signupStep < 3 ? (
                       <Button 

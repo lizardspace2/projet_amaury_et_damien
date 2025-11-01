@@ -338,8 +338,8 @@ const SellPage = () => {
   const [isSigningUp, setIsSigningUp] = useState(false);
 
   const nextStep = async () => {
-    // Si on est à l'étape 3 (réseaux sociaux), créer le compte avant de passer à l'étape suivante (confirmation)
-    if (signupStep === 3) {
+    // Si on est à l'étape 2 (réseaux sociaux), créer le compte avant de passer à l'étape suivante (confirmation)
+    if (signupStep === 2) {
       if (isSigningUp) return; // ignore double submit
       setIsSigningUp(true);
       const { email, password, ...profileData } = authFormData;
@@ -660,7 +660,7 @@ const SellPage = () => {
               {signupStep > 0 && <StepIndicator currentStep={signupStep} totalSteps={4} />}
               
               {signupStep === 0 ? (
-                // Première étape après sélection du type : Email/Mot de passe
+                // Première étape après sélection du type : Email/Mot de passe (sans StepIndicator)
                 <form onSubmit={handleEmailSignUp} className="space-y-4">
                   <Step1 formData={authFormData} handleInputChange={handleAuthInputChange} onEnterKey={nextStep} />
                   <div className="flex justify-between pt-4">
@@ -678,9 +678,8 @@ const SellPage = () => {
                 <Step4 email={authFormData.email} />
               ) : (
                 <form onSubmit={handleEmailSignUp} className="space-y-4">
-                  {signupStep === 1 && <Step1 formData={authFormData} handleInputChange={handleAuthInputChange} onEnterKey={nextStep} />}
-                  {signupStep === 2 && <Step2 formData={authFormData} handleInputChange={handleAuthInputChange} setFormData={setAuthFormData} onEnterKey={nextStep} />}
-                  {signupStep === 3 && <Step3 formData={authFormData} handleInputChange={handleAuthInputChange} />}
+                  {signupStep === 1 && <Step2 formData={authFormData} handleInputChange={handleAuthInputChange} setFormData={setAuthFormData} onEnterKey={nextStep} />}
+                  {signupStep === 2 && <Step3 formData={authFormData} handleInputChange={handleAuthInputChange} />}
                   
                   <div className="flex justify-between pt-4">
                     <Button 
@@ -693,7 +692,7 @@ const SellPage = () => {
                       Précédent
                     </Button>
                     
-                    {signupStep < 3 ? (
+                    {signupStep < 2 ? (
                       <Button 
                         type="button" 
                         onClick={nextStep}

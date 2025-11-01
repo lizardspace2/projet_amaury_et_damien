@@ -470,8 +470,8 @@ const Navbar = () => {
   };
 
   const nextStep = async () => {
-    // Si on est à l'étape 3 (réseaux sociaux), créer le compte avant de passer à l'étape suivante (confirmation)
-    if (signupStep === 3) {
+    // Si on est à l'étape 2 (réseaux sociaux), créer le compte avant de passer à l'étape suivante (confirmation)
+    if (signupStep === 2) {
       if (isSigningUp) return; // ignore double submit
       setIsSigningUp(true);
       const { email, password, ...profileData } = formData;
@@ -1137,7 +1137,7 @@ const Navbar = () => {
               {signupStep > 0 && <StepIndicator currentStep={signupStep} totalSteps={4} />}
               
               {signupStep === 0 ? (
-                // Première étape après sélection du type : Email/Mot de passe
+                // Première étape après sélection du type : Email/Mot de passe (sans StepIndicator)
                 <form onSubmit={handleEmailSignUp} className="space-y-4">
                   <Step1 formData={formData} handleInputChange={handleInputChange} onEnterKey={nextStep} />
                   <div className="flex justify-between pt-4">
@@ -1155,9 +1155,8 @@ const Navbar = () => {
                 <Step4 email={formData.email} />
               ) : (
                 <form onSubmit={handleEmailSignUp} className="space-y-4">
-                  {signupStep === 1 && <Step1 formData={formData} handleInputChange={handleInputChange} onEnterKey={nextStep} />}
-                  {signupStep === 2 && <Step2 formData={formData} handleInputChange={handleInputChange} setFormData={setFormData} onEnterKey={nextStep} />}
-                  {signupStep === 3 && <Step3 formData={formData} handleInputChange={handleInputChange} />}
+                  {signupStep === 1 && <Step2 formData={formData} handleInputChange={handleInputChange} setFormData={setFormData} onEnterKey={nextStep} />}
+                  {signupStep === 2 && <Step3 formData={formData} handleInputChange={handleInputChange} />}
                   
                   <div className="flex justify-between pt-4">
                     <Button 
@@ -1170,7 +1169,7 @@ const Navbar = () => {
                       Précédent
                     </Button>
                     
-                    {signupStep < 3 ? (
+                    {signupStep < 2 ? (
                       <Button 
                         type="button" 
                         onClick={nextStep}

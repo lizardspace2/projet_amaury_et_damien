@@ -813,13 +813,21 @@ const Navbar = () => {
               <div className="flex items-center gap-2">
                 <Button 
                   variant="ghost" 
-                  onClick={() => { setIsAuthDialogOpen(true); setAuthMode('login'); }}
+                  onClick={() => { 
+                    resetForm();
+                    setIsAuthDialogOpen(true); 
+                    setAuthMode('login'); 
+                  }}
                   className="text-slate-700 hover:text-teal-600"
                 >
                   Connexion
                 </Button>
                 <Button 
-                  onClick={() => { setIsAuthDialogOpen(true); setAuthMode('signup'); }}
+                  onClick={() => { 
+                    resetForm();
+                    setIsAuthDialogOpen(true); 
+                    setAuthMode('signup'); 
+                  }}
                   className="bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 shadow-md hover:shadow-lg transition-all"
                 >
                   S'inscrire
@@ -977,14 +985,24 @@ const Navbar = () => {
             <div className="flex flex-col gap-1.5 p-2">
               <Button 
                 variant="outline" 
-                onClick={() => { setIsAuthDialogOpen(true); setAuthMode('login'); closeMobileMenu(); }}
+                onClick={() => { 
+                  resetForm();
+                  setIsAuthDialogOpen(true); 
+                  setAuthMode('login'); 
+                  closeMobileMenu(); 
+                }}
                 className="h-10 rounded-lg text-sm"
               >
                 <LogIn size={16} className="mr-2" />
                 Connexion
               </Button>
               <Button 
-                onClick={() => { setIsAuthDialogOpen(true); setAuthMode('signup'); closeMobileMenu(); }}
+                onClick={() => { 
+                  resetForm();
+                  setIsAuthDialogOpen(true); 
+                  setAuthMode('signup'); 
+                  closeMobileMenu(); 
+                }}
                 className="h-10 rounded-lg bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 text-sm"
               >
                 <UserPlus size={16} className="mr-2" />
@@ -1010,7 +1028,13 @@ const Navbar = () => {
       </div>
 
       {/* Auth Dialog */}
-      <Dialog open={isAuthDialogOpen} onOpenChange={setIsAuthDialogOpen}>
+      <Dialog open={isAuthDialogOpen} onOpenChange={(open) => {
+        setIsAuthDialogOpen(open);
+        if (open) {
+          // Reset form when dialog opens
+          resetForm();
+        }
+      }}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-r from-teal-500 to-emerald-600 mx-auto mb-4">

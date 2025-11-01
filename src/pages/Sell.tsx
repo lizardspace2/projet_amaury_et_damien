@@ -272,8 +272,6 @@ const SellPage = () => {
     loadMonthlyCount();
   }, [user]);
 
-  
-
   const handleAuthInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
     setAuthFormData(prev => ({ ...prev, [id]: value }));
@@ -424,6 +422,7 @@ const SellPage = () => {
             variant="outline"
             className="w-full"
             onClick={() => {
+              resetAuthForm();
               setAuthMode("login");
               setIsAuthDialogOpen(true);
             }}
@@ -435,6 +434,7 @@ const SellPage = () => {
             variant="ghost"
             className="w-full text-teal-600 hover:text-teal-700"
             onClick={() => {
+              resetAuthForm();
               setAuthMode("signup");
               setIsAuthDialogOpen(true);
             }}
@@ -540,7 +540,13 @@ const SellPage = () => {
       <Footer />
 
       {/* Auth Dialog */}
-      <Dialog open={isAuthDialogOpen} onOpenChange={setIsAuthDialogOpen}>
+      <Dialog open={isAuthDialogOpen} onOpenChange={(open) => {
+        setIsAuthDialogOpen(open);
+        if (open) {
+          // Reset form when dialog opens
+          resetAuthForm();
+        }
+      }}>
         <DialogContent className="max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold text-center text-slate-800">

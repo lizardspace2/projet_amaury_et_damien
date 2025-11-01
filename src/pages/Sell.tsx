@@ -192,8 +192,21 @@ const transformProperty = (property: any): Property => {
 
 export const createProperty = async (input: CreatePropertyInput) => {
   try {
+    // Verify authentication and session
     const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) throw new Error("User not authenticated");
+    if (userError || !user) {
+      console.error('Authentication error:', userError);
+      throw new Error("User not authenticated. Please log in and try again.");
+    }
+
+    // Verify we have an active session
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !session) {
+      console.error('Session error:', sessionError);
+      throw new Error("No active session. Please log in and try again.");
+    }
+
+    console.log('Creating property for user:', user.id, 'Session valid:', !!session);
 
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
@@ -224,21 +237,44 @@ export const createProperty = async (input: CreatePropertyInput) => {
     
     let imageUrls: string[] = [];
     if (input.images?.length) {
-      const uploadPromises = input.images.map(async (file) => {
+      console.log(`Uploading ${input.images.length} image(s) for user ${user.id}`);
+      const uploadPromises = input.images.map(async (file, index) => {
         const fileExt = file.name.split('.').pop();
-        const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-        const { error: uploadError } = await supabase.storage
+        const fileName = `${user.id}/${Date.now()}-${index}.${fileExt}`;
+        console.log(`Uploading file: ${fileName}`);
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
           .from('property_images')
-          .upload(fileName, file);
+          .upload(fileName, file, {
+            cacheControl: '3600',
+            upsert: false
+          });
 
         if (uploadError) {
-          console.error('Error uploading image:', uploadError);
+          console.error(`Error uploading image ${index}:`, uploadError);
+          console.error('Upload error details:', {
+            message: uploadError.message,
+            fileName: fileName,
+            userId: user.id,
+            error: uploadError
+          });
+          
+          // Provide more helpful error messages
+          const errorMessage = uploadError.message || '';
+          if (errorMessage.includes('403') || errorMessage.includes('row-level security') || errorMessage.includes('Unauthorized')) {
+            throw new Error('Permission denied: Storage bucket RLS policies may not be configured correctly. Please contact support.');
+          } else if (errorMessage.includes('400') || errorMessage.includes('Bad Request')) {
+            throw new Error(`Upload failed: ${errorMessage || 'Invalid file or bucket configuration'}`);
+          }
           throw uploadError;
         }
+        
         const { data: { publicUrl } } = supabase.storage.from('property_images').getPublicUrl(fileName);
+        console.log(`Successfully uploaded: ${fileName} -> ${publicUrl}`);
         return publicUrl;
       });
       imageUrls = await Promise.all(uploadPromises);
+      console.log(`Successfully uploaded ${imageUrls.length} image(s)`);
     }
 
     const { existingImageUrls: _, removedImageUrls, ...restOfInput } = input;
@@ -251,6 +287,13 @@ export const createProperty = async (input: CreatePropertyInput) => {
     }
 
     const date_publication = new Date().toISOString();
+
+    console.log('Inserting property with data:', {
+      title: restOfInput.title,
+      user_id: user.id,
+      imageCount: totalImages.length,
+      nombre_photos
+    });
 
     const { data: property, error: propertyError } = await supabase
       .from('properties')
@@ -266,8 +309,22 @@ export const createProperty = async (input: CreatePropertyInput) => {
 
     if (propertyError) {
       console.error('Property insertion error:', propertyError);
+      console.error('Property error details:', {
+        message: propertyError.message,
+        code: propertyError.code,
+        details: propertyError.details,
+        hint: propertyError.hint,
+        userId: user.id
+      });
+      
+      // Provide more helpful error messages
+      if (propertyError.code === '42501' || propertyError.message?.includes('row-level security')) {
+        throw new Error('Permission denied: Database RLS policies may not be configured correctly. Please ensure you have the proper permissions to create properties.');
+      }
       throw propertyError;
     }
+
+    console.log('Property created successfully:', property?.id);
 
     toast.success("Annonce immobilière créée avec succès !");
     return property;

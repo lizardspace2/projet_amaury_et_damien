@@ -579,7 +579,7 @@ const SellPage = () => {
     { number: 6, label: "Publier" }
   ];
 
-  const { user, signIn, signUp, monthlyCount } = useAuth();
+  const { user, signIn, signUp, monthlyCount, subscriptionInfo } = useAuth();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<Partial<CreatePropertyInput>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -726,17 +726,25 @@ const SellPage = () => {
                 <div>
                   <p className="font-medium text-amber-900">Quota d'annonces mensuel</p>
                   <div className="flex items-center gap-2 mt-1">
-                    <Badge variant="secondary">{monthlyCount}/{userProfile?.max_listings ?? 50}</Badge>
-                    <span className="text-sm text-amber-700">{Math.max(0, (userProfile?.max_listings ?? 50) - monthlyCount)} restantes</span>
+                    <Badge variant="secondary">{monthlyCount}/{subscriptionInfo.maxListings}</Badge>
+                    {subscriptionInfo.isSubscribed && (
+                      <Badge variant="outline" className="bg-teal-50 text-teal-700 border-teal-200">
+                        Pro+ Actif
+                      </Badge>
+                    )}
+                    <span className="text-sm text-amber-700">{Math.max(0, subscriptionInfo.maxListings - monthlyCount)} restantes</span>
                   </div>
                   <div className="mt-2">
-                    <Progress value={Math.min(100, Math.round((monthlyCount / (userProfile?.max_listings ?? 50)) * 100))} />
+                    <Progress value={Math.min(100, Math.round((monthlyCount / subscriptionInfo.maxListings) * 100))} />
                   </div>
-                  {(userProfile?.max_listings ?? 50) < 500 && (
+                  {!subscriptionInfo.isSubscribed && (
                     <p className="text-sm text-amber-700 mt-1">Passez à Pro+ pour publier jusqu'à 500 annonces (29,99 € / mois).</p>
                   )}
+                  {subscriptionInfo.isExpired && (
+                    <p className="text-sm text-red-600 mt-1">⚠️ Votre abonnement a expiré. Réabonnez-vous pour continuer à publier.</p>
+                  )}
                 </div>
-                {(userProfile?.max_listings ?? 50) < 500 && (
+                {!subscriptionInfo.isSubscribed && (
                   <Button onClick={async () => {
                     try { await startProUpgradeCheckout(); } catch (e: any) { toast.error(e?.message || 'Impossible de démarrer le paiement'); }
                   }} className="bg-amber-600 hover:bg-amber-700">Passer à Pro+ (29,99 € / mois)</Button>

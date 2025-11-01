@@ -56,10 +56,17 @@ const SubscriptionPage: React.FC = () => {
       window.removeEventListener('unhandledrejection', onUnhandled as any);
     };
   }, []);
-  const { user, monthlyCount } = useAuth();
+  const { user, monthlyCount, subscriptionInfo } = useAuth();
   
   // Use custom hook for profile with specific fields
-  const { data: profile } = useUserProfile<{ user_type?: string; max_listings?: number; stripe_subscription_status?: string }>('user_type, max_listings, stripe_subscription_status');
+  const { data: profile } = useUserProfile<{ 
+    user_type?: string; 
+    max_listings?: number; 
+    stripe_subscription_status?: string;
+    subscription_current_period_start?: string;
+    subscription_current_period_end?: string;
+    subscription_cancel_at_period_end?: boolean;
+  }>('user_type, max_listings, stripe_subscription_status, subscription_current_period_start, subscription_current_period_end, subscription_cancel_at_period_end');
 
   const openPortal = async () => {
     try {
@@ -126,13 +133,42 @@ const SubscriptionPage: React.FC = () => {
           <CardHeader>
             <CardTitle>Statut</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
-            <p>Type de compte: {profile?.user_type || '—'}</p>
-            <p>Quota actuel: {profile?.max_listings ?? 50} annonces</p>
-            <p>Annonces publiées ce mois-ci: {monthlyCount ?? 0}</p>
-            <p>Statut abonnement: {profile?.stripe_subscription_status || '—'}</p>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <p><strong>Type de compte:</strong> {profile?.user_type || '—'}</p>
+              <p><strong>Quota actuel:</strong> {subscriptionInfo.maxListings} annonces</p>
+              <p><strong>Annonces publiées ce mois-ci:</strong> {monthlyCount ?? 0}</p>
+              <p><strong>Statut abonnement:</strong> {
+                subscriptionInfo.subscriptionStatus 
+                  ? subscriptionInfo.subscriptionStatus === 'active' 
+                    ? (subscriptionInfo.isExpired ? 'Expiré' : 'Actif ✅') 
+                    : subscriptionInfo.subscriptionStatus 
+                  : 'Non abonné'
+              }</p>
+              
+              {subscriptionInfo.currentPeriodStart && subscriptionInfo.currentPeriodEnd && (
+                <div className="mt-3 pt-3 border-t">
+                  <p className="text-sm text-slate-600 mb-1"><strong>Période d'abonnement:</strong></p>
+                  <p className="text-sm">
+                    Du {new Date(subscriptionInfo.currentPeriodStart).toLocaleDateString('fr-FR')} 
+                    {' '}au {new Date(subscriptionInfo.currentPeriodEnd).toLocaleDateString('fr-FR')}
+                  </p>
+                  {subscriptionInfo.cancelAtPeriodEnd && (
+                    <p className="text-sm text-amber-600 mt-1">
+                      ⚠️ L'abonnement sera annulé à la fin de cette période
+                    </p>
+                  )}
+                  {subscriptionInfo.isExpired && (
+                    <p className="text-sm text-red-600 mt-1">
+                      ⚠️ L'abonnement a expiré
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+            
             <div className="flex gap-3 pt-2">
-              {(profile?.max_listings ?? 50) < 500 && (
+              {!subscriptionInfo.isSubscribed && (
                 <Button
                   id="btn-upgrade-pro"
                   onClick={() => {
@@ -145,8 +181,10 @@ const SubscriptionPage: React.FC = () => {
                   Passer à Pro+ (jusqu'à 500)
                 </Button>
               )}
-              {profile?.stripe_subscription_status && (
-                <Button variant="outline" onClick={openPortal}>Ouvrir le portail client</Button>
+              {(subscriptionInfo.stripeCustomerId || profile?.stripe_subscription_status) && (
+                <Button variant="outline" onClick={openPortal}>
+                  {subscriptionInfo.cancelAtPeriodEnd ? 'Réactiver l\'abonnement' : 'Ouvrir le portail client'}
+                </Button>
               )}
             </div>
           </CardContent>

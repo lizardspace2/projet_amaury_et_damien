@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Search, Filter, MapPin, SlidersHorizontal, X, LayoutGrid, List, Map } from "lucide-react";
 import { toast } from "sonner";
@@ -43,7 +43,6 @@ const Properties = () => {
   const [minBaths, setMinBaths] = useState(0);
   const [minM2, setMinM2] = useState(0);
   const [maxM2, setMaxM2] = useState(100000);
-  const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'map' | 'gallery' | 'list'>('gallery');
   const [minPriceInput, setMinPriceInput] = useState(minPrice.toString());
@@ -208,16 +207,13 @@ const Properties = () => {
   const { data: properties = [], isLoading, error } = useQuery({
     queryKey: ['properties', listingType],
     queryFn: () => getProperties(listingType === 'all' ? undefined : listingType as any),
+    staleTime: 30000, // Cache for 30 seconds to prevent excessive refetching
   });
 
-  // Log when properties are fetched
-  useEffect(() => {
-    console.log('📥 [Properties] Propriétés reçues de l\'API:', {
-      count: properties.length,
-      listingType,
-      properties: properties.map(p => ({ id: p.id, title: p.title, price: p.price, status: p.status, listing_type: p.listing_type }))
-    });
-  }, [properties, listingType]);
+  // Memoize properties IDs to create a stable dependency
+  const propertiesIds = useMemo(() => {
+    return properties.map(p => p.id).sort().join(',');
+  }, [properties]);
 
   const { user } = useAuth();
   
@@ -306,45 +302,17 @@ const Properties = () => {
     setMaxM2(Math.max(min, max));
   };
 
-  // Apply all filters
-  useEffect(() => {
-    console.log('🔍 [Properties] Début du filtrage');
-    console.log('📊 [Properties] Nombre total de propriétés:', properties.length);
-    console.log('📋 [Properties] Listing type:', listingType);
-    console.log('⚙️ [Properties] Filtres actifs:', {
-      minPrice,
-      maxPrice,
-      minBeds,
-      minBaths,
-      minM2,
-      maxM2,
-      searchQuery,
-      propertyTypes,
-      selectedCities
-    });
+  // Apply all filters using useMemo to prevent infinite loops
+  const filteredProperties = useMemo(() => {
+    if (isLoading || !properties.length) {
+      return [];
+    }
     
     let filtered = [...properties];
-    
-    // Log des propriétés initiales pour debug
-    properties.forEach((prop, idx) => {
-      console.log(`🏠 [Properties] Propriété ${idx}:`, {
-        id: prop.id,
-        title: prop.title,
-        status: prop.status,
-        price: prop.price,
-        listing_type: prop.listing_type,
-        property_type: prop.property_type,
-        rooms: prop.rooms,
-        beds: prop.beds,
-        baths: prop.baths,
-        m2: prop.m2
-      });
-    });
 
     // Search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      const beforeSearch = filtered.length;
       filtered = filtered.filter(property => {
         const title = property.title || '';
         const addressStreet = property.address_street || '';
@@ -358,239 +326,163 @@ const Properties = () => {
           description.toLowerCase().includes(query)
         );
       });
-      console.log(`🔎 [Properties] Après recherche: ${beforeSearch} → ${filtered.length}`);
     }
 
     // Property type filter
     if (propertyTypes.length > 0) {
-      const beforeType = filtered.length;
       filtered = filtered.filter(property =>
         property.property_type && propertyTypes.includes(property.property_type)
       );
-      console.log(`🏘️ [Properties] Après type de propriété: ${beforeType} → ${filtered.length}`);
     }
 
     // Price filter
-    console.log(`💰 [Properties] Prix min/max: ${minPrice} - ${maxPrice}`);
-    const beforePrice = filtered.length;
-    filtered.forEach(property => {
-      console.log(`💰 [Properties] Checking property ${property.id}: price=${property.price}, type=${typeof property.price}, passes=${property.price >= minPrice && property.price <= maxPrice}`);
-    });
     filtered = filtered.filter(property =>
       property.price >= minPrice && property.price <= maxPrice
     );
-    console.log(`💰 [Properties] Après prix: ${beforePrice} → ${filtered.length}`);
 
     // Bedrooms filter
     if (minBeds > 0) {
-      const beforeBeds = filtered.length;
-      filtered.forEach(property => {
-        console.log(`🛏️ [Properties] Checking beds - ID: ${property.id}, beds: ${property.beds}, minBeds: ${minBeds}, passes: ${(property.beds || 0) >= minBeds}`);
-      });
       filtered = filtered.filter(property => (property.beds || 0) >= minBeds);
-      console.log(`🛏️ [Properties] Après chambres: ${beforeBeds} → ${filtered.length}`);
     }
 
     // Bathrooms filter
     if (minBaths > 0) {
-      const beforeBaths = filtered.length;
       filtered = filtered.filter(property => (property.baths || 0) >= minBaths);
-      console.log(`🛁 [Properties] Après salles de bain: ${beforeBaths} → ${filtered.length}`);
     }
 
-    const beforeM2 = filtered.length;
+    // Surface filter
     filtered = filtered.filter(property =>
       (property.m2 || 0) >= minM2 && (property.m2 || 0) <= maxM2
     );
-    console.log(`📏 [Properties] Après surface: ${beforeM2} → ${filtered.length}`);
     
     // Status filter - only "pause" status matters, all other statuses are ignored (they are errors)
-    const beforeStatus = filtered.length;
-    filtered = filtered.filter(property => {
-      const passes = property.status !== 'pause';
-      if (!passes) {
-        console.log(`⏸️ [Properties] Propriété ${property.id} exclue: status="${property.status}"`);
-      }
-      return passes;
-    });
-    console.log(`📊 [Properties] Après statut: ${beforeStatus} → ${filtered.length}`);
+    filtered = filtered.filter(property => property.status !== 'pause');
 
     // City filter
     if (selectedCities.length > 0) {
-      const beforeCities = filtered.length;
       filtered = filtered.filter(property => {
         const fullAddress = `${property.address_street || ''} ${property.address_city || ''} ${property.address_district || ''}`.toLowerCase();
         return selectedCities.some(city => fullAddress.includes(city.toLowerCase()));
       });
-      console.log(`🏙️ [Properties] Après villes: ${beforeCities} → ${filtered.length}`);
     }
 
     // Features filters
     Object.keys(features).forEach(key => {
       if (features[key as keyof typeof features]) {
-        const beforeFeatures = filtered.length;
         filtered = filtered.filter(property => property[key as keyof Property]);
-        console.log(`✨ [Properties] Après feature ${key}: ${beforeFeatures} → ${filtered.length}`);
       }
     });
     
     if (features.has_parking) {
-        const beforeParking = filtered.length;
-        filtered = filtered.filter(property => property.parking_type && property.parking_type !== 'none');
-        console.log(`🚗 [Properties] Après parking: ${beforeParking} → ${filtered.length}`);
+      filtered = filtered.filter(property => property.parking_type && property.parking_type !== 'none');
     }
 
     // Condition filter
     if (condition.length > 0) {
-      const beforeCondition = filtered.length;
       filtered = filtered.filter(property => property.condition && condition.includes(property.condition));
-      console.log(`🔧 [Properties] Après condition: ${beforeCondition} → ${filtered.length}`);
     }
 
     // Furniture type filter
     if (furnitureType.length > 0) {
-      const beforeFurniture = filtered.length;
       filtered = filtered.filter(property =>
         property.furniture_type && furnitureType.includes(property.furniture_type)
       );
-      console.log(`🪑 [Properties] Après mobilier: ${beforeFurniture} → ${filtered.length}`);
     }
 
     // Heating type filter
     if (heatingType.length > 0) {
-      const beforeHeating = filtered.length;
       filtered = filtered.filter(property =>
         property.heating_type && heatingType.includes(property.heating_type)
       );
-      console.log(`🔥 [Properties] Après chauffage: ${beforeHeating} → ${filtered.length}`);
     }
 
     // Parking type filter
     if (parkingType.length > 0) {
-      const beforeParkingType = filtered.length;
       filtered = filtered.filter(property =>
         property.parking_type && parkingType.includes(property.parking_type)
       );
-      console.log(`🅿️ [Properties] Après type de parking: ${beforeParkingType} → ${filtered.length}`);
     }
 
     // Building material filter
     if (buildingMaterial.length > 0) {
-      const beforeMaterial = filtered.length;
       filtered = filtered.filter(property =>
         property.building_material && buildingMaterial.includes(property.building_material)
       );
-      console.log(`🧱 [Properties] Après matériau: ${beforeMaterial} → ${filtered.length}`);
     }
 
     // Kitchen type filter
     if (kitchenType.length > 0) {
-      const beforeKitchen = filtered.length;
       filtered = filtered.filter(property =>
         property.kitchen_type && kitchenType.includes(property.kitchen_type)
       );
-      console.log(`🍳 [Properties] Après cuisine: ${beforeKitchen} → ${filtered.length}`);
     }
 
-    // Appliquer le tri final avant de mettre à jour l'état
-    const sortedProperties = sortProperties(filtered);
-    
-    console.log(`✅ [Properties] Résultat final: ${sortedProperties.length} propriétés affichées`);
-    sortedProperties.forEach((prop, idx) => {
-      console.log(`📌 [Properties] Propriété finale ${idx}: ${prop.title} (ID: ${prop.id})`);
-    });
-    
-    setFilteredProperties(sortedProperties);
-
+    // Apply sorting
+    return sortProperties(filtered);
   }, [
-    searchQuery, listingType, propertyTypes, minPrice, maxPrice,
-    minBeds, minBaths, minM2, maxM2, features, condition,
-    furnitureType, heatingType, parkingType, buildingMaterial,
-    kitchenType, properties, sortOption, selectedCities
+    propertiesIds,
+    properties,
+    isLoading,
+    searchQuery,
+    listingType,
+    propertyTypes,
+    minPrice,
+    maxPrice,
+    minBeds,
+    minBaths,
+    minM2,
+    maxM2,
+    features,
+    condition,
+    furnitureType,
+    heatingType,
+    parkingType,
+    buildingMaterial,
+    kitchenType,
+    sortOption,
+    selectedCities,
   ]);
 
   // Update URL when listing type or search changes
+  const prevListingTypeRef = useRef(listingType);
+  const prevSearchQueryRef = useRef(searchQuery);
+  
   useEffect(() => {
-    const params = new URLSearchParams();
-    params.set("type", listingType);
-    if (searchQuery) {
-      params.set("search", searchQuery);
+    // Only update URL if values actually changed
+    if (prevListingTypeRef.current !== listingType || prevSearchQueryRef.current !== searchQuery) {
+      const params = new URLSearchParams();
+      params.set("type", listingType);
+      if (searchQuery) {
+        params.set("search", searchQuery);
+      }
+      const newUrl = `/properties?${params.toString()}`;
+      
+      // Only navigate if URL actually changed
+      if (location.pathname + location.search !== newUrl) {
+        navigate(newUrl, { replace: true });
+      }
+      
+      prevListingTypeRef.current = listingType;
+      prevSearchQueryRef.current = searchQuery;
     }
-    navigate(`/properties?${params.toString()}`, { replace: true });
-  }, [listingType, searchQuery, navigate]);
+  }, [listingType, searchQuery, navigate, location.pathname, location.search]);
 
+  // Only sync listing type from params if it's different from current state
   useEffect(() => {
-    if (listingTypeFromParams) {
-      switch (listingTypeFromParams) {
-        case 'sale':
-          setActiveTab('filters');
-          setListingType('sale');
-          break;
-        case 'lease':
-          setActiveTab('filters');
-          setListingType('lease');
-          break;
-        case 'rent':
-          setActiveTab('filters');
-          setListingType('rent');
-          break;
-        case 'rent_by_day':
-          setActiveTab('filters');
-          setListingType('rent_by_day');
-          break;
-        case 'auction':
-          setActiveTab('filters');
-          setListingType('auction');
-          break;
-        case 'viager':
-          setActiveTab('filters');
-          setListingType('viager');
-          break;
-        case 'exceptional_property':
-          setActiveTab('filters');
-          setListingType('exceptional_property');
-          break;
-        case 'remere':
-          setActiveTab('filters');
-          setListingType('remere');
-          break;
-        case 'vefa':
-          setActiveTab('filters');
-          setListingType('vefa');
-          break;
-        case 'vente_a_terme':
-          setActiveTab('filters');
-          setListingType('vente_a_terme');
-          break;
-        case 'remere_inverse':
-          setActiveTab('filters');
-          setListingType('remere_inverse');
-          break;
-        case 'indivision_nue_propriete':
-          setActiveTab('filters');
-          setListingType('indivision_nue_propriete');
-          break;
-        case 'brs':
-          setActiveTab('filters');
-          setListingType('brs');
-          break;
-        case 'demenbrement_temporaire':
-          setActiveTab('filters');
-          setListingType('demenbrement_temporaire');
-          break;
-        case 'credit_vendeur':
-          setActiveTab('filters');
-          setListingType('credit_vendeur');
-          break;
-        case 'copropriete_lot_volume':
-          setActiveTab('filters');
-          setListingType('copropriete_lot_volume');
-          break;
-        default:
-          break;
+    if (listingTypeFromParams && listingTypeFromParams !== listingType) {
+      const validTypes: ListingType[] = [
+        'sale', 'lease', 'rent', 'rent_by_day', 'auction', 'viager',
+        'exceptional_property', 'remere', 'vefa', 'vente_a_terme',
+        'remere_inverse', 'indivision_nue_propriete', 'brs',
+        'demenbrement_temporaire', 'credit_vendeur', 'copropriete_lot_volume'
+      ];
+      
+      if (validTypes.includes(listingTypeFromParams as ListingType)) {
+        setActiveTab('filters');
+        setListingType(listingTypeFromParams as ListingType);
       }
     }
-  }, [listingTypeFromParams]);
+  }, [listingTypeFromParams, listingType]);
 
   // Handler functions
   const handlePropertyTypeChange = (type: PropertyType) => {

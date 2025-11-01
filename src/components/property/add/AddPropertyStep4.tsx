@@ -5,7 +5,7 @@ import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Images, MapPin } from "lucide-react";
+import { Loader2, Images, MapPin, AlertTriangle } from "lucide-react";
 import { CreatePropertyInput } from "@/lib/api/properties";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
@@ -20,6 +20,7 @@ import {
   FormMessage
 } from "@/components/ui/form";
 import AutocompleteOSM from "@/components/AutocompleteOSM";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -258,6 +259,13 @@ const AddPropertyStep4 = ({
                 {totalImages}/{MAX_IMAGES} {"images"}
               </span>
             </div>
+
+            <Alert className="bg-amber-50 border-amber-200 mb-4">
+              <AlertTriangle className="h-4 w-4 text-amber-600" />
+              <AlertDescription className="text-amber-800">
+                <strong className="font-semibold">Important :</strong> Au moins une photo est obligatoire pour publier l'annonce.
+              </AlertDescription>
+            </Alert>
 
             <div className="space-y-4">
               <div className="flex items-center gap-4">

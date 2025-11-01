@@ -59,33 +59,60 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, newSession) => {
-        console.log('[AuthContext] Auth state changed:', event);
+        console.log('[AuthContext] Auth state changed:', event, { hasSession: !!newSession });
         
         if (!mounted) return;
 
         // For SIGNED_OUT, clear state immediately
-        if (event === 'SIGNED_OUT' || !newSession) {
+        if (event === 'SIGNED_OUT') {
+          console.log('[AuthContext] User signed out, clearing state');
           setSession(null);
           setUser(null);
           return;
         }
 
-        // For SIGNED_IN or TOKEN_REFRESHED, update state
-        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          // Double-check with getSession() for reliability
-          try {
-            const { data: { session: verifiedSession } } = await supabase.auth.getSession();
-            setSession(verifiedSession);
-            setUser(verifiedSession?.user ?? null);
-          } catch (err) {
-            console.error('[AuthContext] Error verifying session after state change:', err);
-            setSession(newSession);
-            setUser(newSession?.user ?? null);
+        // Always verify session with getSession() for reliability
+        // This ensures we don't lose the session on route changes or other events
+        try {
+          const { data: { session: verifiedSession }, error } = await supabase.auth.getSession();
+          
+          if (error) {
+            console.error('[AuthContext] Error getting session during state change:', error);
+            // Only clear if it's truly a session-related error
+            // Don't clear on network errors or other transient issues
+            if (error.message?.includes('session') || error.message?.includes('token')) {
+              setSession(null);
+              setUser(null);
+            }
+            return;
           }
-        } else {
-          // For other events, use the provided session
-          setSession(newSession);
-          setUser(newSession?.user ?? null);
+
+          // Always update with verified session if it exists
+          if (verifiedSession) {
+            console.log('[AuthContext] Session verified, updating state');
+            setSession(verifiedSession);
+            setUser(verifiedSession.user ?? null);
+          } else if (newSession) {
+            // Fallback to newSession if verified session is null but newSession exists
+            console.log('[AuthContext] Using newSession as fallback');
+            setSession(newSession);
+            setUser(newSession.user ?? null);
+          } else {
+            // Both are null - only clear if this is an explicit sign-out event
+            // For other events (like INITIAL_SESSION when no session exists), don't clear
+            // This prevents losing session on route changes
+            if (event !== 'INITIAL_SESSION') {
+              console.log('[AuthContext] No session found for event:', event, '- keeping current state');
+            }
+          }
+        } catch (err) {
+          console.error('[AuthContext] Error verifying session after state change:', err);
+          // Fallback to newSession if verification fails
+          if (newSession) {
+            setSession(newSession);
+            setUser(newSession.user ?? null);
+          }
+          // Don't clear state on verification errors - keep current session
         }
       }
     );

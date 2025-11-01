@@ -2,11 +2,11 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { supabase } from '@/lib/client';
+import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { useAuth } from '@/AuthContext';
 import { getApiBase } from '@/lib/utils';
-import { startProUpgradeCheckout } from '@/lib/billing';
+import { startProUpgradeCheckout } from '@/lib/api';
 
 const SubscriptionPage: React.FC = () => {
   React.useEffect(() => {

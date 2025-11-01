@@ -11,13 +11,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { signInWithEmail, signUpWithEmail, signOut } from '@/lib/auth';
-import { supabase } from '@/lib/client';
+import { signInWithEmail, signUpWithEmail, signOut } from '@/lib/api';
+import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/AuthContext';
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuContent, NavigationMenuLink } from '@/components/ui/navigation-menu';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { startProUpgradeCheckout } from '@/lib/billing';
+import { startProUpgradeCheckout } from '@/lib/api';
 
 const Logo = () => (
   <Link to="/" className="flex items-center gap-3 text-xl font-bold text-slate-900 no-underline group">

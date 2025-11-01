@@ -1,3 +1,5 @@
+﻿import { createClient } from '@supabase/supabase-js';
+
 export type Json =
   | string
   | number
@@ -711,4 +713,19 @@ export const Constants = {
       property_type: ["house", "apartment", "land", "commercial"],
     },
   },
-} as const
+} as const;
+
+// Supabase Client Configuration
+const SUPABASE_URL = "https://bgvqyhmaqujkaflaclyh.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJndnF5aG1hcXVqa2FmbGFjbHloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE5NTU2OTgsImV4cCI6MjA3NzUzMTY5OH0.sEArm4c-f0LMcNVA-wdbKMpX5gfw9kANIZVgjUREw3M";
+
+// Import the supabase client like this:
+// import { supabase } from "@/integrations/supabase/client";
+
+export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true
+  }
+});

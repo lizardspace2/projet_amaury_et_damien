@@ -15,10 +15,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CreatePropertyInput } from '@/lib/properties';
+import { CreatePropertyInput } from '@/lib/api';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
-import { supabase } from "@/lib/client";
+import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/AuthContext";
 
 const MAX_PRICE = 100000000; // 100 millions d'euros

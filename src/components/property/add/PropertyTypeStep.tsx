@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { CreatePropertyInput } from "@/lib/properties";
+import { CreatePropertyInput } from "@/lib/api";
 import { ListingType } from "@/types/property";
 
 type CreateListingType = Exclude<ListingType, 'all'>;

@@ -2,7 +2,7 @@ import { Loader2 } from "lucide-react"; // Added Loader2 import
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getPropertyById, updateProperty, CreatePropertyInput } from '@/lib/properties';
+import { getPropertyById, updateProperty, CreatePropertyInput } from '@/lib/api';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { toast } from 'sonner';

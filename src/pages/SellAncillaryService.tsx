@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { supabase } from "@/lib/client";
+import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { useAuth } from "@/AuthContext";
 import { Calendar } from "@/components/ui/calendar";

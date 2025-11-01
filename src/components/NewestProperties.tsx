@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import NavigationButton from "@/components/ui/navigation-button";
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { getNewestProperties } from "@/lib/properties";
+import { getNewestProperties } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
 

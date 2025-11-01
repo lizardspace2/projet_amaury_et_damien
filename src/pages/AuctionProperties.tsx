@@ -5,10 +5,10 @@ import PropertyCard from "@/components/PropertyCard";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useQuery } from "@tanstack/react-query";
-import { getProperties } from "@/lib/properties";
+import { getProperties } from "@/lib/api";
 import { Property } from "@/types/property";
-import { supabase } from "@/lib/client";
-import { getUserProfile } from "@/lib/auth";
+import { supabase } from "@/lib/supabase";
+import { getUserProfile } from "@/lib/api";
 import { useAuth } from "@/AuthContext";
 
 const AuctionProperties = () => {

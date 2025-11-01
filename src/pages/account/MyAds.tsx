@@ -4,17 +4,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PropertyCard from "@/components/PropertyCard";
 import AncillaryServiceCard from "@/components/AncillaryServiceCard";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getMyProperties, pauseProperty, resumeProperty, deleteProperty } from "@/lib/properties";
-import { getMyAncillaryServices, deleteAncillaryService } from "@/lib/ancillaryServices";
+import { getMyProperties, pauseProperty, resumeProperty, deleteProperty } from "@/lib/api";
+import { getMyAncillaryServices, deleteAncillaryService, AncillaryService } from "@/lib/api";
 import { Property } from "@/types/property";
-import { AncillaryService } from "@/lib/ancillaryServices";
-import { supabase } from "@/lib/client";
+import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { startProUpgradeCheckout } from "@/lib/billing";
+import { startProUpgradeCheckout } from "@/lib/api";
 import { useAuth } from "@/AuthContext";
 
 const MyAds: React.FC = () => {

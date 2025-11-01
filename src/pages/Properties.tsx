@@ -14,10 +14,10 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useQuery } from "@tanstack/react-query";
 import { useCurrency } from '@/CurrencyContext';
-import { getProperties } from "@/lib/properties";
+import { getProperties } from "@/lib/api";
 import { Property, PropertyType, ListingType } from "@/types/property";
-import { supabase } from "@/lib/client";
-import { getUserProfile } from "@/lib/auth";
+import { supabase } from "@/lib/supabase";
+import { getUserProfile } from "@/lib/api";
 import { useAuth } from "@/AuthContext";
 import { FRENCH_CITIES } from "@/data/FrenchCities";
 

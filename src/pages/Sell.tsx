@@ -7,11 +7,11 @@ import AddPropertyStep2 from "@/components/property/add/AddPropertyStep2";
 import AddPropertyStep3 from "@/components/property/add/AddPropertyStep3";
 import AddPropertyStep4 from "@/components/property/add/AddPropertyStep4";
 import StepsIndicator from "@/components/property/add/StepsIndicator";
-import { CreatePropertyInput, createProperty } from "@/lib/properties";
+import { CreatePropertyInput, createProperty } from "@/lib/api";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { supabase } from "@/lib/client";
-import { startProUpgradeCheckout } from "@/lib/billing";
+import { supabase } from "@/lib/supabase";
+import { startProUpgradeCheckout } from "@/lib/api";
 import { toast } from "sonner";
 import { useAuth } from "@/AuthContext";
 import {
@@ -25,7 +25,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { signInWithEmail, signUpWithEmail } from "@/lib/auth";
+import { signInWithEmail, signUpWithEmail } from "@/lib/api";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 

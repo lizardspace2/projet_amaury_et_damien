@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { CreatePropertyInput } from '@/lib/properties';
+import { CreatePropertyInput } from '@/lib/api';
 
 const propertyStep1Schema = z.object({
   phone_number: z.string().min(6, "Numéro de téléphone trop court").max(20, "Numéro de téléphone trop long"),

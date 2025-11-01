@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import NavigationButton from '@/components/ui/navigation-button';
 import { useCurrency } from '@/CurrencyContext';
-import { getProperties } from '@/lib/properties';
+import { getProperties } from '@/lib/api';
 import PropertyCard from '@/components/PropertyCard';
 import FilterBar from '@/components/FilterBar';
 import Navbar from '@/components/Navbar';

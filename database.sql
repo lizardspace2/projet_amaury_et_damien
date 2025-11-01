@@ -41,6 +41,10 @@ CREATE TABLE public.profiles (
   max_listings integer DEFAULT 50,
   stripe_customer_id text,
   stripe_subscription_status text,
+  stripe_subscription_id text,
+  subscription_current_period_start timestamp with time zone,
+  subscription_current_period_end timestamp with time zone,
+  subscription_cancel_at_period_end boolean DEFAULT false,
   CONSTRAINT profiles_pkey PRIMARY KEY (user_id),
   CONSTRAINT profiles_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
 );

@@ -112,38 +112,56 @@ const StepIndicator = ({ currentStep, totalSteps }: { currentStep: number; total
   </div>
 );
 
-const Step1 = ({ formData, handleInputChange }: { formData: any; handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void }) => (
-  <div className="space-y-4">
-    <div className="space-y-2">
-      <Label htmlFor="email" className="text-sm font-medium">Email</Label>
-      <Input 
-        id="email" 
-        type="email" 
-        placeholder="votre@email.com" 
-        value={formData.email} 
-        onChange={handleInputChange} 
-        className="h-11"
-        required 
-      />
-    </div>
-    <div className="space-y-2">
-      <Label htmlFor="password" className="text-sm font-medium">Mot de passe</Label>
-      <Input 
-        id="password" 
-        type="password" 
-        placeholder="Votre mot de passe" 
-        value={formData.password} 
-        onChange={handleInputChange} 
-        className="h-11"
-        required 
-      />
-    </div>
-  </div>
-);
+const Step1 = ({ formData, handleInputChange, onEnterKey }: { formData: any; handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void; onEnterKey?: () => void }) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && onEnterKey) {
+      e.preventDefault();
+      onEnterKey();
+    }
+  };
 
-const Step2 = ({ formData, handleInputChange, setFormData }: { formData: any; handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void; setFormData: React.Dispatch<React.SetStateAction<any>> }) => {
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="email" className="text-sm font-medium">Email</Label>
+        <Input 
+          id="email" 
+          type="email" 
+          placeholder="votre@email.com" 
+          value={formData.email} 
+          onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
+          className="h-11"
+          required 
+        />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="password" className="text-sm font-medium">Mot de passe</Label>
+        <Input 
+          id="password" 
+          type="password" 
+          placeholder="Votre mot de passe" 
+          value={formData.password} 
+          onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
+          className="h-11"
+          required 
+        />
+      </div>
+    </div>
+  );
+};
+
+const Step2 = ({ formData, handleInputChange, setFormData, onEnterKey }: { formData: any; handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void; setFormData: React.Dispatch<React.SetStateAction<any>>; onEnterKey?: () => void }) => {
   const showProfessionalFields = formData.user_type === 'Professionnelle' || formData.user_type === 'Partenaire';
   
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && onEnterKey) {
+      e.preventDefault();
+      onEnterKey();
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -153,7 +171,8 @@ const Step2 = ({ formData, handleInputChange, setFormData }: { formData: any; ha
           type="tel" 
           placeholder="+33 1 23 45 67 89" 
           value={formData.phone} 
-          onChange={handleInputChange} 
+          onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
           className="h-11"
         />
       </div>
@@ -164,7 +183,8 @@ const Step2 = ({ formData, handleInputChange, setFormData }: { formData: any; ha
           type="text" 
           placeholder="Votre adresse complète" 
           value={formData.address} 
-          onChange={handleInputChange} 
+          onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
           className="h-11"
         />
       </div>
@@ -213,7 +233,8 @@ const Step2 = ({ formData, handleInputChange, setFormData }: { formData: any; ha
               type="text" 
               placeholder="12345678901234" 
               value={formData.siret} 
-              onChange={handleInputChange} 
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
               className="h-11"
               maxLength={14}
             />
@@ -377,8 +398,10 @@ const Navbar = () => {
 
   const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     // Ne soumettre que si on est à la dernière étape (étape 2 = index 2)
     if (signupStep !== 2) {
+      console.log('[handleEmailSignUp] Prevented submission: signupStep =', signupStep, 'expected 2');
       return;
     }
     if (isSigningUp) return; // ignore double submit
@@ -1109,8 +1132,8 @@ const Navbar = () => {
               <StepIndicator currentStep={signupStep + 1} totalSteps={3} />
               
               <form onSubmit={handleEmailSignUp} className="space-y-4">
-                {signupStep === 0 && <Step1 formData={formData} handleInputChange={handleInputChange} />}
-                {signupStep === 1 && <Step2 formData={formData} handleInputChange={handleInputChange} setFormData={setFormData} />}
+                {signupStep === 0 && <Step1 formData={formData} handleInputChange={handleInputChange} onEnterKey={nextStep} />}
+                {signupStep === 1 && <Step2 formData={formData} handleInputChange={handleInputChange} setFormData={setFormData} onEnterKey={nextStep} />}
                 {signupStep === 2 && <Step3 formData={formData} handleInputChange={handleInputChange} />}
                 
                 <div className="flex justify-between pt-4">

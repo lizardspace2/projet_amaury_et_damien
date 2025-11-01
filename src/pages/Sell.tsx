@@ -383,7 +383,8 @@ const SellPage = () => {
         setCurrentMaxListings(typeof error.maxListings === 'number' ? error.maxListings : null);
         setShowUpgradeDialog(true);
       } else {
-        toast.error("Erreur lors de la publication de l'annonce");
+        const errorMessage = error?.message || error?.error?.message || "Erreur lors de la publication de l'annonce";
+        toast.error(errorMessage);
       }
     } finally {
       setIsSubmitting(false);

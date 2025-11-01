@@ -543,6 +543,9 @@ export const createProperty = async (input: CreatePropertyInput) => {
       }
     }
 
+    // Save existingImageUrls before destructuring it out
+    const existingImageUrls = input.existingImageUrls || [];
+    
     let imageUrls: string[] = [];
     if (input.images?.length) {
       const uploadPromises = input.images.map(async (file) => {
@@ -562,11 +565,16 @@ export const createProperty = async (input: CreatePropertyInput) => {
       imageUrls = await Promise.all(uploadPromises);
     }
 
-    const { existingImageUrls, removedImageUrls, ...restOfInput } = input;
+    const { existingImageUrls: _, removedImageUrls, ...restOfInput } = input;
 
-    // Calculate nombre_photos from the images array
-    const totalImages = [...(input.existingImageUrls || []), ...imageUrls];
+    // Calculate nombre_photos from the images array - combine existing and new images
+    const totalImages = [...existingImageUrls, ...imageUrls];
     const nombre_photos = totalImages.length;
+
+    // Validate that we have at least one image
+    if (totalImages.length === 0) {
+      throw new Error('Au moins une photo est requise pour publier l\'annonce');
+    }
 
     // Set date_publication to current timestamp
     const date_publication = new Date().toISOString();
@@ -576,14 +584,17 @@ export const createProperty = async (input: CreatePropertyInput) => {
       .insert({
         ...restOfInput,
         user_id: user.id,
-        images: imageUrls,
+        images: totalImages, // Use totalImages instead of just imageUrls
         nombre_photos,
         date_publication,
       })
       .select()
       .single();
 
-    if (propertyError) throw propertyError;
+    if (propertyError) {
+      console.error('Property insertion error:', propertyError);
+      throw propertyError;
+    }
 
     toast.success("Annonce immobiliÃ¨re crÃ©Ã©e avec succÃ¨s !");
     return property;

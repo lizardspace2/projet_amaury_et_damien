@@ -17,7 +17,6 @@ import PropertyMap from "@/components/PropertyMap";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import NavigationButton from "@/components/ui/navigation-button";
-import { toast } from "sonner";
 import { Property } from "@/types/property";
 
 const transformProperty = (property: any): Property => {

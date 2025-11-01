@@ -79,29 +79,38 @@ export const signUpWithEmail = async (
 
     if (authError) throw authError;
 
-    // Tentative d'upsert côté client si la session est dispo pour compléter les champs
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user && profileData) {
-        await supabase
+    // Mise à jour du profil avec toutes les données fournies
+    // On utilise authData.user.id qui est disponible immédiatement après la création
+    if (authData.user && profileData) {
+      try {
+        const { error: profileError } = await supabase
           .from('profiles')
           .upsert({
-            user_id: user.id,
-            email: user.email,
+            user_id: authData.user.id,
+            email: authData.user.email || email,
             user_type: profileData.user_type || 'Particulier',
-            phone: profileData.phone,
-            address: profileData.address,
-            profession: profileData.profession,
-            siret: profileData.siret,
-            instagram: profileData.instagram,
-            twitter: profileData.twitter,
-            facebook: profileData.facebook,
+            phone: profileData.phone || null,
+            address: profileData.address || null,
+            profession: profileData.profession || null,
+            siret: profileData.siret || null,
+            instagram: profileData.instagram || null,
+            twitter: profileData.twitter || null,
+            facebook: profileData.facebook || null,
             updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'user_id'
           });
+
+        if (profileError) {
+          console.error('[signUpWithEmail] Erreur lors de la mise à jour du profil:', profileError);
+          // On ne bloque pas le processus, mais on log l'erreur
+        } else {
+          console.log('[signUpWithEmail] Profil mis à jour avec succès avec toutes les données');
+        }
+      } catch (e) {
+        console.error('[signUpWithEmail] Exception lors de la mise à jour du profil:', e);
+        // Non bloquant: le trigger assure au moins la création de base, les données peuvent être mises à jour plus tard
       }
-    } catch (e) {
-      // Non bloquant: le trigger assure la création, on complète plus tard si besoin
-      console.warn('[signUpWithEmail] upsert profil post-signup non bloquant:', e);
     }
 
     toast.success("Compte créé ! Consultez votre boîte mail pour finaliser votre inscription.");

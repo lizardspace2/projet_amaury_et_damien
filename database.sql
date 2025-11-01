@@ -1,5 +1,29 @@
--- Schema file with tables ordered to satisfy foreign key dependencies
+-- WARNING: This schema is for context only and is not meant to be run.
+-- Table order and constraints may not be valid for execution.
 
+CREATE TABLE public.ancillary_services (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  property_id uuid,
+  service_type text NOT NULL CHECK (service_type = ANY (ARRAY['demenagement'::text, 'travaux'::text, 'diagnostic'::text, 'nettoyage'::text, 'assurance'::text, 'amenagement'::text, 'courtier'::text, 'notaire'::text, 'banque'::text, 'artisan'::text, 'gestionnaire_patrimoine'::text, 'geometre'::text, 'maitre_oeuvre'::text, 'architecte'::text, 'amo'::text, 'promoteur_lotisseur'::text, 'autre'::text])),
+  description text,
+  estimated_cost numeric,
+  provider_name text,
+  provider_contact jsonb,
+  status text DEFAULT 'pending'::text CHECK (status = ANY (ARRAY['pending'::text, 'in_progress'::text, 'completed'::text, 'cancelled'::text])),
+  requested_at timestamp with time zone DEFAULT now(),
+  scheduled_date date,
+  completed_at timestamp with time zone,
+  metadata jsonb,
+  requested_by uuid,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  end_date date,
+  start_date date DEFAULT CURRENT_DATE,
+  is_active boolean DEFAULT true,
+  CONSTRAINT ancillary_services_pkey PRIMARY KEY (id),
+  CONSTRAINT ancillary_services_property_id_fkey FOREIGN KEY (property_id) REFERENCES public.properties(id),
+  CONSTRAINT ancillary_services_requested_by_fkey FOREIGN KEY (requested_by) REFERENCES public.profiles(user_id)
+);
 CREATE TABLE public.profiles (
   user_id uuid NOT NULL,
   phone text,
@@ -20,7 +44,6 @@ CREATE TABLE public.profiles (
   CONSTRAINT profiles_pkey PRIMARY KEY (user_id),
   CONSTRAINT profiles_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
 );
-
 CREATE TABLE public.properties (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   created_at timestamp with time zone DEFAULT now(),
@@ -50,13 +73,13 @@ CREATE TABLE public.properties (
   ceiling_height numeric,
   floor_level integer,
   total_floors integer,
-  amenities text[] DEFAULT '{}'::text[],
-  equipment text[] DEFAULT '{}'::text[],
-  internet_tv text[] DEFAULT '{}'::text[],
-  storage text[] DEFAULT '{}'::text[],
-  security text[] DEFAULT '{}'::text[],
-  nearby_places text[] DEFAULT '{}'::text[],
-  online_services text[] DEFAULT '{}'::text[],
+  amenities ARRAY DEFAULT '{}'::text[],
+  equipment ARRAY DEFAULT '{}'::text[],
+  internet_tv ARRAY DEFAULT '{}'::text[],
+  storage ARRAY DEFAULT '{}'::text[],
+  security ARRAY DEFAULT '{}'::text[],
+  nearby_places ARRAY DEFAULT '{}'::text[],
+  online_services ARRAY DEFAULT '{}'::text[],
   has_elevator boolean DEFAULT false,
   has_ventilation boolean DEFAULT false,
   has_air_conditioning boolean DEFAULT false,
@@ -121,7 +144,7 @@ CREATE TABLE public.properties (
   address_district text,
   lat numeric DEFAULT 41.7151,
   lng numeric DEFAULT 44.8271,
-  images text[] DEFAULT '{}'::text[],
+  images ARRAY DEFAULT '{}'::text[],
   property_type text,
   listing_type text,
   plan text,
@@ -151,31 +174,6 @@ CREATE TABLE public.properties (
   CONSTRAINT properties_pkey PRIMARY KEY (id),
   CONSTRAINT properties_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
 );
-
-CREATE TABLE public.ancillary_services (
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  property_id uuid,
-  service_type text NOT NULL CHECK (service_type = ANY (ARRAY['demenagement'::text, 'travaux'::text, 'diagnostic'::text, 'nettoyage'::text, 'assurance'::text, 'amenagement'::text, 'courtier'::text, 'notaire'::text, 'banque'::text, 'artisan'::text, 'gestionnaire_patrimoine'::text, 'geometre'::text, 'maitre_oeuvre'::text, 'architecte'::text, 'amo'::text, 'promoteur_lotisseur'::text, 'autre'::text])),
-  description text,
-  estimated_cost numeric,
-  provider_name text,
-  provider_contact jsonb,
-  status text DEFAULT 'pending'::text CHECK (status = ANY (ARRAY['pending'::text, 'in_progress'::text, 'completed'::text, 'cancelled'::text])),
-  requested_at timestamp with time zone DEFAULT now(),
-  scheduled_date date,
-  completed_at timestamp with time zone,
-  metadata jsonb,
-  requested_by uuid,
-  created_at timestamp with time zone DEFAULT now(),
-  updated_at timestamp with time zone DEFAULT now(),
-  end_date date,
-  start_date date DEFAULT CURRENT_DATE,
-  is_active boolean DEFAULT true,
-  CONSTRAINT ancillary_services_pkey PRIMARY KEY (id),
-  CONSTRAINT ancillary_services_property_id_fkey FOREIGN KEY (property_id) REFERENCES public.properties(id),
-  CONSTRAINT ancillary_services_requested_by_fkey FOREIGN KEY (requested_by) REFERENCES public.profiles(user_id)
-);
-
 CREATE TABLE public.property_images (
   id uuid NOT NULL DEFAULT gen_random_uuid(),
   property_id uuid,
@@ -184,161 +182,3 @@ CREATE TABLE public.property_images (
   CONSTRAINT property_images_pkey PRIMARY KEY (id),
   CONSTRAINT property_images_property_id_fkey FOREIGN KEY (property_id) REFERENCES public.properties(id)
 );
-
--- Enable Row Level Security
-ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.properties ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.ancillary_services ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.property_images ENABLE ROW LEVEL SECURITY;
-
--- ===== PROFILES POLICIES =====
-
--- Allow users to view their own profile
-CREATE POLICY "Users can view their own profile"
-  ON public.profiles FOR SELECT
-  USING (auth.uid() = user_id);
-
--- Allow users to insert their own profile
-CREATE POLICY "Users can insert their own profile"
-  ON public.profiles FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
-
--- Allow users to update their own profile
-CREATE POLICY "Users can update their own profile"
-  ON public.profiles FOR UPDATE
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
-
--- ===== PROPERTIES POLICIES =====
-
--- Allow anyone to view properties (public listings)
-CREATE POLICY "Properties are viewable by everyone"
-  ON public.properties FOR SELECT
-  USING (true);
-
--- Allow authenticated users to insert their own properties
-CREATE POLICY "Users can insert their own properties"
-  ON public.properties FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
-
--- Allow users to update their own properties
-CREATE POLICY "Users can update their own properties"
-  ON public.properties FOR UPDATE
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
-
--- Allow users to delete their own properties
-CREATE POLICY "Users can delete their own properties"
-  ON public.properties FOR DELETE
-  USING (auth.uid() = user_id);
-
--- ===== ANCILLARY SERVICES POLICIES =====
-
--- Allow users to view ancillary services
-CREATE POLICY "Ancillary services are viewable by everyone"
-  ON public.ancillary_services FOR SELECT
-  USING (true);
-
--- Allow authenticated users to insert ancillary services
-CREATE POLICY "Users can insert ancillary services"
-  ON public.ancillary_services FOR INSERT
-  WITH CHECK (auth.uid() = requested_by OR auth.uid() IS NOT NULL);
-
--- Allow users to update their own ancillary services
-CREATE POLICY "Users can update their own ancillary services"
-  ON public.ancillary_services FOR UPDATE
-  USING (auth.uid() = requested_by)
-  WITH CHECK (auth.uid() = requested_by);
-
--- Allow users to delete their own ancillary services
-CREATE POLICY "Users can delete their own ancillary services"
-  ON public.ancillary_services FOR DELETE
-  USING (auth.uid() = requested_by);
-
--- ===== PROPERTY IMAGES POLICIES =====
-
--- Allow anyone to view property images
-CREATE POLICY "Property images are viewable by everyone"
-  ON public.property_images FOR SELECT
-  USING (true);
-
--- Allow authenticated users to insert property images for their own properties
-CREATE POLICY "Users can insert images for their own properties"
-  ON public.property_images FOR INSERT
-  WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM public.properties
-      WHERE properties.id = property_images.property_id
-      AND properties.user_id = auth.uid()
-    )
-  );
-
--- Allow users to update images for their own properties
-CREATE POLICY "Users can update images for their own properties"
-  ON public.property_images FOR UPDATE
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.properties
-      WHERE properties.id = property_images.property_id
-      AND properties.user_id = auth.uid()
-    )
-  )
-  WITH CHECK (
-    EXISTS (
-      SELECT 1 FROM public.properties
-      WHERE properties.id = property_images.property_id
-      AND properties.user_id = auth.uid()
-    )
-  );
-
--- Allow users to delete images for their own properties
-CREATE POLICY "Users can delete images for their own properties"
-  ON public.property_images FOR DELETE
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.properties
-      WHERE properties.id = property_images.property_id
-      AND properties.user_id = auth.uid()
-    )
-  );
-
--- ===== STORAGE BUCKET POLICIES =====
--- Note: These policies are for the Supabase Storage bucket 'property_images'
--- They allow users to upload/delete files in their own folder (user_id/*)
-
--- Allow authenticated users to view all images in the bucket
-CREATE POLICY "Anyone can view property images"
-  ON storage.objects FOR SELECT
-  USING (bucket_id = 'property_images');
-
--- Allow authenticated users to upload images to their own folder
-CREATE POLICY "Users can upload images to their own folder"
-  ON storage.objects FOR INSERT
-  WITH CHECK (
-    bucket_id = 'property_images' 
-    AND auth.role() = 'authenticated'
-    AND (string_to_array(name, '/'))[1] = auth.uid()::text
-  );
-
--- Allow authenticated users to update images in their own folder
-CREATE POLICY "Users can update images in their own folder"
-  ON storage.objects FOR UPDATE
-  USING (
-    bucket_id = 'property_images'
-    AND auth.role() = 'authenticated'
-    AND (string_to_array(name, '/'))[1] = auth.uid()::text
-  )
-  WITH CHECK (
-    bucket_id = 'property_images'
-    AND auth.role() = 'authenticated'
-    AND (string_to_array(name, '/'))[1] = auth.uid()::text
-  );
-
--- Allow authenticated users to delete images from their own folder
-CREATE POLICY "Users can delete images from their own folder"
-  ON storage.objects FOR DELETE
-  USING (
-    bucket_id = 'property_images'
-    AND auth.role() = 'authenticated'
-    AND (string_to_array(name, '/'))[1] = auth.uid()::text
-  );

@@ -185,7 +185,7 @@ export type Database = {
           hot_water_type: string | null
           parking_type: string | null
           address_street: string | null
-          address_city: string
+          address_city: string | null
           address_district: string | null
           lat: number
           lng: number
@@ -313,7 +313,7 @@ export type Database = {
           hot_water_type?: string | null
           parking_type?: string | null
           address_street?: string | null
-          address_city: string
+          address_city?: string | null
           address_district?: string | null
           lat?: number
           lng?: number

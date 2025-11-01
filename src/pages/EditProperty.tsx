@@ -33,7 +33,7 @@ export interface CreatePropertyInput {
   condition?: PropertyCondition;
   plan?: string;
   address_street?: string;
-  address_city: string;
+  address_city?: string;
   address_district?: string;
   lat?: number;
   lng?: number;

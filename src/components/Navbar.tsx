@@ -11,9 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/AuthContext';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuContent, NavigationMenuLink } from '@/components/ui/navigation-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -324,7 +323,7 @@ const Navbar = () => {
     twitter: '',
     facebook: ''
   });
-  const { user, signIn, signUp, signOut } = useAuth();
+  const { user, signIn, signUp, signOut, monthlyCount } = useAuth();
   const queryClient = useQueryClient();
   const isLoggedIn = !!user;
   const userEmail = user?.email || '';
@@ -339,39 +338,17 @@ const Navbar = () => {
       console.log('[Navbar] User logged in, invalidating profile queries for user:', user.id);
       // Invalidate and refetch immediately
       queryClient.invalidateQueries({ queryKey: ['user-profile'] });
-      queryClient.invalidateQueries({ queryKey: ['my-properties-monthly-count'] });
       // Force refetch
       queryClient.refetchQueries({ queryKey: ['user-profile'] });
-      queryClient.refetchQueries({ queryKey: ['my-properties-monthly-count'] });
     } else {
       // Clear queries when user logs out
       console.log('[Navbar] User logged out, clearing profile queries');
       queryClient.removeQueries({ queryKey: ['user-profile'] });
-      queryClient.removeQueries({ queryKey: ['my-properties-monthly-count'] });
     }
   }, [user?.id, queryClient]); // Use user?.id instead of user to avoid unnecessary re-renders
 
   // Load profile using custom hook for better caching and automatic updates
   const { data: profile } = useUserProfile();
-
-  // Load monthly count using React Query
-  const { data: monthlyCount = 0 } = useQuery({
-    queryKey: ['my-properties-monthly-count'],
-    queryFn: async () => {
-      if (!user) return 0;
-      const now = new Date();
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      const { count, error } = await supabase
-        .from('properties')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .gte('created_at', startOfMonth.toISOString())
-        .lte('created_at', now.toISOString());
-      if (error) return 0;
-      return count || 0;
-    },
-    enabled: !!user
-  });
 
   // Extract values from profile
   const userType = profile?.user_type ?? null;

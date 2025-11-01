@@ -241,30 +241,12 @@ const startProUpgradeCheckout = async (): Promise<void> => {
 const MyAds: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const { user, monthlyCount } = useAuth();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [propertyToDelete, setPropertyToDelete] = useState<string | null>(null);
 
   // Use custom hook for profile
   const { data: profile } = useUserProfile();
-
-  const { data: monthlyCount } = useQuery({
-    queryKey: ['my-properties-monthly-count'],
-    queryFn: async () => {
-      if (!user) return 0;
-      const now = new Date();
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      const { count, error } = await supabase
-        .from('properties')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .gte('created_at', startOfMonth.toISOString())
-        .lte('created_at', now.toISOString());
-      if (error) return 0;
-      return count || 0;
-    },
-    enabled: !!user
-  });
 
   const { data: myProperties = [], isLoading: loadingMyProperties } = useQuery({
     queryKey: ['my-properties'],

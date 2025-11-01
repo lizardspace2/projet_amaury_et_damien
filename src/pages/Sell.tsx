@@ -579,7 +579,7 @@ const SellPage = () => {
     { number: 6, label: "Publier" }
   ];
 
-  const { user, signIn, signUp } = useAuth();
+  const { user, signIn, signUp, monthlyCount } = useAuth();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<Partial<CreatePropertyInput>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -602,24 +602,6 @@ const SellPage = () => {
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [currentMaxListings, setCurrentMaxListings] = useState<number | null>(null);
 
-  // Load monthly count using React Query
-  const { data: monthlyCount = 0 } = useQuery({
-    queryKey: ['my-properties-monthly-count'],
-    queryFn: async () => {
-      if (!user) return 0;
-      const now = new Date();
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      const { count, error } = await supabase
-        .from('properties')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .gte('created_at', startOfMonth.toISOString())
-        .lte('created_at', now.toISOString());
-      if (error) return 0;
-      return count || 0;
-    },
-    enabled: !!user
-  });
 
   const handleAuthInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;

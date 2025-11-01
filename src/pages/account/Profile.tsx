@@ -62,28 +62,10 @@ const Profile: React.FC = () => {
     user_type: '',
   });
 
-  const { user } = useAuth();
+  const { user, monthlyCount } = useAuth();
   
   // Use custom hook for profile
   const { data: profile, isLoading } = useUserProfile();
-
-  const { data: monthlyCount } = useQuery({
-    queryKey: ['my-properties-monthly-count'],
-    queryFn: async () => {
-      if (!user) return 0;
-      const now = new Date();
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      const { count, error } = await supabase
-        .from('properties')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .gte('created_at', startOfMonth.toISOString())
-        .lte('created_at', now.toISOString());
-      if (error) return 0;
-      return count || 0;
-    },
-    enabled: !!user
-  });
 
   // Initialize form data when profile loads
   React.useEffect(() => {

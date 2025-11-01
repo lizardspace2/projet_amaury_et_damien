@@ -10,6 +10,7 @@ import { toast } from 'sonner';
  * - session: La session actuelle (null si non connecté)
  * - loading: Indique si l'authentification est en cours de chargement initial
  * - initialized: Indique si l'authentification a été initialisée
+ * - monthlyCount: Nombre d'annonces déjà publiées ce mois-ci (0 si non connecté)
  * - signIn: Fonction pour connecter un utilisateur
  * - signUp: Fonction pour créer un nouveau compte
  * - signOut: Fonction pour déconnecter l'utilisateur
@@ -19,6 +20,7 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   initialized: boolean;
+  monthlyCount: number;
   signIn: (email: string, password: string) => Promise<boolean>;
   signUp: (
     email: string,
@@ -44,6 +46,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [initialized, setInitialized] = useState<boolean>(false);
+  const [monthlyCount, setMonthlyCount] = useState<number>(0);
 
   useEffect(() => {
     let mounted = true;
@@ -158,6 +161,44 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       subscription.unsubscribe();
     };
   }, []);
+
+  // Fetch monthly count when user changes
+  useEffect(() => {
+    const fetchMonthlyCount = async () => {
+      if (!user) {
+        setMonthlyCount(0);
+        return;
+      }
+
+      try {
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const { count, error } = await supabase
+          .from('properties')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .gte('created_at', startOfMonth.toISOString())
+          .lte('created_at', now.toISOString());
+
+        if (error) {
+          console.error('[AuthContext] Error fetching monthly count:', error);
+          setMonthlyCount(0);
+        } else {
+          setMonthlyCount(count || 0);
+        }
+      } catch (error) {
+        console.error('[AuthContext] Exception fetching monthly count:', error);
+        setMonthlyCount(0);
+      }
+    };
+
+    fetchMonthlyCount();
+
+    // Refresh monthly count every minute to keep it up to date
+    const interval = setInterval(fetchMonthlyCount, 60000);
+
+    return () => clearInterval(interval);
+  }, [user]);
 
   const signIn = async (email: string, password: string): Promise<boolean> => {
     try {
@@ -363,6 +404,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     session,
     loading,
     initialized,
+    monthlyCount,
     signIn,
     signUp,
     signOut,

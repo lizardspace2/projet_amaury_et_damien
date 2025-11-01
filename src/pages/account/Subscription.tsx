@@ -1,5 +1,4 @@
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabase';
@@ -57,27 +56,10 @@ const SubscriptionPage: React.FC = () => {
       window.removeEventListener('unhandledrejection', onUnhandled as any);
     };
   }, []);
-  const { user } = useAuth();
+  const { user, monthlyCount } = useAuth();
   
   // Use custom hook for profile with specific fields
   const { data: profile } = useUserProfile<{ user_type?: string; max_listings?: number; stripe_subscription_status?: string }>('user_type, max_listings, stripe_subscription_status');
-
-  const { data: monthlyCount } = useQuery({
-    queryKey: ['my-properties-monthly-count'],
-    queryFn: async () => {
-      if (!user) return 0;
-      const now = new Date();
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      const { count } = await supabase
-        .from('properties')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .gte('created_at', startOfMonth.toISOString())
-        .lte('created_at', now.toISOString());
-      return count || 0;
-    },
-    enabled: !!user
-  });
 
   const openPortal = async () => {
     try {

@@ -3,8 +3,6 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Outlet } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/AuthContext";
@@ -17,6 +15,7 @@ const Account = () => {
   
   // Require authentication - will redirect if not authenticated
   const { user, session, loading, initialized } = useRequireAuth();
+  const { monthlyCount } = useAuth();
 
   useEffect(() => {
     // Check for auth errors in hash
@@ -33,23 +32,6 @@ const Account = () => {
 
   // Use custom hook for profile
   const { data: profile } = useUserProfile();
-
-  const { data: monthlyCount = 0 } = useQuery({
-    queryKey: ['my-properties-monthly-count'],
-    queryFn: async () => {
-      if (!user) return 0;
-      const now = new Date();
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      const { count } = await supabase
-        .from('properties')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .gte('created_at', startOfMonth.toISOString())
-        .lte('created_at', now.toISOString());
-      return count || 0;
-    },
-    enabled: !!user
-  });
 
   // Redirect from /account to /account/myads
   useEffect(() => {

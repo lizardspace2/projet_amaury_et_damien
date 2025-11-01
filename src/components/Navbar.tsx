@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Menu, X, User, ChevronDown, Home, Key, Users, CalendarDays, LogIn, LogOut, UserPlus, PlusCircle, Truck, Building, Search, Phone, MapPin, BookOpen, Calculator } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -374,12 +374,32 @@ const Navbar = () => {
     loadProfileData();
   }, [user]);
 
+  const resetForm = useCallback(() => {
+    setFormData({ 
+      user_type: '',
+      email: '', 
+      password: '', 
+      phone: '', 
+      address: '', 
+      profession: '',
+      siret: '',
+      instagram: '', 
+      twitter: '', 
+      facebook: '' 
+    });
+    setSignupStep(0);
+    setShowTypeSelection(false);
+    setSignupNoticeEmail(null);
+  }, []);
+
   // Listen for auth state changes to close dialog on sign in
   useEffect(() => {
-    if (isLoggedIn && isAuthDialogOpen) {
+    if (user && isAuthDialogOpen) {
+      console.log('[Navbar] User is logged in, closing auth dialog');
       setIsAuthDialogOpen(false);
+      resetForm();
     }
-  }, [isLoggedIn, isAuthDialogOpen]);
+  }, [user, isAuthDialogOpen, resetForm]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -438,24 +458,6 @@ const Navbar = () => {
     } finally {
       setIsLoggingOut(false);
     }
-  };
-
-  const resetForm = () => {
-    setFormData({ 
-      user_type: '',
-      email: '', 
-      password: '', 
-      phone: '', 
-      address: '', 
-      profession: '',
-      siret: '',
-      instagram: '', 
-      twitter: '', 
-      facebook: '' 
-    });
-    setSignupStep(0);
-    setShowTypeSelection(false);
-    setSignupNoticeEmail(null);
   };
 
   const handleTypeSelection = (userType: string) => {
@@ -1068,10 +1070,16 @@ const Navbar = () => {
       </div>
 
       {/* Auth Dialog */}
-      <Dialog open={isAuthDialogOpen} onOpenChange={(open) => {
+      <Dialog open={isAuthDialogOpen && !user} onOpenChange={(open) => {
+        // Don't allow opening if user is already logged in
+        if (open && user) {
+          console.log('[Navbar] Attempted to open auth dialog while logged in, ignoring');
+          setIsAuthDialogOpen(false);
+          return;
+        }
         setIsAuthDialogOpen(open);
-        if (open) {
-          // Reset form when dialog opens
+        if (open && !user) {
+          // Reset form when dialog opens (only if user is not logged in)
           resetForm();
         }
       }}>

@@ -470,7 +470,7 @@ const Navbar = () => {
   };
 
   const nextStep = async () => {
-    // Si on est à l'étape 2 (réseaux sociaux), créer le compte avant de passer à l'étape suivante (confirmation)
+    // Si on est à l'étape 2 (réseaux sociaux), créer le compte avant de passer à l'étape de confirmation
     if (signupStep === 2) {
       if (isSigningUp) return; // ignore double submit
       setIsSigningUp(true);
@@ -479,7 +479,7 @@ const Navbar = () => {
       if (success) {
         setSignupNoticeEmail(email);
         toast.success('Vérifiez votre boîte mail pour confirmer votre adresse.');
-        setSignupStep(prev => prev + 1); // Passer à l'étape de confirmation
+        setSignupStep(4); // Passer directement à l'étape de confirmation (étape 4)
       }
       setIsSigningUp(false);
     } else {

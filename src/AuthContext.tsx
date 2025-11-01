@@ -10,6 +10,7 @@ export interface SubscriptionInfo {
   isSubscribed: boolean;
   subscriptionStatus: string | null;
   maxListings: number;
+  maxAncillaryServices: number;
   stripeCustomerId: string | null;
   stripeSubscriptionId: string | null;
   currentPeriodStart: string | null;
@@ -25,7 +26,8 @@ export interface SubscriptionInfo {
  * - session: La session actuelle (null si non connecté)
  * - loading: Indique si l'authentification est en cours de chargement initial
  * - initialized: Indique si l'authentification a été initialisée
- * - monthlyCount: Nombre d'annonces déjà publiées ce mois-ci (0 si non connecté)
+ * - monthlyCount: Nombre d'annonces immobilières déjà publiées ce mois-ci (0 si non connecté)
+ * - monthlyAncillaryCount: Nombre d'annonces de services annexes déjà publiées ce mois-ci (0 si non connecté)
  * - subscriptionInfo: Informations sur l'abonnement de l'utilisateur
  * - signIn: Fonction pour connecter un utilisateur
  * - signUp: Fonction pour créer un nouveau compte
@@ -37,6 +39,7 @@ interface AuthContextType {
   loading: boolean;
   initialized: boolean;
   monthlyCount: number;
+  monthlyAncillaryCount: number;
   subscriptionInfo: SubscriptionInfo;
   signIn: (email: string, password: string) => Promise<boolean>;
   signUp: (
@@ -64,10 +67,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [initialized, setInitialized] = useState<boolean>(false);
   const [monthlyCount, setMonthlyCount] = useState<number>(0);
+  const [monthlyAncillaryCount, setMonthlyAncillaryCount] = useState<number>(0);
   const [subscriptionInfo, setSubscriptionInfo] = useState<SubscriptionInfo>({
     isSubscribed: false,
     subscriptionStatus: null,
     maxListings: 50,
+    maxAncillaryServices: 5,
     stripeCustomerId: null,
     stripeSubscriptionId: null,
     currentPeriodStart: null,
@@ -195,10 +200,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const fetchUserData = async () => {
       if (!user) {
         setMonthlyCount(0);
+        setMonthlyAncillaryCount(0);
         setSubscriptionInfo({
           isSubscribed: false,
           subscriptionStatus: null,
           maxListings: 50,
+          maxAncillaryServices: 5,
           stripeCustomerId: null,
           stripeSubscriptionId: null,
           currentPeriodStart: null,
@@ -210,7 +217,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       try {
-        // Fetch monthly count
+        // Fetch monthly count for properties
         const now = new Date();
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
         const { count, error: countError } = await supabase
@@ -227,12 +234,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setMonthlyCount(count || 0);
         }
 
+        // Fetch monthly count for ancillary services
+        const { count: ancillaryCount, error: ancillaryCountError } = await supabase
+          .from('ancillary_services')
+          .select('id', { count: 'exact', head: true })
+          .eq('requested_by', user.id)
+          .gte('created_at', startOfMonth.toISOString())
+          .lte('created_at', now.toISOString());
+
+        if (ancillaryCountError) {
+          console.error('[AuthContext] Error fetching monthly ancillary count:', ancillaryCountError);
+          setMonthlyAncillaryCount(0);
+        } else {
+          setMonthlyAncillaryCount(ancillaryCount || 0);
+        }
+
         // Fetch subscription info from profile
         // Note: Some columns may not exist yet in the database, so we handle errors gracefully
         // First, fetch the basic columns that definitely exist
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
-          .select('stripe_subscription_status, max_listings, stripe_customer_id')
+          .select('stripe_subscription_status, max_listings, max_ancillary_services, stripe_customer_id')
           .eq('user_id', user.id)
           .single();
 
@@ -242,6 +264,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             isSubscribed: false,
             subscriptionStatus: null,
             maxListings: 50,
+            maxAncillaryServices: 5,
             stripeCustomerId: null,
             stripeSubscriptionId: null,
             currentPeriodStart: null,
@@ -289,6 +312,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             isSubscribed: actuallyActive,
             subscriptionStatus: status,
             maxListings: profile?.max_listings ?? 50,
+            maxAncillaryServices: (profile as any)?.max_ancillary_services ?? 5,
             stripeCustomerId: profile?.stripe_customer_id || null,
             stripeSubscriptionId: subscriptionId,
             currentPeriodStart: periodStart,
@@ -300,10 +324,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } catch (error) {
         console.error('[AuthContext] Exception fetching user data:', error);
         setMonthlyCount(0);
+        setMonthlyAncillaryCount(0);
         setSubscriptionInfo({
           isSubscribed: false,
           subscriptionStatus: null,
           maxListings: 50,
+          maxAncillaryServices: 5,
           stripeCustomerId: null,
           stripeSubscriptionId: null,
           currentPeriodStart: null,
@@ -527,6 +553,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     loading,
     initialized,
     monthlyCount,
+    monthlyAncillaryCount,
     subscriptionInfo,
     signIn,
     signUp,

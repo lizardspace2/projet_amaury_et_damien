@@ -45,6 +45,7 @@ CREATE TABLE public.profiles (
   subscription_current_period_start timestamp with time zone,
   subscription_current_period_end timestamp with time zone,
   subscription_cancel_at_period_end boolean DEFAULT false,
+  max_ancillary_services integer DEFAULT 5,
   CONSTRAINT profiles_pkey PRIMARY KEY (user_id),
   CONSTRAINT profiles_user_id_fkey FOREIGN KEY (user_id) REFERENCES auth.users(id)
 );

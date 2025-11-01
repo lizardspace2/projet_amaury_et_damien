@@ -16,6 +16,15 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 
 interface AncillaryServiceInput {
   service_type: string;
@@ -32,11 +41,48 @@ interface AncillaryServiceInput {
   metadata?: any;
 }
 
+const getApiBase = (): string => {
+  const base = (import.meta as any)?.env?.VITE_API_BASE_URL as string | undefined;
+  return base && base.trim().length > 0 ? base.replace(/\/$/, '') : '';
+};
+
+const startProUpgradeCheckout = async (): Promise<void> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('User not authenticated');
+
+  console.log('[billing] startProUpgradeCheckout: user', {
+    id: user.id,
+    email: user.email,
+  });
+
+  const response = await fetch(`${getApiBase()}/api/stripe/create-checkout-session`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId: user.id, userEmail: user.email }),
+  });
+
+  console.log('[billing] create-checkout-session status', response.status);
+  const json = await response.json().catch(() => ({} as any));
+  console.log('[billing] create-checkout-session payload', json);
+  if (!response.ok) {
+    throw new Error(json?.error || `Unable to start checkout (status ${response.status})`);
+  }
+
+  const { url } = json as { url?: string };
+  if (url) {
+    window.location.href = url;
+  } else {
+    throw new Error('No checkout URL received');
+  }
+};
+
 const SellAncillaryService = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, monthlyAncillaryCount, subscriptionInfo } = useAuth();
   const [userProfile, setUserProfile] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const [currentMaxAncillary, setCurrentMaxAncillary] = useState<number | null>(null);
   const [formData, setFormData] = useState<AncillaryServiceInput>({
     service_type: '',
     description: '',
@@ -135,7 +181,7 @@ const SellAncillaryService = () => {
       // Check if profile exists, create it if it doesn't
       const { data: profile } = await supabase
         .from('profiles')
-        .select('user_id')
+        .select('user_id, user_type, max_ancillary_services')
         .eq('user_id', user.id)
         .single();
 
@@ -148,6 +194,34 @@ const SellAncillaryService = () => {
         if (profileError) {
           console.error('Error creating profile:', profileError);
           throw profileError;
+        }
+      }
+
+      // Check monthly limit for professionals
+      const profileData = profile as any;
+      if (profileData?.user_type === 'Professionnelle' || profileData?.user_type === 'Partenaire') {
+        const maxAncillaryServices = typeof profileData?.max_ancillary_services === 'number' 
+          ? profileData.max_ancillary_services 
+          : 5;
+        
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        
+        const { count, error: countError } = await supabase
+          .from('ancillary_services')
+          .select('id', { count: 'exact', head: true })
+          .eq('requested_by', user.id)
+          .gte('created_at', startOfMonth.toISOString())
+          .lte('created_at', now.toISOString());
+
+        if (!countError && typeof count === 'number' && count >= maxAncillaryServices) {
+          setCurrentMaxAncillary(maxAncillaryServices);
+          setShowUpgradeDialog(true);
+          setIsSubmitting(false);
+          const errorWithCode: any = new Error('Professional monthly ancillary service limit reached');
+          errorWithCode.code = 'ANCILLARY_SERVICE_LIMIT_REACHED';
+          errorWithCode.maxAncillaryServices = maxAncillaryServices;
+          throw errorWithCode;
         }
       }
 
@@ -173,8 +247,12 @@ const SellAncillaryService = () => {
 
       toast.success('Annonce de service annexe publiée avec succès');
       navigate('/account');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating service:', error);
+      if (error?.code === 'ANCILLARY_SERVICE_LIMIT_REACHED') {
+        // Dialog already shown, don't show another error toast
+        return;
+      }
       toast.error('Erreur lors de la publication de l\'annonce');
     } finally {
       setIsSubmitting(false);
@@ -342,6 +420,54 @@ const SellAncillaryService = () => {
                     <CardTitle>Informations sur le service</CardTitle>
                   </CardHeader>
                   <CardContent>
+                    {/* Quota display for professionals */}
+                    {(userProfile?.user_type === 'Professionnelle' || userProfile?.user_type === 'Partenaire') && (
+                      <div className="mb-6 rounded-md border border-amber-200 p-4 bg-amber-50">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="w-full">
+                            <p className="font-semibold text-amber-900">Quota de services annexes mensuel</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Badge variant="secondary">{monthlyAncillaryCount}/{subscriptionInfo.maxAncillaryServices}</Badge>
+                              {subscriptionInfo.isSubscribed && (
+                                <Badge variant="outline" className="bg-teal-50 text-teal-700 border-teal-200">
+                                  Pro+ Actif
+                                </Badge>
+                              )}
+                              <span className="text-sm text-amber-700">
+                                {Math.max(0, subscriptionInfo.maxAncillaryServices - monthlyAncillaryCount)} restantes
+                              </span>
+                            </div>
+                            <div className="mt-2">
+                              <Progress value={Math.min(100, Math.round((monthlyAncillaryCount / subscriptionInfo.maxAncillaryServices) * 100))} />
+                            </div>
+                            {!subscriptionInfo.isSubscribed && (
+                              <p className="text-sm text-amber-700 mt-1">
+                                Passez à Pro+ pour publier jusqu'à 20 services annexes par mois (29,99 € / mois).
+                              </p>
+                            )}
+                            {subscriptionInfo.isExpired && (
+                              <p className="text-sm text-red-600 mt-1">
+                                ⚠️ Votre abonnement a expiré. Réabonnez-vous pour continuer à publier.
+                              </p>
+                            )}
+                          </div>
+                          {!subscriptionInfo.isSubscribed && (
+                            <Button 
+                              onClick={async () => {
+                                try { 
+                                  await startProUpgradeCheckout(); 
+                                } catch (e: any) { 
+                                  toast.error(e?.message || 'Impossible de démarrer le paiement'); 
+                                }
+                              }} 
+                              className="bg-amber-600 hover:bg-amber-700 whitespace-nowrap"
+                            >
+                              Passer à Pro+ (29,99 € / mois)
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    )}
                     <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Type de service */}
                     <div className="space-y-2">
@@ -550,6 +676,28 @@ const SellAncillaryService = () => {
       </div>
 
       <Footer />
+
+      {/* Upgrade Dialog for professionals hitting the limit */}
+      <Dialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Augmentez votre limite de services annexes</DialogTitle>
+            <DialogDescription>
+              {currentMaxAncillary ? `Votre quota de ${currentMaxAncillary} services annexes est atteint.` : "Votre quota de services annexes est atteint."} Passez à l'offre Pro+ pour publier jusqu'à 20 services annexes par mois pour 29,99 € / mois.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setShowUpgradeDialog(false)}>Plus tard</Button>
+            <Button className="bg-amber-600 hover:bg-amber-700" onClick={async () => {
+              try {
+                await startProUpgradeCheckout();
+              } catch (e: any) {
+                toast.error(e?.message || 'Impossible de démarrer le paiement');
+              }
+            }}>Passer à Pro+</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

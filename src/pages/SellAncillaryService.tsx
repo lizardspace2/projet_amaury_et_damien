@@ -276,7 +276,7 @@ const SellAncillaryService = () => {
               Publier un service annexe
             </h1>
             <p className="text-lg md:text-xl max-w-2xl mx-auto text-white">
-              Proposez vos services ou recherchez des professionnels
+              Proposez vos services aux acheteurs immobiliers
             </p>
           </div>
         </section>

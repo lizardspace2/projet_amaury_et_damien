@@ -9,18 +9,15 @@ import { supabase } from "@/lib/supabase";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/AuthContext";
+import { useUserProfile } from "@/hooks/useUserProfile";
+import { useRequireAuth } from "@/hooks/useRequireAuth";
 
 const Account = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, session, loading, initialized } = useAuth();
-
-  // Redirect if not authenticated
-  useEffect(() => {
-    if (initialized && !loading && !user) {
-      navigate('/', { replace: true });
-    }
-  }, [user, loading, initialized, navigate]);
+  
+  // Require authentication - will redirect if not authenticated
+  const { user, session, loading, initialized } = useRequireAuth();
 
   useEffect(() => {
     // Check for auth errors in hash
@@ -29,20 +26,8 @@ const Account = () => {
     }
   }, [location]);
 
-  const { data: profile } = useQuery({
-    queryKey: ['user-profile'],
-    queryFn: async () => {
-      if (!user) return null;
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user
-  });
+  // Use custom hook for profile
+  const { data: profile } = useUserProfile();
 
   const { data: monthlyCount = 0 } = useQuery({
     queryKey: ['my-properties-monthly-count'],

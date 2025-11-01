@@ -16,9 +16,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useCurrency } from '@/CurrencyContext';
 import { getProperties } from "@/lib/api";
 import { Property, PropertyType, ListingType } from "@/types/property";
-import { supabase } from "@/lib/supabase";
-import { getUserProfile } from "@/lib/api";
 import { useAuth } from "@/AuthContext";
+import { useUserLikedProperties } from "@/hooks/useUserProfile";
 import { FRENCH_CITIES } from "@/data/FrenchCities";
 
 // Properties Component
@@ -52,7 +51,6 @@ const Properties = () => {
   const [sortOption, setSortOption] = useState<string>("recent");
   const [activeTab, setActiveTab] = useState("filters");
   const [selectedCities, setSelectedCities] = useState<string[]>([]);
-  const [userLikedProperties, setUserLikedProperties] = useState<string[] | null>(null); // Added state
 
   // Listing type buttons with translations
   const listingTypeButtons = [
@@ -217,22 +215,8 @@ const Properties = () => {
 
   const { user } = useAuth();
   
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        if (user) {
-          const profile = await getUserProfile(user.id);
-          setUserLikedProperties(profile?.liked_properties || []);
-        } else {
-          setUserLikedProperties([]); // No user logged in
-        }
-      } catch (error) {
-        console.error("Error fetching user profile for liked properties:", error);
-        setUserLikedProperties([]); // Error case
-      }
-    };
-    fetchProfile();
-  }, [user]);
+  // Load user liked properties using custom hook
+  const userLikedProperties = useUserLikedProperties();
 
   useEffect(() => {
     setMinPriceInput(minPrice.toString());

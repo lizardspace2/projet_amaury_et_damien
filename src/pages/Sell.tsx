@@ -13,7 +13,9 @@ import Footer from "@/components/Footer";
 import { supabase } from "@/lib/supabase";
 import { startProUpgradeCheckout } from "@/lib/api";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/AuthContext";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import {
   Dialog,
   DialogContent,
@@ -249,7 +251,6 @@ const SellPage = () => {
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
   const [signupStep, setSignupStep] = useState(0);
   const [showTypeSelection, setShowTypeSelection] = useState(false);
-  const [userProfile, setUserProfile] = useState<{ user_type?: string; max_listings?: number } | null>(null);
   const [authFormData, setAuthFormData] = useState({
     user_type: "",
     email: "",
@@ -265,32 +266,12 @@ const SellPage = () => {
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [currentMaxListings, setCurrentMaxListings] = useState<number | null>(null);
-  const [monthlyCount, setMonthlyCount] = useState<number>(0);
 
-  // Load profile for logged-in users to know type and current quota
-  useEffect(() => {
-    const loadProfile = async () => {
-      if (!user) {
-        setUserProfile(null);
-        return;
-      }
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('user_type, max_listings')
-        .eq('user_id', user.id)
-        .single();
-      if (!error) setUserProfile(data);
-    };
-    loadProfile();
-  }, [user]);
-
-  // Load count of properties created this month for the user
-  useEffect(() => {
-    const loadMonthlyCount = async () => {
-      if (!user) {
-        setMonthlyCount(0);
-        return;
-      }
+  // Load monthly count using React Query
+  const { data: monthlyCount = 0 } = useQuery({
+    queryKey: ['my-properties-monthly-count'],
+    queryFn: async () => {
+      if (!user) return 0;
       const now = new Date();
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
       const { count, error } = await supabase
@@ -299,10 +280,11 @@ const SellPage = () => {
         .eq('user_id', user.id)
         .gte('created_at', startOfMonth.toISOString())
         .lte('created_at', now.toISOString());
-      if (!error) setMonthlyCount(count || 0);
-    };
-    loadMonthlyCount();
-  }, [user]);
+      if (error) return 0;
+      return count || 0;
+    },
+    enabled: !!user
+  });
 
   const handleAuthInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -335,6 +317,9 @@ const SellPage = () => {
 
   const [signupNoticeEmail, setSignupNoticeEmail] = useState<string | null>(null);
   const [isSigningUp, setIsSigningUp] = useState(false);
+
+  // Load profile using custom hook
+  const { data: userProfile } = useUserProfile<{ user_type?: string; max_listings?: number }>();
 
   const nextStep = async () => {
     // Si on est à l'étape 2 (réseaux sociaux), créer le compte avant de passer à l'étape de confirmation

@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { startProUpgradeCheckout } from "@/lib/api";
 import { useAuth } from "@/AuthContext";
+import { useUserProfile } from "@/hooks/useUserProfile";
 
 const MyAds: React.FC = () => {
   const navigate = useNavigate();
@@ -23,20 +24,8 @@ const MyAds: React.FC = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [propertyToDelete, setPropertyToDelete] = useState<string | null>(null);
 
-  const { data: profile } = useQuery({
-    queryKey: ['user-profile'],
-    queryFn: async () => {
-      if (!user) return null;
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*, max_listings')
-        .eq('user_id', user.id)
-        .single();
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user
-  });
+  // Use custom hook for profile
+  const { data: profile } = useUserProfile();
 
   const { data: monthlyCount } = useQuery({
     queryKey: ['my-properties-monthly-count'],

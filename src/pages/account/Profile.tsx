@@ -8,6 +8,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { useAuth } from '@/AuthContext';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import { Separator } from '@/components/ui/separator';
 import { startProUpgradeCheckout } from '@/lib/api';
 import { Badge } from '@/components/ui/badge';
@@ -28,21 +29,9 @@ const Profile: React.FC = () => {
   });
 
   const { user } = useAuth();
-
-  const { data: profile, isLoading } = useQuery({
-    queryKey: ['user-profile'],
-    queryFn: async () => {
-      if (!user) return null;
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!user
-  });
+  
+  // Use custom hook for profile
+  const { data: profile, isLoading } = useUserProfile();
 
   const { data: monthlyCount } = useQuery({
     queryKey: ['my-properties-monthly-count'],

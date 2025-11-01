@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/AuthContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuTrigger, NavigationMenuContent, NavigationMenuLink } from '@/components/ui/navigation-menu';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -346,26 +347,8 @@ const Navbar = () => {
     }
   }, [user?.id, queryClient]); // Use user?.id instead of user to avoid unnecessary re-renders
 
-  // Load profile using React Query for better caching and automatic updates
-  const { data: profile } = useQuery({
-    queryKey: ['user-profile'],
-    queryFn: async () => {
-      if (!user) return null;
-      console.log('[Navbar] Fetching profile for user:', user.id);
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
-      if (error) {
-        console.error('[Navbar] Profile fetch error:', error);
-        throw error;
-      }
-      console.log('[Navbar] Profile fetched:', data);
-      return data;
-    },
-    enabled: !!user
-  });
+  // Load profile using custom hook for better caching and automatic updates
+  const { data: profile } = useUserProfile();
 
   // Load monthly count using React Query
   const { data: monthlyCount = 0 } = useQuery({

@@ -3,6 +3,17 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 
+/**
+ * Interface du contexte d'authentification
+ * 
+ * - user: L'utilisateur actuellement connecté (null si non connecté)
+ * - session: La session actuelle (null si non connecté)
+ * - loading: Indique si l'authentification est en cours de chargement initial
+ * - initialized: Indique si l'authentification a été initialisée
+ * - signIn: Fonction pour connecter un utilisateur
+ * - signUp: Fonction pour créer un nouveau compte
+ * - signOut: Fonction pour déconnecter l'utilisateur
+ */
 interface AuthContextType {
   user: User | null;
   session: Session | null;
@@ -360,6 +371,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
+/**
+ * Hook pour accéder au contexte d'authentification
+ * 
+ * @example
+ * ```tsx
+ * const { user, signIn, signOut } = useAuth();
+ * 
+ * if (user) {
+ *   // Utilisateur connecté
+ * }
+ * ```
+ * 
+ * @throws {Error} Si utilisé en dehors d'un AuthProvider
+ * @returns Le contexte d'authentification
+ */
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {

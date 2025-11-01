@@ -13,7 +13,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
-import { useAuth } from "@/AuthContext";
+import { useRequireAuth } from "@/hooks/useRequireAuth";
 import { Wrapper } from "@googlemaps/react-wrapper";
 
 const CreateAuctionPage = () => {
@@ -30,14 +30,13 @@ const CreateAuctionPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
-  const { user } = useAuth();
+  // Require authentication - will redirect if not authenticated
+  const { user, loading, initialized } = useRequireAuth();
   
-  useEffect(() => {
-    if (!user) {
-      toast.error("Vous devez être connecté pour créer une vente aux enchères.");
-      navigate("/");
-    }
-  }, [user, navigate]);
+  // Show loading state while checking auth
+  if (loading || !initialized || !user) {
+    return null; // Will redirect via useRequireAuth
+  }
 
   const handleFinalSubmit = async (data: Partial<CreatePropertyInput>) => {
     try {

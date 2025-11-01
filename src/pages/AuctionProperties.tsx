@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import PropertyCard from "@/components/PropertyCard";
@@ -7,36 +7,16 @@ import Footer from "@/components/Footer";
 import { useQuery } from "@tanstack/react-query";
 import { getProperties } from "@/lib/api";
 import { Property } from "@/types/property";
-import { supabase } from "@/lib/supabase";
-import { getUserProfile } from "@/lib/api";
-import { useAuth } from "@/AuthContext";
+import { useUserLikedProperties } from "@/hooks/useUserProfile";
 
 const AuctionProperties = () => {
-  const [userLikedProperties, setUserLikedProperties] = useState<string[] | null>(null);
-
   const { data: properties = [], isLoading } = useQuery({
     queryKey: ['properties', 'auction'],
     queryFn: () => getProperties('auction'),
   });
 
-  const { user } = useAuth();
-  
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        if (user) {
-          const profile = await getUserProfile(user.id);
-          setUserLikedProperties(profile?.liked_properties || []);
-        } else {
-          setUserLikedProperties([]);
-        }
-      } catch (error) {
-        console.error("Error fetching user profile for liked properties:", error);
-        setUserLikedProperties([]);
-      }
-    };
-    fetchProfile();
-  }, [user]);
+  // Load user liked properties using custom hook
+  const userLikedProperties = useUserLikedProperties();
 
   return (
     <div className="flex flex-col min-h-screen bg-estate-background">
@@ -67,7 +47,7 @@ const AuctionProperties = () => {
               <PropertyCard
                 key={property.id}
                 property={property}
-                isLiked={userLikedProperties?.includes(property.id) ?? false}
+                isLiked={userLikedProperties.includes(property.id)}
               />
             ))}
           </div>

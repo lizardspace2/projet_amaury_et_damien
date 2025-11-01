@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { useAuth } from '@/AuthContext';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import { getApiBase } from '@/lib/utils';
 import { startProUpgradeCheckout } from '@/lib/api';
 
@@ -24,21 +25,9 @@ const SubscriptionPage: React.FC = () => {
     };
   }, []);
   const { user } = useAuth();
-
-  const { data: profile } = useQuery({
-    queryKey: ['user-profile'],
-    queryFn: async () => {
-      if (!user) return null;
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('user_type, max_listings, stripe_subscription_status')
-        .eq('user_id', user.id)
-        .single();
-      if (error) throw error;
-      return data as { user_type?: string; max_listings?: number; stripe_subscription_status?: string };
-    },
-    enabled: !!user
-  });
+  
+  // Use custom hook for profile with specific fields
+  const { data: profile } = useUserProfile<{ user_type?: string; max_listings?: number; stripe_subscription_status?: string }>('user_type, max_listings, stripe_subscription_status');
 
   const { data: monthlyCount } = useQuery({
     queryKey: ['my-properties-monthly-count'],
